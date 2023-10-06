@@ -30,7 +30,7 @@ public interface DataExtractor {
      * @param range
      * @return
      */
-    TreeMap<Date, Double> getData(String param, Pair<Date, Date> range);
+    TreeMap<Date, Double> getData(String param, Pair<Date, Date> range, Coordinate coordinates);
 
     /**
      * Returns all available data for a given parameter.
@@ -38,7 +38,7 @@ public interface DataExtractor {
      * @param param
      * @return
      */
-    TreeMap<Date, Double> getData(String param);
+    TreeMap<Date, Double> getData(String param, Coordinate coordinates);
 
 
 }

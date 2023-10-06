@@ -26,7 +26,7 @@ public class Presenter {
      * @param range
      * @return
      */
-    public LineChart<Date, Double> getDataAsLineChart(ArrayList<String> params, Pair<Date, Date> range) {
+    public LineChart<Date, Double> getDataAsLineChart(ArrayList<String> params, Pair<Date, Date> range, Coordinate coordinates) {
         return null;
     }
 
