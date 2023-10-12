@@ -84,6 +84,7 @@ public class AirQualityDataExtractor implements DataExtractor {
      * @return url string which can be used for queries
      */
     private String constructApiUrl(String place, Date startDate, Date endDate) {
+        StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
         String url = new String("Url");
         return url;
     }
@@ -106,5 +107,20 @@ public class AirQualityDataExtractor implements DataExtractor {
     private static final String MAX_LOCATIONS = "&maxlocations=";
     private static final String CRS = "&crs=";
     private static final String TIME_STEP = "×tep=";
+
+    // air quality parameters
+    private static final String SO2 = "SO2_PT1H_avg";                   // sulphur dioxide
+    private static final String NO = "NO_PT1H_avg";                     // nitrogen oxide
+    private static final String N02 = "NO2_PT1H_avg";                   // nitrogen dioxide
+    private static final String O3 = "O3_PT1H_avg";                     // ozone
+    private static final String TRSC = "TRSC_PT1H_avg";                 // total reduced sulphur compounds
+    private static final String CO = "CO_PT1H_avg";                     // carbon monoxide
+    private static final String PM10 = "PM10_PT1H_avg";                 // thoracic particles
+    private static final String PM2_5 = "PM25_PT1H_avg";                // fine particles PM2.5
+    private static final String AIR_QUALITY_INDEX = "AQINDEX_PT1H_avg"; // air quality index
+
+
+
+
 
 }
