@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
 
-
+/**
+ *  Data extractor class to fetch Air Quality data.
+ */
 public class AirQualityDataExtractor implements DataExtractor {
 
     /**
@@ -22,7 +24,7 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     /**
      * List parameters which are available for the API
-     * @return
+     * @return a list of valid String parameters
      */
     @Override
     public ArrayList<String> getValidParameters() {
@@ -31,8 +33,8 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     /**
      * Return valid time range for the data
-     * @param param
-     * @return
+     * @param param the parameter of interest
+     * @return valid time range as Date pair
      */
     @Override
     public Pair<Date, Date> getValidDataRange(String param) {
@@ -44,7 +46,7 @@ public class AirQualityDataExtractor implements DataExtractor {
      * @param param the parameter of interest
      * @param range the time range for the data
      * @param coordinates the coordinates of the place
-     * @return
+     * @return map of data, <Date, Double>
      */
     @Override
     public TreeMap<Date, Double> getData(String param, Pair<Date, Date> range,
@@ -67,31 +69,33 @@ public class AirQualityDataExtractor implements DataExtractor {
      * Function to fetch raw parameter data from the given url
      * @param apiUrl url to the API
      * @param param the parameter of interest
-     * @return
+     * @return the raw data as map structure; <Date, Double>
      */
     private TreeMap<Date, Double> fetchData(String apiUrl, String param){
-        TreeMap<Date, Double> data = new TreeMap<Date,Double>();
+        TreeMap<Date, Double> data = new TreeMap<>();
         return data;
     }
 
     /**
      * Constructor for API url. Currently uses place instead of coordinates.
      * @param place the name of the city or town
-     * @param place the name of the city or town
      * @param startDate the start date in ISO 8601 format (yyyy-MM-dd)
      * @param endDate the end date in form ISO 8601 format (yyyy-MM-dd)
-     * @return
+     * @return url string which can be used for queries
      */
     private String constructApiUrl(String place, Date startDate, Date endDate) {
         String url = new String("Url");
         return url;
     }
 
+    /**
+     *  Creates http client for the extractor
+     */
     private AirQualityDataExtractor() {
         this.httpClient = new OkHttpClient();
     }
 
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
     private static AirQualityDataExtractor instance;
 
     private static final String API_BASE_URL = "https://opendata.fmi.fi/wfs?s" +
