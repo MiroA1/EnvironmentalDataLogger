@@ -37,7 +37,7 @@ public class AirQualityDataExtractor implements DataExtractor {
                 .map(AirQualityParameter::getAbbreviation)
                 .collect(Collectors.toList()));
         return parameters;
-        //(ArrayList<String> params = Arrays.stream(AirQualityParameter.values()).toList();
+
     }
 
     /**
