@@ -96,7 +96,7 @@
          <children>
             <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="32.0" tabMinWidth="144.0">
               <tabs>
-                <Tab closable="false" text="Kartta">
+                <Tab closable="false" text="Map">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                        <children>
@@ -113,24 +113,18 @@
                     </AnchorPane>
                   </content>
                 </Tab>
-                <Tab closable="false" text="Sää">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                       <children>
-                         <SplitPane dividerPositions="0.7587476979742173">
-                           <items>
-                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="800.0" />
-                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="280.0" />
-                           </items>
-                           <padding>
-                             <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-                           </padding>
-                         </SplitPane>
-                       </children>
-                    </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab closable="false" text="Ilmanlaatu">
+                  <Tab closable="false" text="Weather" fx:id="weatherTab">
+                      <content>
+                          <VBox fx:id="weatherVBox" spacing="10">
+                              <children>
+                                  <Region/>
+                                  <HBox fx:id="weatherHBox" spacing="10">
+                                  </HBox>
+                              </children>
+                          </VBox>
+                      </content>
+                  </Tab>
+                <Tab closable="false" text="Air Quality">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                       <children>
