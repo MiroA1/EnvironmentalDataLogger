@@ -1,10 +1,14 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
 import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 /**
  *  Data extractor class to fetch Air Quality data.
@@ -28,7 +32,12 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     @Override
     public ArrayList<String> getValidParameters() {
-        return null;
+        ArrayList<String> parameters = new ArrayList<String>(Stream
+                .of(AirQualityParameter.values())
+                .map(AirQualityParameter::getAbbreviation)
+                .collect(Collectors.toList()));
+        return parameters;
+        //(ArrayList<String> params = Arrays.stream(AirQualityParameter.values()).toList();
     }
 
     /**
@@ -107,20 +116,5 @@ public class AirQualityDataExtractor implements DataExtractor {
     private static final String MAX_LOCATIONS = "&maxlocations=";
     private static final String CRS = "&crs=";
     private static final String TIME_STEP = "×tep=";
-
-    // air quality parameters
-    private static final String SO2 = "SO2_PT1H_avg";                   // sulphur dioxide
-    private static final String NO = "NO_PT1H_avg";                     // nitrogen oxide
-    private static final String N02 = "NO2_PT1H_avg";                   // nitrogen dioxide
-    private static final String O3 = "O3_PT1H_avg";                     // ozone
-    private static final String TRSC = "TRSC_PT1H_avg";                 // total reduced sulphur compounds
-    private static final String CO = "CO_PT1H_avg";                     // carbon monoxide
-    private static final String PM10 = "PM10_PT1H_avg";                 // thoracic particles
-    private static final String PM2_5 = "PM25_PT1H_avg";                // fine particles PM2.5
-    private static final String AIR_QUALITY_INDEX = "AQINDEX_PT1H_avg"; // air quality index
-
-
-
-
 
 }
