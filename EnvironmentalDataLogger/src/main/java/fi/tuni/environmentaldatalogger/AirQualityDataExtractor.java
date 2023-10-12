@@ -9,14 +9,10 @@ import java.util.TreeMap;
 
 public class AirQualityDataExtractor implements DataExtractor {
 
-    private OkHttpClient httpClient;
-
-    private static AirQualityDataExtractor instance;
-
-    private AirQualityDataExtractor() {
-        this.httpClient = new OkHttpClient();
-    }
-
+    /**
+     * Returns an instance of the Air Quality data extractor
+     * @return AirQualityDataExtractor instance
+     */
     public static AirQualityDataExtractor getInstance() {
         if (instance == null) {
             instance = new AirQualityDataExtractor();
@@ -90,5 +86,21 @@ public class AirQualityDataExtractor implements DataExtractor {
         String url = new String("Url");
         return url;
     }
+
+    private AirQualityDataExtractor() {
+        this.httpClient = new OkHttpClient();
+    }
+
+    private OkHttpClient httpClient;
+    private static AirQualityDataExtractor instance;
+
+    private static final String API_BASE_URL = "https://opendata.fmi.fi/wfs?s" +
+            "ervice=WFS&version=2.0.0&request=GetFeature&storedquery_id=fmi::" +
+            "observations::airquality::hourly::timevaluepair";
+    private static final String STARTTIME = "&starttime=";
+    private static final String ENDTIME = "&endtime=";
+    private static final String MAX_LOCATIONS = "&maxlocations=";
+    private static final String CRS = "&crs=";
+    private static final String TIME_STEP = "×tep=";
 
 }
