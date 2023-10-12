@@ -38,6 +38,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         stage.setScene(scene);
         stage.show();
 
+        /*
         DataExtractor extractor = WeatherDataExtractor.getInstance();
         System.out.println("Running!!!!");
 
@@ -55,6 +56,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         for(Map.Entry<Date, Double> entry : data.entrySet()) {
             System.out.println("Date: " + entry.getKey() + ", Temperature: " + entry.getValue());
         }
+        */
     }
 
     private Callback<DatePicker, DateCell> getDayCellFactory(LocalDate minDate, LocalDate maxDate) {
