@@ -98,18 +98,8 @@
               <tabs>
                 <Tab closable="false" text="Map">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                       <children>
-                          <SplitPane dividerPositions="0.7587476979742173">
-                            <items>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="800.0" />
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="280.0" />
-                            </items>
-                             <padding>
-                                <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-                             </padding>
-                          </SplitPane>
-                       </children>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="testPane">
+
                     </AnchorPane>
                   </content>
                 </Tab>

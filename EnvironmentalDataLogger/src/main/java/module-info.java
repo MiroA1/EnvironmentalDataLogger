@@ -4,6 +4,7 @@ module fi.tuni.environmentaldatalogger {
     requires javafx.base;
     requires okhttp3;
     requires org.json;
+    requires javafx.web;
 
     opens fi.tuni.environmentaldatalogger to javafx.fxml;
     exports fi.tuni.environmentaldatalogger;
