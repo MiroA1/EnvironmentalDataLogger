@@ -3,7 +3,10 @@ package fi.tuni.environmentaldatalogger;
 import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
 import javafx.util.Pair;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,6 +76,7 @@ public class AirQualityDataExtractor implements DataExtractor {
         for (AirQualityParameter ap : AirQualityParameter.values()){
             if (ap.getAbbreviation().equals(param)){
                 validParam = true;
+                url = url + "&" + PARAMETERS + ap.getQueryWord();
                 break;
             }
         }
@@ -80,7 +84,7 @@ public class AirQualityDataExtractor implements DataExtractor {
           //  throw new Exception("Invalid parameter!");
             return null;
         }
-        return fetchData(url, param);
+        return null; //fetchData(url, param);
     }
 
     /**
@@ -92,17 +96,6 @@ public class AirQualityDataExtractor implements DataExtractor {
     @Override
     public TreeMap<Date, Double> getData(String param, Coordinate coordinates) {
         return null;
-    }
-
-    /**
-     * Function to fetch raw parameter data from the given url
-     * @param apiUrl url to the API
-     * @param param the parameter of interest
-     * @return the raw data as map structure; <Date, Double>
-     */
-    private TreeMap<Date, Double> fetchData(String apiUrl, String param){
-        TreeMap<Date, Double> data = new TreeMap<>();
-        return data;
     }
 
     /**
@@ -129,6 +122,35 @@ public class AirQualityDataExtractor implements DataExtractor {
         return apiUrl.toString();
 
     }
+
+    /**
+     * Fetch data for the given parameter
+     * @param apiUrl constructed url for the query
+     * @param param the parameter which is queried
+     * @return data as a Treemap (Date,Double)
+     */
+    private TreeMap<Date, Double> fetchData(String apiUrl, String param) {
+        TreeMap<Date, Double> airQualityData = new TreeMap<>();
+        Request request = new Request.Builder().url(apiUrl).build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body().string();
+                System.out.println(responseBody);
+                airQualityData = parseAirQualityData(responseBody, param);
+            } else {
+                System.err.println("Unexpected response code: " + response.code());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return airQualityData;
+    }
+
+    private TreeMap<Date, Double> parseAirQualityData(String json, String param) {
+        return null;
+    }
+
 
     /**
      *  Creates http client for the extractor
