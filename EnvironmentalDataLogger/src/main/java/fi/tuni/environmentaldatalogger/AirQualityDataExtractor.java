@@ -5,7 +5,6 @@ import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,7 +66,21 @@ public class AirQualityDataExtractor implements DataExtractor {
     @Override
     public TreeMap<Date, Double> getData(String param, Pair<Date, Date> range,
                                          Coordinate coordinates) {
-        return null;
+        String latitude = "61.29,56.8";     // placeholder for now
+        String longitude = "23.47,13.63";   // placeholder for now
+        String url = constructApiUrl(latitude,longitude, range.getKey(),range.getValue());
+        boolean validParam = false;
+        for (AirQualityParameter ap : AirQualityParameter.values()){
+            if (ap.getAbbreviation().equals(param)){
+                validParam = true;
+                break;
+            }
+        }
+        if (!validParam) {
+          //  throw new Exception("Invalid parameter!");
+            return null;
+        }
+        return fetchData(url, param);
     }
 
     /**
