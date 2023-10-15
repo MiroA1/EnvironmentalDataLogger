@@ -3,12 +3,15 @@ package fi.tuni.environmentaldatalogger;
 import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
 import javafx.util.Pair;
 import okhttp3.OkHttpClient;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 /**
  *  Data extractor class to fetch Air Quality data.
@@ -32,11 +35,9 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     @Override
     public ArrayList<String> getValidParameters() {
-        ArrayList<String> parameters = new ArrayList<String>(Stream
+        return Stream
                 .of(AirQualityParameter.values())
-                .map(AirQualityParameter::getAbbreviation)
-                .collect(Collectors.toList()));
-        return parameters;
+                .map(AirQualityParameter::getAbbreviation).collect(Collectors.toCollection(ArrayList::new));
 
     }
 
@@ -47,7 +48,13 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     @Override
     public Pair<Date, Date> getValidDataRange(String param) {
-        return null;
+        Date now = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(now);
+        c.add(Calendar.DATE, 5);
+        Date newestEntry = c.getTime();
+
+        return new Pair<>(OLDEST_ENTRY, newestEntry);
     }
 
     /**
@@ -86,16 +93,28 @@ public class AirQualityDataExtractor implements DataExtractor {
     }
 
     /**
-     * Constructor for API url. Currently uses place instead of coordinates.
-     * @param place the name of the city or town
+     * Constructor for API query url.
+     * @param latitude latitude for the query, for now a string element
+     * @param longitude longitude for the query, for now a string element
      * @param startDate the start date in ISO 8601 format (yyyy-MM-dd)
      * @param endDate the end date in form ISO 8601 format (yyyy-MM-dd)
      * @return url string which can be used for queries
      */
-    private String constructApiUrl(String place, Date startDate, Date endDate) {
+    public String constructApiUrl(String latitude, String longitude, Date startDate, Date endDate) {
         StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
-        String url = new String("Url");
-        return url;
+        apiUrl.append(LATITUDE).append(latitude);
+        apiUrl.append("&" + LONGITUDE).append(longitude);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        if (startDate != null && endDate != null) {
+            apiUrl.append("&" + START_DATE).append(dateFormat.format(startDate));
+            apiUrl.append("&" + END_DATE).append(dateFormat.format(endDate));
+        }
+
+        apiUrl.append("&" + DOMAINS);
+        System.out.println(apiUrl);
+        return apiUrl.toString();
+
     }
 
     /**
@@ -108,13 +127,29 @@ public class AirQualityDataExtractor implements DataExtractor {
     private final OkHttpClient httpClient;
     private static AirQualityDataExtractor instance;
 
+    private static final String API_BASE_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?";
+    private static final String LATITUDE = "latitude=";
+    private static final String LONGITUDE = "longitude=";
+    private static final String PARAMETERS = "hourly=";
+    private static final String PAST = "past_days=";
+    private static final String START_DATE = "start_date=";
+    private static final String END_DATE = "end_date=";
+    private static final String DOMAINS = "domains=cams_europe";
+    private static final Date OLDEST_ENTRY = new Date(2022-1900,Calendar.JULY,29);
+
+    /*  Ilmatieteen laitoksen API query elementit:
+    ================================================
+
     private static final String API_BASE_URL = "https://opendata.fmi.fi/wfs?s" +
-            "ervice=WFS&version=2.0.0&request=GetFeature&storedquery_id=fmi::" +
-            "observations::airquality::hourly::timevaluepair";
-    private static final String STARTTIME = "&starttime=";
+    "ervice=WFS&version=2.0.0&request=GetFeature&storedquery_id=fmi::" +
+    "observations::airquality::hourly::timevaluepair";
+    private static final String START = "&starttime=";
     private static final String ENDTIME = "&endtime=";
+    private static final String PLACE = "&place=";
     private static final String MAX_LOCATIONS = "&maxlocations=";
     private static final String CRS = "&crs=";
     private static final String TIME_STEP = "×tep=";
+
+    */
 
 }
