@@ -36,21 +36,12 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(EnvironmentalDataLogger.class.getResource("gui_template.fxml"));
 
-
-        Presenter presenter = new Presenter();
-        ArrayList<String> params = new ArrayList<>(Collections.singletonList("temp"));
-        Date startDate = new Date(2023-1900, Calendar.OCTOBER, 23);
-        Date endDate = new Date(2023-1900, Calendar.NOVEMBER, 10);
-        System.out.println(startDate);
-        Pair<Date, Date> range = new Pair<Date, Date>(startDate, endDate);
-        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params, range);
-        Scene scene1 = new Scene(lineChart);
-
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("Environmental Data Logger");
 
-        stage.setScene(scene1);
+        stage.setScene(scene);
         stage.show();
+
 
         /*
         DataExtractor extractor = WeatherDataExtractor.getInstance();
@@ -58,13 +49,14 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
         System.out.println("Valid parameters: " + extractor.getValidParameters());
 
-
         // Get valid data range for a parameter
         //Pair<Date, Date> range = extractor.getValidDataRange("temperature");
         //System.out.println("Valid data range for temperature: " + range.getKey() + " to " + range.getValue());
         Coordinate coordinates = new Coordinate(0, 0);
         //Date startDate = new Date(); // replace with actual date
         //Date endDate = new Date(); // replace with actual date
+        Date startDate = new Date(2023-1900, Calendar.OCTOBER, 23);
+        Date endDate = new Date(2023-1900, Calendar.NOVEMBER, 10);
         TreeMap<Date, Double> data = extractor.getData("temp", new Pair<>(startDate, endDate), coordinates);
 
         // Print the data
@@ -72,6 +64,10 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             System.out.println("Date: " + entry.getKey() + ", Temperature: " + entry.getValue());
         }
         */
+
+
+
+
     }
 
     public static void main(String[] args) {
@@ -102,5 +98,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         testPane.getChildren().add(view);
 
          */
+
+
     }
 }

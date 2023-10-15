@@ -32,6 +32,8 @@ public class ChartViewerElement extends VBox implements Initializable {
     @FXML
     public VBox testBox;
 
+    Presenter presenter = new Presenter();
+
     public ChartViewerElement() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ChartViewerElement.class.getResource("chartViewerElement.fxml"));
         fxmlLoader.setController(this);
@@ -43,7 +45,15 @@ public class ChartViewerElement extends VBox implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        testBox.getChildren().add(testChart());
+        ArrayList<String> params1 = new ArrayList<>(Collections.singletonList("temp"));
+
+        Date startDate = new Date(2023-1900, Calendar.OCTOBER, 23);
+        Date endDate = new Date(2023-1900, Calendar.NOVEMBER, 10);
+
+        Pair<Date, Date> range = new Pair<>(startDate, endDate);
+
+        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params1, range);
+        testBox.getChildren().add(lineChart);
 
         MenuButton menuButton = new MenuButton("Select Options");
         ContextMenu contextMenu = new ContextMenu();
