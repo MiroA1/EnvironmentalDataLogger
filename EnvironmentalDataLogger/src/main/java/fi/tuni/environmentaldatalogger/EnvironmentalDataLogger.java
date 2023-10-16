@@ -48,32 +48,6 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         stage.setScene(scene);
         stage.show();
 
-
-        /*
-        DataExtractor extractor = WeatherDataExtractor.getInstance();
-        System.out.println("Running!!!!");
-
-        System.out.println("Valid parameters: " + extractor.getValidParameters());
-
-        // Get valid data range for a parameter
-        //Pair<Date, Date> range = extractor.getValidDataRange("temperature");
-        //System.out.println("Valid data range for temperature: " + range.getKey() + " to " + range.getValue());
-        Coordinate coordinates = new Coordinate(0, 0);
-        //Date startDate = new Date(); // replace with actual date
-        //Date endDate = new Date(); // replace with actual date
-        Date startDate = new Date(2023-1900, Calendar.OCTOBER, 23);
-        Date endDate = new Date(2023-1900, Calendar.NOVEMBER, 10);
-        TreeMap<Date, Double> data = extractor.getData("temp", new Pair<>(startDate, endDate), coordinates);
-
-        // Print the data
-        for(Map.Entry<Date, Double> entry : data.entrySet()) {
-            System.out.println("Date: " + entry.getKey() + ", Temperature: " + entry.getValue());
-        }
-        */
-
-
-
-
     }
 
     public static void main(String[] args) {
