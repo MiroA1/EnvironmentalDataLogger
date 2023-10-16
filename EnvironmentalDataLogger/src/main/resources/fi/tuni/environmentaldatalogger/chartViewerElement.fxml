@@ -10,7 +10,6 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:id="testBox"
       spacing="10">
-    <Region/>
     <HBox spacing="40">
         <HBox fx:id="optionsHBox" spacing="10">
         </HBox>

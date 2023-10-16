@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.CategoryAxis;
@@ -11,9 +12,10 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import java.io.IOException;
@@ -31,6 +33,10 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public HBox weatherHBox;
     public VBox weatherVBox;
     public AnchorPane testPane;
+    public Label locationLabel;
+    public HBox locationHBox;
+    public SVGPath locationSVG;
+    public AnchorPane weatherPane;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -78,10 +84,17 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         try {
-            weatherTab.setContent(new ChartViewerElement());
+            //weatherTab.setContent(new ChartViewerElement());
+            weatherPane.getChildren().add(new ChartViewerElement());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        locationSVG.setOnMouseClicked((click) -> launchCoordinateDialog());
+
+
+
+        //handleLocationInit();
 
         /*
         WebView view = new WebView();
@@ -101,4 +114,51 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
 
     }
+
+    void launchCoordinateDialog() {
+        Dialog<Pair<Double, Double>> dialog = new Dialog<>();
+        dialog.setTitle("Coordinate Input");
+
+        // Create the text fields and labels
+        TextField latitudeField = new TextField();
+        TextField longitudeField = new TextField();
+
+        GridPane grid = new GridPane();
+        grid.add(new Label("Latitude:"), 0, 0);
+        grid.add(latitudeField, 1, 0);
+        grid.add(new Label("Longitude:"), 0, 1);
+        grid.add(longitudeField, 1, 1);
+
+        grid.setVgap(5);
+        grid.setHgap(5);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Add the "OK" and "Cancel" buttons
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    double latitude = Double.parseDouble(latitudeField.getText());
+                    double longitude = Double.parseDouble(longitudeField.getText());
+                    return new Pair<>(latitude, longitude);
+                } catch (NumberFormatException e) {
+                    return null; // Return null if parsing fails
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(result -> {
+            double latitude = result.getKey();
+            double longitude = result.getValue();
+
+            // You can perform validation and further processing here
+            // For this example, we will just print the values
+            System.out.println("Latitude: " + latitude);
+            System.out.println("Longitude: " + longitude);
+        });
+    }
+
 }

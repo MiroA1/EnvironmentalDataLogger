@@ -6,6 +6,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.Group?>
 <BorderPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fi.tuni.environmentaldatalogger.EnvironmentalDataLogger">
    <top>
       <HBox BorderPane.alignment="CENTER">
@@ -43,7 +45,7 @@
                </HBox.margin></ImageView>
             <VBox>
                <children>
-                  <Label alignment="CENTER" text="+- Deg °C" textAlignment="CENTER">
+                  <Label text="+- Deg °C">
                      <font>
                         <Font size="48.0" />
                      </font>
@@ -57,14 +59,19 @@
                         <Insets top="20.0" />
                      </padding>
                   </Label>
-                  <Label text="Location">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </Label>
+                   <HBox fx:id="locationHBox" spacing="10">
+                       <Group>
+                           <SVGPath fx:id="locationSVG" scaleX="0.07" scaleY="0.07" content="M197.849,0C122.131,0,60.531,61.609,60.531,137.329c0,72.887,124.591,243.177,129.896,250.388l4.951,6.738
+		c0.579,0.792,1.501,1.255,2.471,1.255c0.985,0,1.901-0.463,2.486-1.255l4.948-6.738c5.308-7.211,129.896-177.501,129.896-250.388
+		C335.179,61.609,273.569,0,197.849,0z M197.849,88.138c27.13,0,49.191,22.062,49.191,49.191c0,27.115-22.062,49.191-49.191,49.191
+		c-27.114,0-49.191-22.076-49.191-49.191C148.658,110.2,170.734,88.138,197.849,88.138z" />
+                       </Group>
+                       <Label text="Location" fx:id="locationLabel">
+                           <font>
+                               <Font size="24.0" />
+                           </font>
+                       </Label>
+                   </HBox>
                </children>
                <HBox.margin>
                   <Insets top="50.0" />
@@ -91,27 +98,23 @@
    <center>
       <StackPane BorderPane.alignment="CENTER">
          <BorderPane.margin>
-            <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </BorderPane.margin>
          <children>
             <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="32.0" tabMinWidth="144.0">
               <tabs>
                 <Tab closable="false" text="Map">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="testPane">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="testPane" style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
 
                     </AnchorPane>
                   </content>
                 </Tab>
                   <Tab closable="false" text="Weather" fx:id="weatherTab">
                       <content>
-                          <VBox fx:id="weatherVBox" spacing="10">
-                              <children>
-                                  <Region/>
-                                  <HBox fx:id="weatherHBox" spacing="10">
-                                  </HBox>
-                              </children>
-                          </VBox>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="weatherPane" style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+
+                          </AnchorPane>
                       </content>
                   </Tab>
                 <Tab closable="false" text="Air Quality">

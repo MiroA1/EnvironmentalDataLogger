@@ -10,6 +10,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
@@ -44,6 +45,11 @@ public class ChartViewerElement extends VBox implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        AnchorPane.setTopAnchor(this, 10.0);
+        AnchorPane.setLeftAnchor(this, 10.0);
+        AnchorPane.setRightAnchor(this, 10.0);
+        AnchorPane.setBottomAnchor(this, 10.0);
 
         ArrayList<String> params1 = new ArrayList<>(Collections.singletonList("temp"));
 
