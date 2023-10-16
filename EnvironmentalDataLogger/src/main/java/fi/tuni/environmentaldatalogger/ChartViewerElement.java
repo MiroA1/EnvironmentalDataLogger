@@ -36,7 +36,7 @@ public class ChartViewerElement extends VBox implements Initializable {
     Presenter presenter = new Presenter();
 
     public ChartViewerElement() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ChartViewerElement.class.getResource("chartViewerElement.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ChartViewerElement.class.getResource("chart_viewer_element.fxml"));
         fxmlLoader.setController(this);
         this.getChildren().add(fxmlLoader.load());
     }
@@ -61,15 +61,14 @@ public class ChartViewerElement extends VBox implements Initializable {
         LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params1, range);
         testBox.getChildren().add(lineChart);
 
-        MenuButton menuButton = new MenuButton("Select Options");
+        MenuButton menuButton = new MenuButton("Select Parameters");
         ContextMenu contextMenu = new ContextMenu();
 
-        // Create CheckMenuItem items and add them to the context menu
-        CheckMenuItem option1 = new CheckMenuItem("Option 1");
-        CheckMenuItem option2 = new CheckMenuItem("Option 2");
-        CheckMenuItem option3 = new CheckMenuItem("Option 3");
-
-        contextMenu.getItems().addAll(option1, option2, option3);
+        // TODO: change to presenter when implemented
+        for (String param : WeatherDataExtractor.getInstance().getValidParameters()) {
+            CheckMenuItem item = new CheckMenuItem(param);
+            contextMenu.getItems().add(item);
+        }
 
         menuButton.setContextMenu(contextMenu);
 
@@ -119,36 +118,6 @@ public class ChartViewerElement extends VBox implements Initializable {
                 customRangePicker.setManaged(false);
             }
         });
-    }
-
-
-    private LineChart<String, Number> testChart() {
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel("Month");
-
-        // Create a NumberAxis for the Y-axis (used for numeric data)
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Sales");
-
-        // Create a LineChart with String (Month) on the X-axis and Number (Sales) on the Y-axis
-        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("Monthly Sales Chart");
-
-        // Create a data series with sample data
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("2023");
-
-        series.getData().add(new XYChart.Data<>("Jan", 1200));
-        series.getData().add(new XYChart.Data<>("Feb", 1400));
-        series.getData().add(new XYChart.Data<>("Mar", 900));
-        series.getData().add(new XYChart.Data<>("Apr", 1600));
-        series.getData().add(new XYChart.Data<>("May", 1100));
-        series.getData().add(new XYChart.Data<>("Jun", 1800));
-
-        // Add the data series to the chart
-        lineChart.getData().add(series);
-
-        return lineChart;
     }
 
     private HBox getCustomRangePicker() {

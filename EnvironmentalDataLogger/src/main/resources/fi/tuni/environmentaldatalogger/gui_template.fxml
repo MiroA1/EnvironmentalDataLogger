@@ -60,12 +60,7 @@
                      </padding>
                   </Label>
                    <HBox fx:id="locationHBox" spacing="10">
-                       <Group>
-                           <SVGPath fx:id="locationSVG" scaleX="0.07" scaleY="0.07" content="M197.849,0C122.131,0,60.531,61.609,60.531,137.329c0,72.887,124.591,243.177,129.896,250.388l4.951,6.738
-		c0.579,0.792,1.501,1.255,2.471,1.255c0.985,0,1.901-0.463,2.486-1.255l4.948-6.738c5.308-7.211,129.896-177.501,129.896-250.388
-		C335.179,61.609,273.569,0,197.849,0z M197.849,88.138c27.13,0,49.191,22.062,49.191,49.191c0,27.115-22.062,49.191-49.191,49.191
-		c-27.114,0-49.191-22.076-49.191-49.191C148.658,110.2,170.734,88.138,197.849,88.138z" />
-                       </Group>
+                       <Button fx:id="locationButton" stylesheets="@location_button.css" />
                        <Label text="Location" fx:id="locationLabel">
                            <font>
                                <Font size="24.0" />
@@ -80,11 +75,11 @@
             <Separator HBox.hgrow="ALWAYS" />
             <VBox alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" text="Exit">
+                  <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" fx:id="exitButton" stylesheets="@icon_button.css">
                      <VBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </VBox.margin></Button>
-                  <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" text="Info">
+                  <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" fx:id="infoButton" stylesheets="@icon_button.css">
                      <VBox.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </VBox.margin></Button>
@@ -101,7 +96,7 @@
             <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </BorderPane.margin>
          <children>
-            <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="32.0" tabMinWidth="144.0">
+            <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="32.0" tabMinWidth="144.0" stylesheets="@tab_pane.css">
               <tabs>
                 <Tab closable="false" text="Map">
                   <content>
