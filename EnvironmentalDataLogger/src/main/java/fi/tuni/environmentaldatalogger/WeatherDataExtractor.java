@@ -59,13 +59,19 @@ public class WeatherDataExtractor implements DataExtractor {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         if (startDate != null && endDate != null) {
-            apiUrl.append("/").append("2023-10-01").append("/").append(dateFormat.format(endDate));
+            apiUrl.append("/").append(dateFormat.format(startDate)).append("/").append(dateFormat.format(endDate));
+        } else {
+            apiUrl.append("/last30days"); // Get data for the last 30 days if no date range is provided
         }
 
         apiUrl.append("?key=").append(API_KEY);
+        apiUrl.append("&include=days");
+        apiUrl.append("&elements=datetime,humidity,temp");
+
         System.out.println(apiUrl);
         return apiUrl.toString();
     }
+
 
     private TreeMap<Date, Double> fetchData(String apiUrl, String param) {
         TreeMap<Date, Double> weatherData = new TreeMap<>();
