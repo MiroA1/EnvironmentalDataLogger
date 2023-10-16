@@ -61,7 +61,7 @@ public class WeatherDataExtractor implements DataExtractor {
         if (startDate != null && endDate != null) {
             apiUrl.append("/").append(dateFormat.format(startDate)).append("/").append(dateFormat.format(endDate));
         } else {
-            apiUrl.append("/last30days"); // Get data for the last 30 days if no date range is provided
+            apiUrl.append("/last30days");
         }
 
         apiUrl.append("?key=").append(API_KEY);
