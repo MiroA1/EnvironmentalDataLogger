@@ -2,8 +2,6 @@ package fi.tuni.environmentaldatalogger;
 
 import javafx.scene.chart.*;
 import javafx.util.Pair;
-
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,14 +37,21 @@ public class Presenter {
      * @param range
      * @return
      */
-    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<Date, Date> range) {
+    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<Date, Date> range, Coordinate coordinates) {
 
-        // ArrayList<String> params, Pair<Date, Date> range, Coordinate coordinates
+        TreeMap<String, TreeMap<Date, Double>> datamap = new TreeMap<>();
+        //ArrayList<TreeMap<Date, Double>> datalist = new ArrayList<>();
+
+        for (String param : params) {
+            TreeMap<Date, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
+            datamap.put(param, result);
+            //datalist.add(result);
+        }
 
         //NumberAxis yAxis = new NumberAxis();
         CategoryAxis xAxis = new CategoryAxis();
 
-        ArrayList<NumberAxis> yAxes = new ArrayList<>();
+        //ArrayList<NumberAxis> yAxes = new ArrayList<>();
         TreeMap<String, NumberAxis> yAxisMap = new TreeMap<>();
 
         for (String param : params) {
@@ -55,12 +60,28 @@ public class Presenter {
         }
 
         LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxisMap.get("temp"));
-        lineChart.setTitle("Temperature Line Chart");
 
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        for (String param : datamap.keySet()) {
+
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            TreeMap<Date, Double> innerMap = datamap.get(param);
+
+            for (Date innerKey : innerMap.keySet()) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String dateString = dateFormat.format(innerKey);
+                series.getData().add(new XYChart.Data<>(dateString, innerMap.get(innerKey)));
+            }
+            series.setName(param);
+            lineChart.getData().add(series);
+        }
+
+        //LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxisMap.get("temp"));
+        lineChart.setTitle("Weather statistics");
+
+/*        XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Temperature");
 
-        int temperature = 10;
+        //int temperature = 10;
 
         Calendar start = Calendar.getInstance();
         start.setTime(range.getKey());
@@ -73,11 +94,10 @@ public class Presenter {
             String dateString = dateFormat.format(date);
             series.getData().add(new XYChart.Data<>(dateString, temperature));
             temperature += 1;
-        }
+        }*/
 
-        lineChart.getData().add(series);
+        //lineChart.getData().add(series);
         return lineChart;
-
 
     }
 
