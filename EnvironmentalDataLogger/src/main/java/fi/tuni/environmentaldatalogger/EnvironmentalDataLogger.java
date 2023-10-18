@@ -40,7 +40,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         Date endDate = new Date(2023-1900, Calendar.NOVEMBER, 10);
         System.out.println(startDate);
         Pair<Date, Date> range = new Pair<Date, Date>(startDate, endDate);
-        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params, range);
+        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params, range, coordinates);
         Scene scene1 = new Scene(lineChart);
 
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
