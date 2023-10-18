@@ -33,20 +33,10 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(EnvironmentalDataLogger.class.getResource("gui_template.fxml"));
 
-
-        Presenter presenter = new Presenter();
-        ArrayList<String> params = new ArrayList<>(Collections.singletonList("temp"));
-        Date startDate = new Date(2023-1900, Calendar.OCTOBER, 23);
-        Date endDate = new Date(2023-1900, Calendar.NOVEMBER, 10);
-        System.out.println(startDate);
-        Pair<Date, Date> range = new Pair<Date, Date>(startDate, endDate);
-        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params, range, coordinates);
-        Scene scene1 = new Scene(lineChart);
-
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("Environmental Data Logger");
 
-        stage.setScene(scene1);
+        stage.setScene(scene);
         stage.show();
     }
 
