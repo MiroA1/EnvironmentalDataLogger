@@ -30,13 +30,11 @@ import javafx.util.Pair;
 
 import java.util.*;
 public class EnvironmentalDataLogger extends Application implements Initializable {
-
-    @FXML
-    public Tab weatherTab;
-    public AnchorPane testPane;
+    
+    public AnchorPane mapPane;
     public Label locationLabel;
     public HBox locationHBox;
-    public AnchorPane weatherPane;
+    public AnchorPane graphsPane;
     public Button exitButton;
     public Button locationButton;
     public Button infoButton;
@@ -79,7 +77,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         try {
-            weatherPane.getChildren().add(new ChartViewerElement());
+            graphsPane.getChildren().add(new ChartViewerElement());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
