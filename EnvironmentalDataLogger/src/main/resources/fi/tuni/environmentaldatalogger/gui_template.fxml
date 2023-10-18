@@ -6,144 +6,116 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.Group?>
 <BorderPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fi.tuni.environmentaldatalogger.EnvironmentalDataLogger">
    <top>
-      <HBox BorderPane.alignment="CENTER">
-         <children>
-            <VBox>
+       <HBox BorderPane.alignment="CENTER">
+           <VBox>
                <HBox.margin>
-                  <Insets left="50.0" top="50.0" />
+                   <Insets left="50.0" top="50.0"/>
                </HBox.margin>
-               <children>
-                  <Label alignment="CENTER" text="00:00" textAlignment="CENTER">
-                     <font>
-                        <Font size="48.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                     <padding>
-                        <Insets left="20.0" top="20.0" />
-                     </padding></Label>
-                  <Label text="Weekday DD.MM.YYYY">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets left="20.0" />
-                     </padding>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </Label>
-               </children></VBox>
-            <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+               <Label alignment="CENTER" text="00:00" textAlignment="CENTER">
+                   <font>
+                       <Font size="48.0"/>
+                   </font>
+                   <VBox.margin>
+                       <Insets/>
+                   </VBox.margin>
+                   <padding>
+                       <Insets left="20.0" top="20.0"/>
+                   </padding>
+               </Label>
+               <Label text="Weekday DD.MM.YYYY">
+                   <font>
+                       <Font size="24.0"/>
+                   </font>
+                   <padding>
+                       <Insets left="20.0"/>
+                   </padding>
+                   <VBox.margin>
+                       <Insets/>
+                   </VBox.margin>
+               </Label>
+           </VBox>
+           <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+              <HBox.margin>
+                  <Insets left="10.0" top="50.0"/>
+              </HBox.margin>
+           </ImageView>
+           <VBox>
                <HBox.margin>
-                  <Insets left="10.0" top="50.0" />
-               </HBox.margin></ImageView>
-            <VBox>
-               <children>
-                  <Label alignment="CENTER" text="+- Deg °C" textAlignment="CENTER">
-                     <font>
-                        <Font size="48.0" />
-                     </font>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                     <padding>
-                        <Insets top="20.0" />
-                     </padding>
-                  </Label>
-                  <Label text="Location">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </Label>
-               </children>
-               <HBox.margin>
-                  <Insets top="50.0" />
+                   <Insets top="50.0"/>
                </HBox.margin>
-            </VBox>
-            <Separator HBox.hgrow="ALWAYS" />
-            <VBox alignment="CENTER">
-               <children>
-                  <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" text="Exit">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </VBox.margin></Button>
-                  <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" text="Info">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </VBox.margin></Button>
-               </children>
+               <Label text="+- Deg °C">
+                   <font>
+                       <Font size="48.0"/>
+                   </font>
+                   <opaqueInsets>
+                       <Insets/>
+                   </opaqueInsets>
+                   <VBox.margin>
+                       <Insets/>
+                   </VBox.margin>
+                   <padding>
+                       <Insets top="20.0"/>
+                   </padding>
+               </Label>
+               <HBox fx:id="locationHBox" spacing="10">
+                   <Button fx:id="locationButton" stylesheets="@location_button.css"/>
+                   <Label text="Location" fx:id="locationLabel">
+                       <font>
+                           <Font size="24.0"/>
+                       </font>
+                   </Label>
+               </HBox>
+           </VBox>
+           <Separator HBox.hgrow="ALWAYS"/>
+           <VBox alignment="CENTER">
                <HBox.margin>
-                  <Insets right="50.0" top="50.0" />
+                   <Insets right="50.0" top="50.0"/>
                </HBox.margin>
-            </VBox>
-         </children></HBox>
+               <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" fx:id="exitButton"
+                       stylesheets="@icon_button.css">
+                   <VBox.margin>
+                       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                   </VBox.margin>
+               </Button>
+               <Button mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" fx:id="infoButton"
+                       stylesheets="@icon_button.css">
+                   <VBox.margin>
+                       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                   </VBox.margin>
+               </Button>
+           </VBox>
+       </HBox>
    </top>
    <center>
-      <StackPane BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-         </BorderPane.margin>
-         <children>
-            <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="32.0" tabMinWidth="144.0">
-              <tabs>
-                <Tab closable="false" text="Map">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                       <children>
-                          <SplitPane dividerPositions="0.7587476979742173">
-                            <items>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="800.0" />
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="280.0" />
-                            </items>
-                             <padding>
-                                <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-                             </padding>
-                          </SplitPane>
-                       </children>
-                    </AnchorPane>
-                  </content>
-                </Tab>
-                  <Tab closable="false" text="Weather" fx:id="weatherTab">
-                      <content>
-                          <VBox fx:id="weatherVBox" spacing="10">
-                              <children>
-                                  <Region/>
-                                  <HBox fx:id="weatherHBox" spacing="10">
-                                  </HBox>
-                              </children>
-                          </VBox>
-                      </content>
-                  </Tab>
-                <Tab closable="false" text="Air Quality">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      <children>
-                        <SplitPane dividerPositions="0.7587476979742173">
-                          <items>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="800.0" />
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="280.0" />
-                          </items>
-                          <padding>
-                            <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-                          </padding>
-                        </SplitPane>
-                      </children>
-                    </AnchorPane>
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
-         </children>
-      </StackPane>
+       <StackPane BorderPane.alignment="CENTER">
+           <BorderPane.margin>
+               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0"/>
+           </BorderPane.margin>
+           <TabPane tabClosingPolicy="UNAVAILABLE" tabMinHeight="32.0" tabMinWidth="144.0"
+                    stylesheets="@tab_pane.css">
+               <Tab closable="false" text="Map">
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="mapPane"
+                               style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+
+                   </AnchorPane>
+               </Tab>
+               <Tab closable="false" text="Charts">
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="chartsPane"
+                               style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+
+                   </AnchorPane>
+               </Tab>
+               <Tab closable="false" text="Notes">
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"
+                               style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+
+                   </AnchorPane>
+               </Tab>
+           </TabPane>
+       </StackPane>
    </center>
 </BorderPane>

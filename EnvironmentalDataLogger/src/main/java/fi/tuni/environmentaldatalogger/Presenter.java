@@ -21,6 +21,15 @@ public class Presenter {
     }
 
     /**
+     * Returns the maximum range of data available for the given set of parameters.
+     * @param params
+     * @return
+     */
+    public Pair<Date, Date> getValidDataRange(ArrayList<String> params) {
+        return new Pair<>(new Date(), new Date());
+    }
+
+    /**
      * Return a line chart containing data of supplied parameters.
      * (Return type not finalized)
      *
