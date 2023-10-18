@@ -56,6 +56,9 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             "3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275" +
             " 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z";
 
+    private static final Coordinate DEFAULT_LOCATION = new Coordinate(61.4978, 23.7610);
+    private static Coordinate currentLocation = DEFAULT_LOCATION;
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(EnvironmentalDataLogger.class.getResource("gui_template.fxml"));
@@ -82,6 +85,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         }
 
         locationButton.setOnAction(actionEvent -> launchCoordinateDialog());
+        locationLabel.setText(currentLocation.toString());
 
         initExitButton();
         initInfoButton();
@@ -103,6 +107,10 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
          */
 
 
+    }
+
+    public static Coordinate getCurrentLocation() {
+        return currentLocation;
     }
 
     private static SVGPath createPath(String d, String fill, String hoverFill) {
@@ -156,6 +164,9 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             // For this example, we will just print the values
             System.out.println("Latitude: " + latitude);
             System.out.println("Longitude: " + longitude);
+
+            currentLocation = new Coordinate(latitude, longitude);
+            locationLabel.setText(currentLocation.toString());
         });
     }
 

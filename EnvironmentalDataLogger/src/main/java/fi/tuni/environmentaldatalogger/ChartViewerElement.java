@@ -33,6 +33,7 @@ public class ChartViewerElement extends VBox implements Initializable {
     @FXML
     public VBox testBox;
 
+    // TODO: remember to change this
     Presenter presenter = new Presenter();
 
     public ChartViewerElement() throws IOException {
@@ -58,6 +59,7 @@ public class ChartViewerElement extends VBox implements Initializable {
 
         Pair<Date, Date> range = new Pair<>(startDate, endDate);
 
+        //var loc = EnvironmentalDataLogger.getCurrentLocation();
         LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params1, range);
         testBox.getChildren().add(lineChart);
 
