@@ -19,7 +19,9 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.*;
 
 public class ChartViewerElement extends VBox implements Initializable {
@@ -143,10 +145,14 @@ public class ChartViewerElement extends VBox implements Initializable {
         Pair<Date, Date> range = new Pair<>(new Date(2023 - 1900, Calendar.SEPTEMBER, 15)
                 , new Date(2023 - 1900, Calendar.OCTOBER, 10));
 
-
+        Pair<LocalDateTime, LocalDateTime> range1 = new Pair<>(LocalDateTime.of(2023, 9, 15, 0, 0),
+                LocalDateTime.of(2023, 10, 10, 0, 0));
 
         LocalDate minDate = range.getKey().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate maxDate = range.getValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        LocalDate minDate1 = range1.getKey().toLocalDate();
+        LocalDate maxDate1 = range1.getValue().toLocalDate();
 
         startDatePicker.setDayCellFactory(getDayCellFactory(minDate, maxDate));
         endDatePicker.setDayCellFactory(getDayCellFactory(minDate, maxDate));

@@ -34,7 +34,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public AnchorPane mapPane;
     public Label locationLabel;
     public HBox locationHBox;
-    public AnchorPane graphsPane;
+    public AnchorPane chartsPane;
     public Button exitButton;
     public Button locationButton;
     public Button infoButton;
@@ -77,7 +77,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         try {
-            graphsPane.getChildren().add(new ChartViewerElement());
+            chartsPane.getChildren().add(new ChartViewerElement());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -87,24 +87,6 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
         initExitButton();
         initInfoButton();
-
-        /*
-        WebView view = new WebView();
-        view.getEngine().loadContent("<div style=\"overflow:hidden;max-width:100%;width:500px;height:500px;\">" +
-                "<div id=\"embed-ded-map-canvas\" style=\"height:100%; width:100%;max-width:100%;\">" +
-                "<iframe style=\"height:100%;width:100%;border:0;\" frameborder=\"0\" " +
-                "src=\"https://www.google.com/maps/embed/v1/place?q=Tampere,+Suomi&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8\">" +
-                "</iframe></div><a class=\"our-googlemap-code\" href=\"https://www.bootstrapskins.com/themes\" " +
-                "id=\"get-map-data\">premium bootstrap themes</a><style>#embed-ded-map-canvas " +
-                "img{max-width:none!important;background:none!important;font-size: inherit;font-weight:inherit;}" +
-                "</style></div>");
-        view.setStyle("");
-
-        testPane.getChildren().add(view);
-
-         */
-
-
     }
 
     public static Coordinate getCurrentLocation() {
@@ -119,51 +101,12 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         return path;
     }
 
-    void launchCoordinateDialog() {
-        Dialog<Pair<Double, Double>> dialog = new Dialog<>();
-        dialog.setTitle("Coordinate Input");
+    private void launchCoordinateDialog() {
 
-        // Create the text fields and labels
-        TextField latitudeField = new TextField();
-        TextField longitudeField = new TextField();
-
-        GridPane grid = new GridPane();
-        grid.add(new Label("Latitude:"), 0, 0);
-        grid.add(latitudeField, 1, 0);
-        grid.add(new Label("Longitude:"), 0, 1);
-        grid.add(longitudeField, 1, 1);
-
-        grid.setVgap(5);
-        grid.setHgap(5);
-
-        dialog.getDialogPane().setContent(grid);
-
-        // Add the "OK" and "Cancel" buttons
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == ButtonType.OK) {
-                try {
-                    double latitude = Double.parseDouble(latitudeField.getText());
-                    double longitude = Double.parseDouble(longitudeField.getText());
-                    return new Pair<>(latitude, longitude);
-                } catch (NumberFormatException e) {
-                    return null; // Return null if parsing fails
-                }
-            }
-            return null;
-        });
+        CoordinateDialog dialog = new CoordinateDialog();
 
         dialog.showAndWait().ifPresent(result -> {
-            double latitude = result.getKey();
-            double longitude = result.getValue();
-
-            // You can perform validation and further processing here
-            // For this example, we will just print the values
-            System.out.println("Latitude: " + latitude);
-            System.out.println("Longitude: " + longitude);
-
-            currentLocation = new Coordinate(latitude, longitude);
+            currentLocation = result;
             locationLabel.setText(currentLocation.toString());
         });
     }
