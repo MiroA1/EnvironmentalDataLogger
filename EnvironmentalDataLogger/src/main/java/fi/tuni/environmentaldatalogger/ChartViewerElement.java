@@ -52,7 +52,7 @@ public class ChartViewerElement extends VBox implements Initializable {
 
         Pair<Date, Date> range = new Pair<>(startDate, endDate);
 
-        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params1, range);
+        LineChart<String, Number> lineChart = presenter.getDataAsLineChart(params1, range, new Coordinate(1, 1));
         testBox.getChildren().add(lineChart);
 
         MenuButton menuButton = new MenuButton("Select Options");
