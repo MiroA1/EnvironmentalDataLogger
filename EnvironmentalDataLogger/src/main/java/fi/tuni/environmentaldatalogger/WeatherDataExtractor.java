@@ -67,6 +67,7 @@ public class WeatherDataExtractor implements DataExtractor {
         apiUrl.append("?key=").append(API_KEY);
         apiUrl.append("&include=days");
         apiUrl.append("&elements=datetime,humidity,temp");
+        apiUrl.append("&unitGroup=metric");
 
         System.out.println(apiUrl);
         return apiUrl.toString();
