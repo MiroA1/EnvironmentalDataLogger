@@ -6,15 +6,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import fi.tuni.environmentaldatalogger.CustomDateRangePicker?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:id="testBox"
       spacing="10">
-    <Region/>
     <HBox spacing="40">
         <HBox fx:id="optionsHBox" spacing="10">
+            <MenuButton fx:id="parameterSelector" text="Select Parameters">
+
+            </MenuButton>
+            <ComboBox fx:id="rangeSelector">
+
+            </ComboBox>
+            <CustomDateRangePicker fx:id="customRangePicker" />
         </HBox>
         <HBox fx:id="confirmHBox" spacing="10">
+            <Button fx:id="loadButton" text="Load"/>
         </HBox>
     </HBox>
+    <AnchorPane fx:id="chartBox" />
 </VBox>

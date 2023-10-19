@@ -1,0 +1,19 @@
+.button .svg {
+    -fx-fill: -fill;
+}
+
+.button {
+    -fx-background-color: #FCFCFC;
+    -fx-border-color: black;
+    -fx-border-width: 0.5;
+}
+
+.button:hover {
+    -fx-background-color: #FCFCFC;
+    -fx-border-color: black;
+}
+
+
+.button:hover .svg {
+    -fx-fill: -hover-fill;
+}
