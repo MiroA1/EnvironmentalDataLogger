@@ -3,10 +3,7 @@ package fi.tuni.environmentaldatalogger;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TreeMap;
+import java.util.*;
 
 public class Presenter {
 
@@ -43,20 +40,24 @@ public class Presenter {
 
         for (String param : params) {
             TreeMap<Date, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
+/*            if (Objects.equals(param, "temp")) {
+                for (Date entry : result.keySet()) {
+                    Double tempf = result.get(entry);
+                    Double tempc = (tempf - 32) * 5 / 9;
+                    result.replace(entry, tempc);
+                }
+            }*/
             datamap.put(param, result);
         }
 
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-
-
         LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Weather statistics");
 
         for (String param : datamap.keySet()) {
-
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             TreeMap<Date, Double> innerMap = datamap.get(param);
-
             for (Date innerKey : innerMap.keySet()) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 String dateString = dateFormat.format(innerKey);
@@ -66,12 +67,16 @@ public class Presenter {
             lineChart.getData().add(series);
         }
 
-        lineChart.setTitle("Weather statistics");
-
         return lineChart;
-
     }
 
 
-    // TODO: possibly other chart types
+/*    public PieChart getDataAsPieChart() {
+
+        PieChart pieChart = new PieChart(pieChartData);
+
+        return pieChart;
+    }*/
+
+
 }
