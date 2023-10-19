@@ -3,6 +3,8 @@ package fi.tuni.environmentaldatalogger;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,8 +18,16 @@ public class Presenter {
         return new ArrayList<>();
     }
 
-    public Pair<Date, Date> getValidDataRange(String param) {
-        return new Pair<>(new Date(), new Date());
+    public ArrayList<String> getValidWeatherParameters() {
+        return new ArrayList<>();
+    }
+
+    public ArrayList<String> getValidAirQualityParameters() {
+        return new ArrayList<>();
+    }
+
+    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
+        return null;
     }
 
     /**
@@ -25,8 +35,8 @@ public class Presenter {
      * @param params
      * @return
      */
-    public Pair<Date, Date> getValidDataRange(ArrayList<String> params) {
-        return new Pair<>(new Date(), new Date());
+    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
+        return null;
     }
 
     /**
@@ -37,12 +47,12 @@ public class Presenter {
      * @param range
      * @return
      */
-    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<Date, Date> range, Coordinate coordinates) {
+    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
 
-        TreeMap<String, TreeMap<Date, Double>> datamap = new TreeMap<>();
+        TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
 
         for (String param : params) {
-            TreeMap<Date, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
+            TreeMap<LocalDateTime, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
             datamap.put(param, result);
         }
 
@@ -55,11 +65,15 @@ public class Presenter {
         for (String param : datamap.keySet()) {
 
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-            TreeMap<Date, Double> innerMap = datamap.get(param);
+            TreeMap<LocalDateTime, Double> innerMap = datamap.get(param);
 
-            for (Date innerKey : innerMap.keySet()) {
+            for (LocalDateTime innerKey : innerMap.keySet()) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String dateString = dateFormat.format(innerKey);
+
+                // TODO: do this properly
+                Date innerKey1 = java.util.Date.from(innerKey.atZone(ZoneId.systemDefault()).toInstant());
+
+                String dateString = dateFormat.format(innerKey1);
                 series.getData().add(new XYChart.Data<>(dateString, innerMap.get(innerKey)));
             }
             series.setName(param);

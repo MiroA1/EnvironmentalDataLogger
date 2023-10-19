@@ -52,12 +52,12 @@ public class CustomDateRangePicker extends HBox {
         this.getChildren().addAll(startDatePicker, endDatePicker);
     }
 
-    public Date getStartDate() {
-        return Date.from(startDatePicker.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    public LocalDateTime getStartDate() {
+        return startDatePicker.getValue().atStartOfDay();
     }
 
-    public Date getEndDate() {
-        return Date.from(endDatePicker.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    public LocalDateTime getEndDate() {
+        return endDatePicker.getValue().atStartOfDay();
     }
 
     private Callback<DatePicker, DateCell> getDayCellFactory(LocalDate minDate, LocalDate maxDate) {
@@ -74,7 +74,7 @@ public class CustomDateRangePicker extends HBox {
         };
     }
 
-    public Pair<Date, Date> getRange() {
+    public Pair<LocalDateTime, LocalDateTime> getRange() {
         return new Pair<>(this.getStartDate(), this.getEndDate());
     }
 }

@@ -117,7 +117,7 @@ public class ChartViewerElement extends VBox implements Initializable {
         loadButton.fire();
     }
 
-    private Pair<Date, Date> getRange() {
+    private Pair<LocalDateTime, LocalDateTime> getRange() {
 
         LocalDate now = LocalDate.now();
 
@@ -126,32 +126,32 @@ public class ChartViewerElement extends VBox implements Initializable {
             LocalDate start = now.minusDays(14);
             Date startDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             Date endDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(startDate, endDate);
+            return new Pair<>(start.atStartOfDay(), now.atStartOfDay());
         } else if (rangeSelector.getValue().equals("Last 7 days")) {
             LocalDate start = now.minusDays(7);
             Date startDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             Date endDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(startDate, endDate);
+            return new Pair<>(start.atStartOfDay(), now.atStartOfDay());
         } else if (rangeSelector.getValue().equals("Last 24 hours")) {
             LocalDate start = now.minusDays(1);
             Date startDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             Date endDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(startDate, endDate);
+            return new Pair<>(start.atStartOfDay(), now.atStartOfDay());
         } else if (rangeSelector.getValue().equals("Next 24 hours")) {
             LocalDate start = now.plusDays(1);
             Date endDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             Date startDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(startDate, endDate);
+            return new Pair<>(now.atStartOfDay(), start.atStartOfDay());
         } else if (rangeSelector.getValue().equals("Next 7 days")) {
             LocalDate start = now.plusDays(7);
             Date endDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             Date startDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(startDate, endDate);
+            return new Pair<>(now.atStartOfDay(), start.atStartOfDay());
         } else if (rangeSelector.getValue().equals("Next 14 days")) {
             LocalDate start = now.plusDays(14);
             Date endDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             Date startDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(startDate, endDate);
+            return new Pair<>(now.atStartOfDay(), start.atStartOfDay());
         } else {
             return customRangePicker.getRange();
         }
