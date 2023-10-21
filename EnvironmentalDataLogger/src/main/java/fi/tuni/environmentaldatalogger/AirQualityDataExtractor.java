@@ -55,14 +55,9 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     @Override
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
-        Date now = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(now);
-        c.add(Calendar.DATE, 5);
-        // TODO: do this properly
-        LocalDateTime newestEntry = c.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        return new Pair<>(OLDEST_ENTRY, newestEntry);
+        // Forecast is made for 5 days
+        LocalDateTime upperLimit = LocalDateTime.now().plusDays(5);
+        return new Pair<>(OLDEST_ENTRY, upperLimit);
     }
 
     /**
