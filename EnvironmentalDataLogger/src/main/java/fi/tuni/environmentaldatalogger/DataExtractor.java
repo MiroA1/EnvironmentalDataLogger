@@ -49,7 +49,7 @@ public interface DataExtractor {
      * @param coordinates
      * @return
      */
-    TreeMap<LocalDateTime, Double> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates);
+    TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates);
 
     /**
      * Returns real-time data of given parameters

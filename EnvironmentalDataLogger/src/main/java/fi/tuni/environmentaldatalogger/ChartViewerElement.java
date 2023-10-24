@@ -27,7 +27,7 @@ import java.util.*;
 public class ChartViewerElement extends VBox implements Initializable {
 
     private final String DEFAULT_RANGE = "Last 7 days";
-    private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temp");
+    private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
 
     // TODO: remember to change this
     Presenter presenter = new Presenter();

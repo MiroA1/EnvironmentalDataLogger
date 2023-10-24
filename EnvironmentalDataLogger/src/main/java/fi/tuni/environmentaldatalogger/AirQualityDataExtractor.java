@@ -99,7 +99,7 @@ public class AirQualityDataExtractor implements DataExtractor {
     }
 
     @Override
-    public TreeMap<LocalDateTime, Double> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range,
+    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range,
                                                   Coordinate coordinates) {
         return null;
     }
