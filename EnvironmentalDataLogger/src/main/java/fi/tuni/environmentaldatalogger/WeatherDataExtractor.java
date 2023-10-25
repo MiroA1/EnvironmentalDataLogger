@@ -59,7 +59,7 @@ public class WeatherDataExtractor implements DataExtractor {
 
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
-        String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), params);
+        String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), params, false);
         TreeMap<LocalDateTime, TreeMap<String, Double>> fetchedData = fetchDataMultipleParams(apiUrl, params);
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> resultMap = new TreeMap<>();
@@ -76,7 +76,9 @@ public class WeatherDataExtractor implements DataExtractor {
 
     @Override
     public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) {
-        return null;
+        String apiUrl = constructApiUrl(coordinates, LocalDateTime.now(), LocalDateTime.now(), params, true);
+        TreeMap<String, Double> currentData = fetchCurrentData(apiUrl, params);
+        return currentData;
     }
 
     @Override
@@ -91,7 +93,7 @@ public class WeatherDataExtractor implements DataExtractor {
         }
     }
 
-    private String constructApiUrl(Coordinate coordinates, LocalDateTime startDate, LocalDateTime endDate, ArrayList<String> params) {
+    private String constructApiUrl(Coordinate coordinates, LocalDateTime startDate, LocalDateTime endDate, ArrayList<String> params, boolean getCurrent) {
         StringBuilder apiUrl = new StringBuilder(API_BASE_URL + "London,UK");
 
         ArrayList<String> urlParams = new ArrayList<>(params);
@@ -105,7 +107,11 @@ public class WeatherDataExtractor implements DataExtractor {
 
         apiUrl.append("/").append(dateFormat.format(start)).append("/").append(dateFormat.format(end));
         apiUrl.append("?key=").append(API_KEY);
-        apiUrl.append("&include=days");
+        if (getCurrent) {
+            apiUrl.append("&include=current");
+        } else {
+            apiUrl.append("&include=days");
+        }
 
         String elements = String.join(",", urlParams);
         apiUrl.append("&elements=datetime,").append(elements);
@@ -162,6 +168,26 @@ public class WeatherDataExtractor implements DataExtractor {
         return weatherData;
     }
 
+
+    private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) {
+        TreeMap<String, Double> currentData = new TreeMap<>();
+        Request request = new Request.Builder().url(apiUrl).build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body().string();
+                System.out.println(responseBody);
+                currentData = parseCurrentWeatherData(responseBody, params);
+            } else {
+                System.err.println("Unexpected response code: " + response.code());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return currentData;
+    }
+
+
     private LocalDateTime parseDate(String datetime) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -172,6 +198,28 @@ public class WeatherDataExtractor implements DataExtractor {
             return null;
         }
     }
+
+    private TreeMap<String, Double> parseCurrentWeatherData(String json, ArrayList<String> params) {
+        TreeMap<String, Double> currentData = new TreeMap<>();
+
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            JSONObject currentConditions = jsonObject.getJSONObject("currentConditions");
+
+            for (String param : params) {
+                if (param.equals("temperature") && currentConditions.has("temp")) {
+                    currentData.put("temperature", currentConditions.getDouble("temp"));
+                } else if (currentConditions.has(param)) {
+                    currentData.put(param, currentConditions.getDouble(param));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return currentData;
+    }
+
 }
 
 
