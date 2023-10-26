@@ -7,11 +7,15 @@
 <?import javafx.scene.layout.*?>
 
 <?import fi.tuni.environmentaldatalogger.CustomDateRangePicker?>
+<?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       spacing="10">
-    <HBox spacing="40">
+    <HBox fx:id="headerHBox" spacing="40">
         <HBox fx:id="optionsHBox" spacing="10">
+            <HBox.margin>
+                <Insets left="20"/>
+            </HBox.margin>
             <MenuButton fx:id="parameterSelector" text="Select Parameters">
 
             </MenuButton>
@@ -22,6 +26,12 @@
         </HBox>
         <HBox fx:id="confirmHBox" spacing="10">
             <Button fx:id="loadButton" text="Load"/>
+        </HBox>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <HBox fx:id="removeHBox">
+            <HBox.margin>
+                <Insets right="10"/>
+            </HBox.margin>
         </HBox>
     </HBox>
     <AnchorPane fx:id="chartBox" />

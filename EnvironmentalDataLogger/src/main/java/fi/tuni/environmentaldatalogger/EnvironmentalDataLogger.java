@@ -75,17 +75,34 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        try {
-            chartsPane.getChildren().add(new ChartViewerElement());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
         locationButton.setOnAction(actionEvent -> launchCoordinateDialog());
         locationLabel.setText(currentLocation.toString());
 
         initExitButton();
         initInfoButton();
+
+        try {
+            var grid = new ChartGrid();
+            chartsPane.getChildren().add(grid);
+
+            Button test = new Button("View");
+            test.setOnAction(actionEvent -> {
+                if (test.getText().equals("View")) {
+                    grid.viewMode();
+                    test.setText("Edit");
+                } else {
+                    grid.editMode();
+                    test.setText("View");
+                }
+            });
+
+            AnchorPane.setTopAnchor(test, 5.0);
+            AnchorPane.setRightAnchor(test, 5.0);
+
+            chartsPane.getChildren().add(test);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Coordinate getCurrentLocation() {
