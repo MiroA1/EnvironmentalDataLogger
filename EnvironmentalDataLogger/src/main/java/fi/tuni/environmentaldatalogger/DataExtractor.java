@@ -2,6 +2,7 @@ package fi.tuni.environmentaldatalogger;
 
 import javafx.util.Pair;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
@@ -21,7 +22,7 @@ public interface DataExtractor {
      * @param param
      * @return
      */
-    Pair<Date, Date> getValidDataRange(String param);
+    Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param);
 
     /**
      * Returns data for a given parameter within specified time range.
@@ -30,7 +31,7 @@ public interface DataExtractor {
      * @param range
      * @return
      */
-    TreeMap<Date, Double> getData(String param, Pair<Date, Date> range, Coordinate coordinates);
+    TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates);
 
     /**
      * Returns all available data for a given parameter.
@@ -38,7 +39,32 @@ public interface DataExtractor {
      * @param param
      * @return
      */
-    TreeMap<Date, Double> getData(String param, Coordinate coordinates);
+    TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates);
 
+    /**
+     * Returns data for a givens parameters within specified time range.
+     *
+     * @param params
+     * @param range
+     * @param coordinates
+     * @return
+     */
+    TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates);
 
+    /**
+     * Returns real-time data of given parameters
+     *
+     * @param params
+     * @param coordinates
+     * @return map(param, value)
+     */
+    TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates);
+
+    /**
+     * Returns the unit used for given parameter (e.g. "°C")
+     *
+     * @param param
+     * @return
+     */
+    String getUnit(String param);
 }

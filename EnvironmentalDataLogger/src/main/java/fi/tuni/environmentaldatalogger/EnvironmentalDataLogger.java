@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ResourceBundle;
 import javafx.scene.web.WebView;
 import javafx.util.Pair;
+import java.time.LocalDateTime;
 
 import java.util.*;
 public class EnvironmentalDataLogger extends Application implements Initializable {
@@ -65,8 +66,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
         stage.setScene(scene);
         stage.show();
-
     }
+
 
     public static void main(String[] args) {
         launch();
