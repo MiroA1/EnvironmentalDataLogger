@@ -3,12 +3,14 @@ package fi.tuni.environmentaldatalogger;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
 import java.text.SimpleDateFormat;
+import java.util.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TreeMap;
+
 
 public class Presenter {
 
@@ -58,12 +60,10 @@ public class Presenter {
 
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-
-
         LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Weather statistics");
 
         for (String param : datamap.keySet()) {
-
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             TreeMap<LocalDateTime, Double> innerMap = datamap.get(param);
 
@@ -80,12 +80,16 @@ public class Presenter {
             lineChart.getData().add(series);
         }
 
-        lineChart.setTitle("Weather statistics");
-
         return lineChart;
-
     }
 
 
-    // TODO: possibly other chart types
+/*    public PieChart getDataAsPieChart() {
+
+        PieChart pieChart = new PieChart(pieChartData);
+
+        return pieChart;
+    }*/
+
+
 }

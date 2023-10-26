@@ -9,13 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,14 +50,10 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     @Override
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
-        Date now = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(now);
-        c.add(Calendar.DATE, 5);
-        // TODO: do this properly
-        LocalDateTime newestEntry = c.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        return new Pair<>(OLDEST_ENTRY, newestEntry);
+        // TODO: TimeZone changes? Current API provides timestamps in GMT+0 -> https://open-meteo.com/en/docs/air-quality-api
+        // For now allow only 3-day forecast; if longer period is allowed, json parsing must be improved
+        LocalDateTime upperLimit = LocalDateTime.now().plusDays(5);
+        return new Pair<>(OLDEST_ENTRY, upperLimit);
     }
 
     /**
@@ -78,6 +69,7 @@ public class AirQualityDataExtractor implements DataExtractor {
         String latitude = "61.29,56.8";     // placeholder for now. TODO: Replace with coordinates, once class is implemented
         String longitude = "23.47,13.63";   // placeholder for now
         String url = constructApiUrl(latitude,longitude, range.getKey(),range.getValue());
+        System.out.print(url);
         boolean validParam = false;
         String queryWord = "";
         for (AirQualityParameter ap : AirQualityParameter.values()){
@@ -107,7 +99,8 @@ public class AirQualityDataExtractor implements DataExtractor {
     }
 
     @Override
-    public TreeMap<LocalDateTime, Double> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range,
+                                                  Coordinate coordinates) {
         return null;
     }
 
@@ -134,16 +127,11 @@ public class AirQualityDataExtractor implements DataExtractor {
         apiUrl.append(LATITUDE).append(latitude);
         apiUrl.append("&" + LONGITUDE).append(longitude);
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         if (startDate != null && endDate != null) {
-            apiUrl.append("&" + START_DATE).append(dateFormat.format(startDate));
-            apiUrl.append("&" + END_DATE).append(dateFormat.format(endDate));
+            apiUrl.append("&" + START_DATE).append(startDate.toLocalDate().toString());
+            apiUrl.append("&" + END_DATE).append(endDate.toLocalDate().toString());
         }
-
-      //  apiUrl.append("&" + DOMAINS);
-        System.out.println(apiUrl);
         return apiUrl.toString();
-
     }
 
     /**
@@ -159,7 +147,6 @@ public class AirQualityDataExtractor implements DataExtractor {
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseBody = response.body().string();
-                System.out.println(responseBody);
                 airQualityData = parseAirQualityData(responseBody, param);
             } else {
                 System.err.println("Unexpected response code: " + response.code());
@@ -183,8 +170,7 @@ public class AirQualityDataExtractor implements DataExtractor {
             for ( int i = 0; i < dateArray.length(); i++) {
                 String dateObject = dateArray.getString(i);
                 double paramValue = dataArray.getDouble(i);
-
-                LocalDateTime date = parseDate(dateObject);
+                LocalDateTime date = LocalDateTime.parse(dateObject);
                 if (date != null) {
                     airQualityData.put(date, paramValue);
                 }
@@ -195,15 +181,6 @@ public class AirQualityDataExtractor implements DataExtractor {
         return airQualityData;
     }
 
-    private LocalDateTime parseDate(String dateString) {
-        try {
-            // TODO: do this properly
-            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(dateString).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
     /**
      *  Creates http client for the extractor
      */

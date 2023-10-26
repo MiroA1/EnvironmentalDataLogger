@@ -29,8 +29,8 @@ import java.util.*;
 
 public class ChartViewerElement extends VBox implements Initializable, GridElement {
 
-    private final String DEFAULT_RANGE = "Last 24 hours";
-    private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temp");
+    private final String DEFAULT_RANGE = "Last 7 days";
+    private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
 
     // TODO: remember to change this
     Presenter presenter = new Presenter();
