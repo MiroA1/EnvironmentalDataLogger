@@ -39,6 +39,9 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public Button exitButton;
     public Button locationButton;
     public Button infoButton;
+    public Label temperatureLabel;
+    public Label timeLabel;
+    public Label dateLabel;
 
     private static final String EXIT_RECTANGLE_PATH = "M36.501,33c-0.552,0-1,0.447-1,1v20h-32V2h32v20c0,0.553," +
             "0.448,1,1,1s1-0.447,1-1V1c0-0.553-0.448-1-1-1h-34c-0.552,0-1,0.447-1,1v54c0,0.553,0.448,1,1,1h34c0.552" +
@@ -55,8 +58,11 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             "3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275" +
             " 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z";
 
-    private static final Coordinate DEFAULT_LOCATION = new Coordinate(61.4978, 23.7610);
-    private static Coordinate currentLocation = DEFAULT_LOCATION;
+    private static final Location DEFAULT_LOCATION = new Location("Tampere", "FI", new Coordinate(61.4978, 23.7610));
+    private static Location currentLocation = DEFAULT_LOCATION;
+
+    Timer temperatureTimer = new Timer(true);
+    Timer clockTimer = new Timer(true);
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -104,10 +110,26 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        // update temperature label every 10 minutes
+        temperatureTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateTemperatureLabel();
+            }
+        }, 0, 600000);
+
+        // update time and date labels every second
+        clockTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateTime();
+            }
+        }, 0, 1000);
     }
 
-    public static Coordinate getCurrentLocation() {
-        return currentLocation;
+    public static Coordinate getCurrentCoords() {
+        return currentLocation.getCoordinates();
     }
 
     private static SVGPath createPath(String d, String fill, String hoverFill) {
@@ -123,13 +145,20 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         CoordinateDialog dialog = new CoordinateDialog();
 
         dialog.showAndWait().ifPresent(result -> {
-            currentLocation = result;
+            try {
+                currentLocation = Location.fromCoordinates(result);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             locationLabel.setText(currentLocation.toString());
         });
     }
 
     private void initExitButton() {
-        exitButton.setOnAction(actionEvent -> Platform.exit());
+        exitButton.setOnAction(actionEvent -> {
+                    Platform.exit();
+                });
 
 
         Group svg = new Group(
@@ -165,5 +194,20 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         infoButton.setMaxSize(48, 48);
         infoButton.setMinSize(48, 48);
         infoButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+    }
+
+    private void updateTemperatureLabel() {
+        String str = Presenter.getInstance().getCurrentData(new ArrayList<>(List.of("temperature")), getCurrentCoords()).get("temperature");
+        Platform.runLater(() -> temperatureLabel.setText(str));
+    }
+
+    private void updateTime() {
+        // TODO: change to time of location
+        Platform.runLater(() -> {
+            LocalDateTime now = LocalDateTime.now();
+            timeLabel.setText(now.getHour() + ":" + now.getMinute());
+            dateLabel.setText(now.getDayOfMonth() + "." + now.getMonthValue() + "." + now.getYear());
+        });
+
     }
 }

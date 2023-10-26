@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 public interface DataExtractor {
 
+
     /**
      * Returns a list of valid parameters (e.g. temperature, humidity).
      *

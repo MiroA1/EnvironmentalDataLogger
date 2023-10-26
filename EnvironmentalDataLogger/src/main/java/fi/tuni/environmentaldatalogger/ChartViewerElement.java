@@ -33,7 +33,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
 
     // TODO: remember to change this
-    Presenter presenter = new Presenter();
+    Presenter presenter = Presenter.getInstance();
 
     private int column;
     private int row;
@@ -123,7 +123,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
             chartBox.getChildren().clear();
 
-            var lc = presenter.getDataAsLineChart(params, getRange(), EnvironmentalDataLogger.getCurrentLocation());
+            var lc = presenter.getDataAsLineChart(params, getRange(), EnvironmentalDataLogger.getCurrentCoords());
 
 
             AnchorPane.setTopAnchor(lc, 10.0);
