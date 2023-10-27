@@ -1,16 +1,13 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
-import java.text.SimpleDateFormat;
+
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.TreeMap;
 
 

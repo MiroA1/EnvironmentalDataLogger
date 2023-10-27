@@ -1,4 +1,4 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.gui;
 
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;

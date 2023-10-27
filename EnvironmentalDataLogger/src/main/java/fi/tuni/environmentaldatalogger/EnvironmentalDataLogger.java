@@ -1,33 +1,27 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.gui.ChartGrid;
+import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
+import fi.tuni.environmentaldatalogger.util.Coordinate;
+import fi.tuni.environmentaldatalogger.util.Location;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
-import javafx.util.Callback;
+
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ResourceBundle;
-import javafx.scene.web.WebView;
+
 import javafx.util.Pair;
 import java.time.LocalDateTime;
 
@@ -129,6 +123,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                 updateTime();
             }
         }, 0, 1000);
+
+        //currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), new Pair<>(LocalDateTime.now().minusDays(5), LocalDateTime.now()), getCurrentCoords()));
     }
 
     public static Coordinate getCurrentCoords() {

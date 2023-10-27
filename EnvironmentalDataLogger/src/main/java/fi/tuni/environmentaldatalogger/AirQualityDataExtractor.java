@@ -1,6 +1,7 @@
 package fi.tuni.environmentaldatalogger;
 
 import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
+import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

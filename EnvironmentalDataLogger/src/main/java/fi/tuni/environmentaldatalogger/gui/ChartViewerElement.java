@@ -1,30 +1,20 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.gui;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
+import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.WeatherDataExtractor;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import javafx.util.Pair;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.*;
 
 public class ChartViewerElement extends VBox implements Initializable, GridElement {
@@ -61,7 +51,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         this.column = column;
         this.row = row;
 
-        FXMLLoader fxmlLoader = new FXMLLoader(ChartViewerElement.class.getResource("chart_viewer_element.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ChartViewerElement.class.getResource("/fi/tuni/environmentaldatalogger/chart_viewer_element.fxml"));
         fxmlLoader.setController(this);
         this.getChildren().add(fxmlLoader.load());
     }
