@@ -3,6 +3,8 @@ package fi.tuni.environmentaldatalogger;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -65,12 +67,12 @@ public class Presenter {
     }
 
     /**
-     * Return a line chart containing data of supplied parameters.
-     * (Return type not finalized)
+     * Returns a line chart containing data of supplied parameters
      *
-     * @param params
-     * @param range
-     * @return
+     * @param params what data is used to create a line chart. Temperature and humidity for example.
+     * @param range date or time range for the data
+     * @param coordinates coordinates for the geographic location of data
+     * @return line chart of the given parameters
      */
     public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
 
@@ -81,29 +83,65 @@ public class Presenter {
             datamap.put(param, result);
         }
 
-        CategoryAxis xAxis = new CategoryAxis();
-        NumberAxis yAxis = new NumberAxis();
-        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("Weather statistics");
+        Duration duration = Duration.between(range.getKey(), range.getValue());
+        DateTimeFormatter formatter = (duration.toHours() <= 24) ?
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH") :
+                DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        NumberAxis yAxis = new NumberAxis();
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setGapStartAndEnd(false);
+        xAxis.setStartMargin(10);
+        xAxis.setEndMargin(50);
+
+        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        //lineChart.setTitle("Weather statistics");
+
+        var api = weatherAPIs.get(0);
         for (String param : datamap.keySet()) {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-            TreeMap<LocalDateTime, Double> innerMap = datamap.get(param);
+            TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
+            // Change the first letter of param to uppercase
+            String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
 
-            for (LocalDateTime innerKey : innerMap.keySet()) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-                // TODO: do this properly
-                Date innerKey1 = java.util.Date.from(innerKey.atZone(ZoneId.systemDefault()).toInstant());
-
-                String dateString = dateFormat.format(innerKey1);
-                series.getData().add(new XYChart.Data<>(dateString, innerMap.get(innerKey)));
+            for (LocalDateTime date : dateMap.keySet()) {
+                String dateString = date.format(formatter);
+                series.getData().add(new XYChart.Data<>(dateString, dateMap.get(date)));
             }
-            series.setName(param);
+            series.setName(paramFormatted + " " + api.getUnit(param));
             lineChart.getData().add(series);
         }
 
         return lineChart;
+    }
+
+
+    /**
+     * Returns a pie chart containing data of supplied parameters
+     * @param params List of pollutants in the air
+     * @param range date or time range for the data
+     * @param coordinates coordinates for the geographic location of data
+     * @return pie chart containing data of supplied parameters
+     */
+    public PieChart getDataAsPieChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+
+        TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
+        PieChart pieChart = new PieChart();
+
+        for (String param : params) {
+            TreeMap<LocalDateTime, Double> result = AirQualityDataExtractor.getInstance().getData(param, range, coordinates);
+            datamap.put(param, result);
+        }
+
+        for (String param : datamap.keySet()) {
+            TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
+            for (LocalDateTime date : dateMap.keySet()) {
+                PieChart.Data slice = new PieChart.Data(param, dateMap.get(date));
+                pieChart.getData().add(slice);
+            }
+        }
+
+        return pieChart;
     }
 
     /**
@@ -125,14 +163,5 @@ public class Presenter {
 
         return result;
     }
-
-
-/*    public PieChart getDataAsPieChart() {
-
-        PieChart pieChart = new PieChart(pieChartData);
-
-        return pieChart;
-    }*/
-
 
 }
