@@ -88,22 +88,27 @@ public class Presenter {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH") :
                 DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
+        CategoryAxis xAxis = new CategoryAxis();
         xAxis.setGapStartAndEnd(false);
+        xAxis.setStartMargin(10);
+        xAxis.setEndMargin(50);
 
         LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
         //lineChart.setTitle("Weather statistics");
 
+        var api = weatherAPIs.get(0);
         for (String param : datamap.keySet()) {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
+            // Change the first letter of param to uppercase
+            String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
 
             for (LocalDateTime date : dateMap.keySet()) {
                 String dateString = date.format(formatter);
                 series.getData().add(new XYChart.Data<>(dateString, dateMap.get(date)));
             }
-            series.setName(param);
+            series.setName(paramFormatted + " " + api.getUnit(param));
             lineChart.getData().add(series);
         }
 
