@@ -1,5 +1,16 @@
 package fi.tuni.environmentaldatalogger;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public record Coordinate(double latitude, double longitude) {
 
     public Coordinate {
@@ -15,15 +26,5 @@ public record Coordinate(double latitude, double longitude) {
 
     public String toString() {
         return String.format("%.4f° N; %.4f° E", latitude, longitude);
-    }
-
-    // TODO: toteutetaan jos ehditään, esim. https://developers.google.com/maps/documentation/geocoding/overview
-    public static Coordinate searchCoordinates(String placeName) {
-        return null;
-    }
-
-    // TODO: toteutetaan jos ehditään, esim. https://ip-api.com/
-    public static Coordinate geoLocateByIP() {
-        return null;
     }
 }

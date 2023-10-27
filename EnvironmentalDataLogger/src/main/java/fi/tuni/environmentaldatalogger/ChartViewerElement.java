@@ -1,5 +1,8 @@
 package fi.tuni.environmentaldatalogger;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,13 +27,16 @@ import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDateTime;
 import java.util.*;
 
-public class ChartViewerElement extends VBox implements Initializable {
+public class ChartViewerElement extends VBox implements Initializable, GridElement {
 
     private final String DEFAULT_RANGE = "Last 7 days";
     private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
 
     // TODO: remember to change this
-    Presenter presenter = new Presenter();
+    Presenter presenter = Presenter.getInstance();
+
+    private int column;
+    private int row;
     
     @FXML
     public AnchorPane chartBox;
@@ -42,14 +48,35 @@ public class ChartViewerElement extends VBox implements Initializable {
     public Button loadButton;
     @FXML
     public CustomDateRangePicker customRangePicker;
+    @FXML
+    public HBox removeHBox;
+    @FXML
+    public HBox headerHBox;
 
-    public ChartViewerElement() throws IOException {
+    private final RemoveChartButton removeButton;
+
+    public ChartViewerElement(int column, int row, RemoveChartButton removeButton) throws IOException {
+
+        this.removeButton = removeButton;
+        this.column = column;
+        this.row = row;
+
         FXMLLoader fxmlLoader = new FXMLLoader(ChartViewerElement.class.getResource("chart_viewer_element.fxml"));
         fxmlLoader.setController(this);
         this.getChildren().add(fxmlLoader.load());
     }
 
+    public void viewMode() {
+        headerHBox.setVisible(false);
+        headerHBox.setManaged(false);
+        this.setStyle("-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;");
+    }
 
+    public void editMode() {
+        headerHBox.setVisible(true);
+        headerHBox.setManaged(true);
+        this.setStyle("-fx-border-color: transparent;");
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -58,6 +85,8 @@ public class ChartViewerElement extends VBox implements Initializable {
         AnchorPane.setLeftAnchor(this, 10.0);
         AnchorPane.setRightAnchor(this, 10.0);
         AnchorPane.setBottomAnchor(this, 10.0);
+
+        this.setPrefWidth(4000);
 
         //MenuButton menuButton = new MenuButton("Select Parameters");
         ContextMenu contextMenu = new ContextMenu();
@@ -94,12 +123,16 @@ public class ChartViewerElement extends VBox implements Initializable {
 
             chartBox.getChildren().clear();
 
-            var lc = presenter.getDataAsLineChart(params, getRange(), EnvironmentalDataLogger.getCurrentLocation());
+            var lc = presenter.getDataAsLineChart(params, getRange(), EnvironmentalDataLogger.getCurrentCoords());
 
-            AnchorPane.setTopAnchor(lc, 0.0);
+
+            AnchorPane.setTopAnchor(lc, 10.0);
             AnchorPane.setLeftAnchor(lc, 0.0);
             AnchorPane.setRightAnchor(lc, 0.0);
             AnchorPane.setBottomAnchor(lc, 0.0);
+
+            lc.setPrefHeight(500);
+            //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
 
             chartBox.getChildren().add(lc);
         });
@@ -114,46 +147,48 @@ public class ChartViewerElement extends VBox implements Initializable {
             }
         });
 
+
+        if (removeButton != null) {
+            removeHBox.getChildren().add(removeButton);
+        }
+
         loadButton.fire();
     }
 
     private Pair<LocalDateTime, LocalDateTime> getRange() {
 
-        LocalDate now = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
 
-        // TODO: change
         if (rangeSelector.getValue().equals("Last 14 days")) {
-            LocalDate start = now.minusDays(14);
-            Date startDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(start.atStartOfDay(), now.atStartOfDay());
+            return new Pair<>(now.minusDays(14), now);
+
         } else if (rangeSelector.getValue().equals("Last 7 days")) {
-            LocalDate start = now.minusDays(7);
-            Date startDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(start.atStartOfDay(), now.atStartOfDay());
+            return new Pair<>(now.minusDays(7), now);
+
         } else if (rangeSelector.getValue().equals("Last 24 hours")) {
-            LocalDate start = now.minusDays(1);
-            Date startDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(start.atStartOfDay(), now.atStartOfDay());
+            return new Pair<>(now.minusDays(1), now);
+
         } else if (rangeSelector.getValue().equals("Next 24 hours")) {
-            LocalDate start = now.plusDays(1);
-            Date endDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            Date startDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(now.atStartOfDay(), start.atStartOfDay());
+            return new Pair<>(now, now.plusDays(1));
+
         } else if (rangeSelector.getValue().equals("Next 7 days")) {
-            LocalDate start = now.plusDays(7);
-            Date endDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            Date startDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(now.atStartOfDay(), start.atStartOfDay());
+            return new Pair<>(now, now.plusDays(7));
+
         } else if (rangeSelector.getValue().equals("Next 14 days")) {
-            LocalDate start = now.plusDays(14);
-            Date endDate = Date.from(start.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            Date startDate = Date.from(now.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            return new Pair<>(now.atStartOfDay(), start.atStartOfDay());
+            return new Pair<>(now, now.plusDays(14));
+
         } else {
             return customRangePicker.getRange();
         }
+    }
+
+    @Override
+    public int getColumn() {
+        return column;
+    }
+
+    @Override
+    public int getRow() {
+        return row;
     }
 }
