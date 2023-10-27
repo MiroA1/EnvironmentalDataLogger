@@ -1,4 +1,4 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.gui;
 
 public interface GridElement {
 

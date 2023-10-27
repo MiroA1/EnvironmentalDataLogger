@@ -1,4 +1,4 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.gui;
 
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -10,9 +10,6 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 public class ChartGrid extends GridPane {
 

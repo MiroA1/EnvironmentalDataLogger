@@ -1,9 +1,6 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.gui;
 
 import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-
-import java.io.IOException;
 
 public class RemoveChartButton extends Button {
 
