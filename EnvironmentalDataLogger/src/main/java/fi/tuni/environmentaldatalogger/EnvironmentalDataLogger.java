@@ -24,6 +24,8 @@ import javafx.util.Callback;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ResourceBundle;
 import javafx.scene.web.WebView;
 import javafx.util.Pair;
@@ -42,6 +44,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public Label temperatureLabel;
     public Label timeLabel;
     public Label dateLabel;
+    public AnchorPane currentDataPane;
 
     private static final String EXIT_RECTANGLE_PATH = "M36.501,33c-0.552,0-1,0.447-1,1v20h-32V2h32v20c0,0.553," +
             "0.448,1,1,1s1-0.447,1-1V1c0-0.553-0.448-1-1-1h-34c-0.552,0-1,0.447-1,1v54c0,0.553,0.448,1,1,1h34c0.552" +
@@ -203,10 +206,14 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
     private void updateTime() {
         // TODO: change to time of location
+        // clock format to hh:mm
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
-            timeLabel.setText(now.getHour() + ":" + now.getMinute());
-            dateLabel.setText(now.getDayOfMonth() + "." + now.getMonthValue() + "." + now.getYear());
+            DateTimeFormatter clockFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            timeLabel.setText(now.format(clockFormatter));
+            dateLabel.setText(now.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("en")) +
+                    " " + now.format(dateFormatter));
         });
 
     }
