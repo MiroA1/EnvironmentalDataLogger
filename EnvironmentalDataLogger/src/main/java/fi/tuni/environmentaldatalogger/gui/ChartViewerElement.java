@@ -2,7 +2,7 @@ package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
-import fi.tuni.environmentaldatalogger.WeatherDataExtractor;
+import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;

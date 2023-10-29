@@ -1,4 +1,4 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.apis;
 
 import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
 import fi.tuni.environmentaldatalogger.util.Coordinate;

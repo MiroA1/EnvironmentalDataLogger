@@ -1,5 +1,8 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
+import fi.tuni.environmentaldatalogger.apis.DataExtractor;
+import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
