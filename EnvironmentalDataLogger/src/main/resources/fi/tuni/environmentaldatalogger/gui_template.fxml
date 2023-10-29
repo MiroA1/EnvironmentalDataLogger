@@ -109,6 +109,12 @@
 
                    </AnchorPane>
                </Tab>
+               <Tab closable="false" text="Current Data">
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" fx:id="currentDataPane"
+                               style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+
+                   </AnchorPane>
+               </Tab>
                <Tab closable="false" text="Notes">
                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"
                                style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
