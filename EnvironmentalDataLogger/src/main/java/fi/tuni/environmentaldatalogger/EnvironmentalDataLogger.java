@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.gui.ChartGrid;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
@@ -11,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.SVGPath;
@@ -124,7 +126,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             }
         }, 0, 1000);
 
-        //currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), new Pair<>(LocalDateTime.now().minusDays(5), LocalDateTime.now()), getCurrentCoords()));
+
     }
 
     public static Coordinate getCurrentCoords() {

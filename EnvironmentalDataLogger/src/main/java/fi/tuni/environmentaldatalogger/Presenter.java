@@ -9,6 +9,8 @@ import javafx.util.Pair;
 
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -123,25 +125,39 @@ public class Presenter {
      * @param coordinates coordinates for the geographic location of data
      * @return pie chart containing data of supplied parameters
      */
-    public PieChart getDataAsPieChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public TreeMap<LocalDateTime, PieChart> getDataAsPieChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
-        PieChart pieChart = new PieChart();
+
+        TreeMap<LocalDateTime, PieChart> piechartsMap = new TreeMap<>();
 
         for (String param : params) {
             TreeMap<LocalDateTime, Double> result = AirQualityDataExtractor.getInstance().getData(param, range, coordinates);
             datamap.put(param, result);
         }
 
-        for (String param : datamap.keySet()) {
-            TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
-            for (LocalDateTime date : dateMap.keySet()) {
-                PieChart.Data slice = new PieChart.Data(param, dateMap.get(date));
-                pieChart.getData().add(slice);
+        LocalDateTime startDate = range.getKey();
+        LocalDateTime endDate = range.getValue();
+        LocalDateTime currentDate = startDate;
+
+        while (currentDate.isBefore(endDate)) {
+            PieChart pieChart = new PieChart();
+            pieChart.setTitle(currentDate.toString());
+            for (String param : datamap.keySet()) {
+                TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
+                for (LocalDateTime date : dateMap.keySet()) {
+                    if (date == currentDate) {
+                        PieChart.Data slice = new PieChart.Data(param, dateMap.get(date));
+                        pieChart.getData().add(slice);
+                    }
+                }
             }
+            piechartsMap.put(currentDate, pieChart);
+            currentDate = currentDate.plusDays(1);
         }
 
-        return pieChart;
+        return piechartsMap;
     }
 
     /**
