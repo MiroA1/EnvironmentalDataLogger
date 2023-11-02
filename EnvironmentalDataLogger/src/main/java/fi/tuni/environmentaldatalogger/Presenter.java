@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger;
 
+import javafx.scene.Node;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
 import java.text.SimpleDateFormat;
@@ -116,47 +117,70 @@ public class Presenter {
         return lineChart;
     }
 
+    private void setSliceColor(PieChart.Data slice) {
+
+        String sliceName = slice.getName();
+        double sliceValue = slice.getPieValue();
+        Node sliceNode = slice.getNode();
+
+        if (sliceName.equals("S02")) {
+            if (sliceValue < 20) {
+                sliceNode.setStyle("-fx-pie-color: #33FF4C");
+            } else if (20 <= sliceValue && sliceValue < 80){
+                sliceNode.setStyle("-fx-pie-color: #FFF933");
+            } else if (80 <= sliceValue && sliceValue < 250) {
+                sliceNode.setStyle("-fx-pie-color: #FFA533");
+            } else if (250 <= sliceValue && sliceValue < 350) {
+                sliceNode.setStyle("-fx-pie-color: #EA3F1D");
+            } else if (sliceValue >= 350) {
+                sliceNode.setStyle("-fx-pie-color: #b5468b");
+            }
+        } else if (sliceName.equals("NO2")) {
+            if (sliceValue < 40) {
+                sliceNode.setStyle("-fx-pie-color: #33FF4C");
+            } else if (40 <= sliceValue && sliceValue < 70){
+                sliceNode.setStyle("-fx-pie-color: #FFF933");
+            } else if (70 <= sliceValue && sliceValue < 150) {
+                sliceNode.setStyle("-fx-pie-color: #FFA533");
+            } else if (150 <= sliceValue && sliceValue < 200) {
+                sliceNode.setStyle("-fx-pie-color: #EA3F1D");
+            } else if (sliceValue >= 200) {
+                sliceNode.setStyle("-fx-pie-color: #b5468b");
+            }
+        } else {
+            sliceNode.setStyle("-fx-pie-color: #000000");
+        }
+
+    }
+
 
     /**
      * Returns a pie chart containing data of supplied parameters
      * @param params List of pollutants in the air
-     * @param range date or time range for the data
+     * @param date date for the data
      * @param coordinates coordinates for the geographic location of data
      * @return pie chart containing data of supplied parameters
      */
-    public TreeMap<LocalDateTime, PieChart> getDataAsPieChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public PieChart getDataAsPieChart(ArrayList<String> params, LocalDateTime date, Coordinate coordinates) {
 
+        Pair<LocalDateTime, LocalDateTime> range = new Pair<>(date, date);
 
-        TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
+        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap = AirQualityDataExtractor.getInstance().
+                                                                        getData(params, range, coordinates);
 
-        TreeMap<LocalDateTime, PieChart> piechartsMap = new TreeMap<>();
+        PieChart pieChart = new PieChart();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateString = date.format(formatter);
+        pieChart.setTitle(dateString);
 
-        for (String param : params) {
-            TreeMap<LocalDateTime, Double> result = AirQualityDataExtractor.getInstance().getData(param, range, coordinates);
-            datamap.put(param, result);
+        for (String param : dataMap.keySet()) {
+            TreeMap<LocalDateTime, Double> dateMap = dataMap.get(param);
+            PieChart.Data slice = new PieChart.Data(param, dateMap.get(date));
+            setSliceColor(slice);
+            pieChart.getData().add(slice);
         }
 
-        LocalDateTime startDate = range.getKey();
-        LocalDateTime endDate = range.getValue();
-        LocalDateTime currentDate = startDate;
-
-        while (currentDate == endDate) {
-            PieChart pieChart = new PieChart();
-            pieChart.setTitle(currentDate.toString());
-            for (String param : datamap.keySet()) {
-                TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
-                for (LocalDateTime date : dateMap.keySet()) {
-                    if (date == currentDate) {
-                        PieChart.Data slice = new PieChart.Data(param, dateMap.get(date));
-                        pieChart.getData().add(slice);
-                    }
-                }
-            }
-            piechartsMap.put(currentDate, pieChart);
-            currentDate = currentDate.plusDays(1);
-        }
-
-        return piechartsMap;
+        return pieChart;
     }
 
     /**
