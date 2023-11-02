@@ -11,4 +11,8 @@ module fi.tuni.environmentaldatalogger {
     exports fi.tuni.environmentaldatalogger;
     exports fi.tuni.environmentaldatalogger.util;
     opens fi.tuni.environmentaldatalogger.util to javafx.fxml;
+    exports fi.tuni.environmentaldatalogger.gui;
+    opens fi.tuni.environmentaldatalogger.gui to javafx.fxml;
+    exports fi.tuni.environmentaldatalogger.apis;
+    opens fi.tuni.environmentaldatalogger.apis to javafx.fxml;
 }

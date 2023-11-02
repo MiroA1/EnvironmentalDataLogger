@@ -1,4 +1,4 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

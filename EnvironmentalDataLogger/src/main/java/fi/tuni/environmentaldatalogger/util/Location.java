@@ -1,4 +1,4 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -6,9 +6,7 @@ import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Objects;
 
 public class Location {
 

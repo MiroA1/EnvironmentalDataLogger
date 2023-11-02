@@ -1,5 +1,6 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.apis;
 
+import fi.tuni.environmentaldatalogger.util.Coordinate;
 import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -1,18 +1,19 @@
 package fi.tuni.environmentaldatalogger;
 
 import javafx.scene.Node;
+import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
+import fi.tuni.environmentaldatalogger.apis.DataExtractor;
+import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
+import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
-import java.text.SimpleDateFormat;
+
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.TreeMap;
 
 

@@ -1,7 +1,6 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.gui;
 
 import javafx.geometry.HPos;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;

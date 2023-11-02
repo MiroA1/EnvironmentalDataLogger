@@ -1,10 +1,10 @@
-package fi.tuni.environmentaldatalogger;
+package fi.tuni.environmentaldatalogger.apis;
 
+import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.util.Pair;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.TreeMap;
 
 public interface DataExtractor {
