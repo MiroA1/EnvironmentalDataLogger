@@ -114,7 +114,6 @@ public class WeatherDataExtractor implements DataExtractor {
         if (getCurrent) {
             apiUrl.append("&include=current");
         } else {
-            // Check if the dates are defined and the separation is maximum one day
             if (startDate != null && endDate != null && !endDate.isAfter(startDate.plusDays(1))) {
                 apiUrl.append("&include=hours");
             } else {
@@ -158,15 +157,12 @@ public class WeatherDataExtractor implements DataExtractor {
                 JSONObject dayObject = daysArray.getJSONObject(i);
                 String dateStr = dayObject.getString("datetime");
 
-                // Adjust here for the 'date' field based on your JSON structure
                 LocalDateTime date = LocalDate.parse(dateStr).atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
 
                 if (dayObject.has("hours")) {
-                    // This is hourly data
                     JSONArray hoursArray = dayObject.getJSONArray("hours");
                     for (int j = 0; j < hoursArray.length(); j++) {
                         JSONObject hourObject = hoursArray.getJSONObject(j);
-                        // Assuming 'datetime' field contains hour information
                         String time = hourObject.getString("datetime");
                         LocalDateTime dateTime = LocalDateTime.parse(dateStr + "T" + time, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
@@ -174,7 +170,6 @@ public class WeatherDataExtractor implements DataExtractor {
                         weatherData.put(dateTime, hourlyData);
                     }
                 } else {
-                    // This is daily data
                     TreeMap<String, Double> dailyData = extractParams(dayObject, params);
                     weatherData.put(date, dailyData);
                 }
