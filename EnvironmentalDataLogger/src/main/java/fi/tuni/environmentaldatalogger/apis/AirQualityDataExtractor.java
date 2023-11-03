@@ -152,11 +152,7 @@ public class AirQualityDataExtractor implements DataExtractor {
         if (!queryWords.isEmpty()) {
             var apiData = fetchData(url.toString(), queryWords);
             cache.insert(coordinates, apiData);
-
-            for (var paramData : apiData.keySet()) {
-                SortedMap<LocalDateTime, Double> subMap = apiData.get(paramData).subMap(range.getKey().minus(margin), range.getValue().plus(margin));
-                data.put(paramData, new TreeMap<>(subMap));
-            }
+            data.putAll(apiData);
         }
 
         return data;

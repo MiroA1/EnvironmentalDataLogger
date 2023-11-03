@@ -1,6 +1,7 @@
 package fi.tuni.environmentaldatalogger.apis;
 
 import fi.tuni.environmentaldatalogger.util.Coordinate;
+import fi.tuni.environmentaldatalogger.util.TimeUtils;
 import javafx.util.Pair;
 
 import java.time.Duration;
@@ -53,7 +54,7 @@ public class ApiCache {
             return null;
         }
 
-        SortedMap<LocalDateTime, Double> subMap = data.subMap(range.getKey().minus(margin), range.getValue().plus(margin));
+        SortedMap<LocalDateTime, Double> subMap = data.subMap(TimeUtils.getStartOfDay(range.getKey()), TimeUtils.getEndOfDay(range.getValue()));
 
         System.out.println("Cache hit: " + param + " " + subMap.size() + " " + subMap.firstKey() + " " + subMap.lastKey());
         return new TreeMap<>(subMap);
