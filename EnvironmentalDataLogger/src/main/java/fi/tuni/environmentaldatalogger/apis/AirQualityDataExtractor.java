@@ -8,10 +8,13 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,7 +56,7 @@ public class AirQualityDataExtractor implements DataExtractor {
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
         // TODO: TimeZone changes? Current API provides timestamps in GMT+0 -> https://open-meteo.com/en/docs/air-quality-api
         // For now allow only 3-day forecast; if longer period is allowed, json parsing must be improved
-        LocalDateTime upperLimit = LocalDateTime.now().plusDays(5);
+        LocalDateTime upperLimit = LocalDateTime.now().plusDays(MAX_FORECAST_DAYS);
         return new Pair<>(OLDEST_ENTRY, upperLimit);
     }
 
@@ -67,6 +70,7 @@ public class AirQualityDataExtractor implements DataExtractor {
     @Override
     public TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range,
                                          Coordinate coordinates) {
+        /*
         String latitude = "61.29,56.8";     // placeholder for now. TODO: Replace with coordinates, once class is implemented
         String longitude = "23.47,13.63";   // placeholder for now
         String url = constructApiUrl(latitude,longitude, range.getKey(),range.getValue());
@@ -86,6 +90,9 @@ public class AirQualityDataExtractor implements DataExtractor {
             return null;
         }
         return fetchData(url, queryWord);
+
+         */
+        return null;
     }
 
     /**
@@ -102,10 +109,50 @@ public class AirQualityDataExtractor implements DataExtractor {
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range,
                                                   Coordinate coordinates) {
+
         TreeMap<String, TreeMap<LocalDateTime, Double>> data = new TreeMap<>();
 
+        String latitude = String.valueOf(coordinates.latitude());
+        String longitude = String.valueOf(coordinates.longitude());
+
+        StringBuilder url = new StringBuilder(constructApiUrl(latitude, longitude, range.getKey(), range.getValue()));
+
+        ArrayList<String> queryWords = new ArrayList<>();
+
+        url.append("&").append(PARAMETERS);
+
+        boolean isFirst = true;
+        Duration margin = Duration.ofHours(1);
+
         for (String param : params) {
-            data.put(param, getData(param, range, coordinates));
+            for (AirQualityParameter ap : AirQualityParameter.values()){
+                if (ap.getAbbreviation().equals(param)){
+
+                    var cachedData = this.cache.get(coordinates, param, range, margin);
+
+                    if (cachedData != null) {
+                        data.put(param, cachedData);
+                        break;
+                    }
+
+                    queryWords.add(ap.getQueryWord());
+                    if (!isFirst) {
+                        url.append(",");
+                    } else {
+                        isFirst = false;
+                    }
+                    url.append(ap.getQueryWord());
+                    break;
+                }
+            }
+        }
+
+        System.out.println(url);
+
+        if (!queryWords.isEmpty()) {
+            var apiData = fetchData(url.toString(), queryWords);
+            cache.insert(coordinates, apiData);
+            data.putAll(apiData);
         }
 
         return data;
@@ -113,12 +160,41 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     @Override
     public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) {
-        return null;
+
+        String latitude = String.valueOf(coordinates.latitude());
+        String longitude = String.valueOf(coordinates.longitude());
+
+        StringBuilder url = new StringBuilder(constructApiUrl(latitude, longitude, null, null));
+
+        ArrayList<String> queryWords = new ArrayList<>();
+
+        url.append("&").append(CURRENT);
+
+        boolean isFirst = true;
+
+        for (String param : params) {
+            for (AirQualityParameter ap : AirQualityParameter.values()){
+                if (ap.getAbbreviation().equals(param)){
+                    queryWords.add(ap.getQueryWord());
+                    if (!isFirst) {
+                        url.append(",");
+                    } else {
+                        isFirst = false;
+                    }
+                    url.append(ap.getQueryWord());
+                    break;
+                }
+            }
+        }
+
+        System.out.println(url);
+
+        return fetchCurrentData(url.toString(), queryWords);
     }
 
     @Override
     public String getUnit(String param) {
-        return null;
+        return "";
     }
 
     /**
@@ -129,32 +205,45 @@ public class AirQualityDataExtractor implements DataExtractor {
      * @param endDate the end date in form ISO 8601 format (yyyy-MM-dd)
      * @return url string which can be used for queries
      */
-    public String constructApiUrl(String latitude, String longitude, LocalDateTime startDate, LocalDateTime endDate) {
+    private String constructApiUrl(String latitude, String longitude, LocalDateTime startDate, LocalDateTime endDate) {
         StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
         apiUrl.append(LATITUDE).append(latitude);
         apiUrl.append("&" + LONGITUDE).append(longitude);
 
-        if (startDate != null && endDate != null) {
-            apiUrl.append("&" + START_DATE).append(startDate.toLocalDate().toString());
-            apiUrl.append("&" + END_DATE).append(endDate.toLocalDate().toString());
+        if (startDate == null || endDate == null) {
+            return apiUrl.toString();
         }
+
+        if (startDate.isBefore(OLDEST_ENTRY)) {
+            System.err.println("Start date cannot be before " + OLDEST_ENTRY);
+            startDate = OLDEST_ENTRY;
+        }
+
+        if (endDate.isAfter(LocalDateTime.now().plusDays(MAX_FORECAST_DAYS))) {
+            System.err.println("End date cannot be after " + endDate);
+            endDate = LocalDateTime.now().plusDays(MAX_FORECAST_DAYS);
+        }
+
+        apiUrl.append("&" + START_DATE).append(startDate.toLocalDate().toString());
+        apiUrl.append("&" + END_DATE).append(endDate.toLocalDate().toString());
+
         return apiUrl.toString();
     }
 
     /**
      * Fetch data for the given parameter
      * @param apiUrl constructed url for the query
-     * @param param the parameter which is queried
+     * @param params the parameter which is queried
      * @return data as a Treemap (Date,Double)
      */
-    private TreeMap<LocalDateTime, Double> fetchData(String apiUrl, String param) {
-        TreeMap<LocalDateTime, Double> airQualityData = new TreeMap<>();
+    private TreeMap<String, TreeMap<LocalDateTime, Double>> fetchData(String apiUrl, ArrayList<String> params) {
+        TreeMap<String, TreeMap<LocalDateTime, Double>> airQualityData = new TreeMap<>();
         Request request = new Request.Builder().url(apiUrl).build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseBody = response.body().string();
-                airQualityData = parseAirQualityData(responseBody, param);
+                airQualityData = parseAirQualityData(responseBody, params);
             } else {
                 System.err.println("Unexpected response code: " + response.code());
             }
@@ -164,23 +253,61 @@ public class AirQualityDataExtractor implements DataExtractor {
         return airQualityData;
     }
 
-    public TreeMap<LocalDateTime, Double> parseAirQualityData(String json, String param) {
+    private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) {
+        TreeMap<String, Double> airQualityData = new TreeMap<>();
+        Request request = new Request.Builder().url(apiUrl).build();
 
-        TreeMap<LocalDateTime, Double> airQualityData = new TreeMap<>();
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body().string();
+                airQualityData = parseCurrentAirQualityData(responseBody, params);
+            } else {
+                System.err.println("Unexpected response code: " + response.code());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return airQualityData;
+    }
+
+    private TreeMap<String, TreeMap<LocalDateTime, Double>> parseAirQualityData(String json, ArrayList<String> params) {
+
+        TreeMap<String, TreeMap<LocalDateTime, Double>> airQualityData = new TreeMap<>();
 
         try {
-            JSONArray dateArray = new JSONArray(json).getJSONObject(0).getJSONObject("hourly")
-                                                     .getJSONArray("time");
-            JSONArray dataArray = new JSONArray(json).getJSONObject(0).getJSONObject("hourly")
-                                                     .getJSONArray(param);
+            JSONArray dateArray = new JSONObject(json).getJSONObject("hourly").getJSONArray("time");
 
-            for ( int i = 0; i < dateArray.length(); i++) {
-                String dateObject = dateArray.getString(i);
-                double paramValue = dataArray.getDouble(i);
-                LocalDateTime date = LocalDateTime.parse(dateObject);
-                if (date != null) {
-                    airQualityData.put(date, paramValue);
+            for ( String param : params) {
+                JSONArray dataArray = new JSONObject(json).getJSONObject("hourly").getJSONArray(param);
+
+                String abbr = AirQualityParameter.fromQueryWord(param).getAbbreviation();
+                airQualityData.put(abbr, new TreeMap<>());
+
+                for ( int i = 0; i < dateArray.length(); i++) {
+                    String dateObject = dateArray.getString(i);
+                    double paramValue = dataArray.getDouble(i);
+                    // TODO: make sure program can continue operations even if date cannot be parsed
+                    LocalDateTime date = LocalDateTime.parse(dateObject);
+                    airQualityData.get(abbr).put(date, paramValue);
                 }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return airQualityData;
+    }
+
+    private TreeMap<String, Double> parseCurrentAirQualityData(String json, ArrayList<String> params) {
+
+        TreeMap<String, Double> airQualityData = new TreeMap<>();
+
+        try {
+            JSONObject dataObject = new JSONObject(json).getJSONObject("current");
+
+            for ( String param : params) {
+                double paramValue = dataObject.getDouble(param);
+                airQualityData.put(AirQualityParameter.fromQueryWord(param).getAbbreviation(), paramValue);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -193,9 +320,11 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     private AirQualityDataExtractor() {
         this.httpClient = new OkHttpClient();
+        this.cache = new ApiCache();
     }
 
     private final OkHttpClient httpClient;
+    private final ApiCache cache;
     private static AirQualityDataExtractor instance;
 
     private static final String API_BASE_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?";
@@ -205,7 +334,9 @@ public class AirQualityDataExtractor implements DataExtractor {
     private static final String PAST = "past_days=";
     private static final String START_DATE = "start_date=";
     private static final String END_DATE = "end_date=";
+    private static final String CURRENT = "current=";
     private static final String DOMAINS = "domains=cams_europe";
+    private static final int MAX_FORECAST_DAYS = 5;
     private static final LocalDateTime OLDEST_ENTRY = LocalDateTime.of(2022, 7, 29, 0, 0);
 
     // json string for practising. TODO: Remove from the final version
