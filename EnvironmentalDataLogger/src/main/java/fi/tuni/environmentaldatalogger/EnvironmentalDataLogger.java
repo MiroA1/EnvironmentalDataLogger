@@ -125,11 +125,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                 updateTime();
             }
         }, 0, 1000);
-
-        System.out.println(AirQualityDataExtractor.getInstance().getCurrentData(AirQualityDataExtractor.getInstance().getValidParameters(), getCurrentCoords()));
-
-        System.out.println(AirQualityDataExtractor.getInstance().getData(AirQualityDataExtractor.getInstance().getValidParameters(), new Pair<>(LocalDateTime.now(), LocalDateTime.now().plusDays(4)), getCurrentCoords()));
-        System.out.println(AirQualityDataExtractor.getInstance().getData(AirQualityDataExtractor.getInstance().getValidParameters(), new Pair<>(LocalDateTime.now(), LocalDateTime.now().plusDays(4)), getCurrentCoords()));
+        
     }
 
     public static Coordinate getCurrentCoords() {
