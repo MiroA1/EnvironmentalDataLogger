@@ -41,6 +41,17 @@ public enum AirQualityParameter {
         }
         return null; // name doesn't match any enum constant
     }
+
+    public static AirQualityParameter fromQueryWord(String queryWord) {
+
+        for (AirQualityParameter parameter : values()) {
+            if (parameter.queryWord.equals(queryWord)) {
+                return parameter;
+            }
+        }
+
+        throw new IllegalArgumentException("No enum constant with query word " + queryWord);
+    }
 }
 
 
