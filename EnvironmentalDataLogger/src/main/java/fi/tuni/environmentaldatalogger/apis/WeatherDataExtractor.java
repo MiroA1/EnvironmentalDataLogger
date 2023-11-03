@@ -9,9 +9,12 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.time.format.DateTimeFormatter;
+
 
 public class WeatherDataExtractor implements DataExtractor {
     private static final String API_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
@@ -111,7 +114,12 @@ public class WeatherDataExtractor implements DataExtractor {
         if (getCurrent) {
             apiUrl.append("&include=current");
         } else {
-            apiUrl.append("&include=days");
+            // Check if the dates are defined and the separation is maximum one day
+            if (startDate != null && endDate != null && !endDate.isAfter(startDate.plusDays(1))) {
+                apiUrl.append("&include=hours");
+            } else {
+                apiUrl.append("&include=days");
+            }
         }
 
         String elements = String.join(",", urlParams);
@@ -128,6 +136,7 @@ public class WeatherDataExtractor implements DataExtractor {
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseBody = response.body().string();
+                System.out.println(responseBody);
                 weatherData = parseWeatherDataMultipleParams(responseBody, params);
             } else {
                 System.err.println("Unexpected response code: " + response.code());
@@ -147,20 +156,28 @@ public class WeatherDataExtractor implements DataExtractor {
 
             for (int i = 0; i < daysArray.length(); i++) {
                 JSONObject dayObject = daysArray.getJSONObject(i);
-                String datetime = dayObject.getString("datetime");
-                LocalDateTime date = parseDate(datetime);
+                String dateStr = dayObject.getString("datetime");
 
-                TreeMap<String, Double> dailyData = new TreeMap<>();
+                // Adjust here for the 'date' field based on your JSON structure
+                LocalDateTime date = LocalDate.parse(dateStr).atStartOfDay(ZoneId.systemDefault()).toLocalDateTime();
 
-                for (String param : params) {
-                    if (param.equals("temperature") && dayObject.has("temp")) {
-                        dailyData.put("temperature", dayObject.getDouble("temp"));
-                    } else if (dayObject.has(param)) {
-                        dailyData.put(param, dayObject.getDouble(param));
+                if (dayObject.has("hours")) {
+                    // This is hourly data
+                    JSONArray hoursArray = dayObject.getJSONArray("hours");
+                    for (int j = 0; j < hoursArray.length(); j++) {
+                        JSONObject hourObject = hoursArray.getJSONObject(j);
+                        // Assuming 'datetime' field contains hour information
+                        String time = hourObject.getString("datetime");
+                        LocalDateTime dateTime = LocalDateTime.parse(dateStr + "T" + time, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+                        TreeMap<String, Double> hourlyData = extractParams(hourObject, params);
+                        weatherData.put(dateTime, hourlyData);
                     }
+                } else {
+                    // This is daily data
+                    TreeMap<String, Double> dailyData = extractParams(dayObject, params);
+                    weatherData.put(date, dailyData);
                 }
-
-                weatherData.put(date, dailyData);
             }
 
         } catch (Exception e) {
@@ -168,6 +185,19 @@ public class WeatherDataExtractor implements DataExtractor {
         }
         return weatherData;
     }
+
+    private TreeMap<String, Double> extractParams(JSONObject dataObject, ArrayList<String> params) {
+        TreeMap<String, Double> data = new TreeMap<>();
+        for (String param : params) {
+            if (param.equals("temperature") && dataObject.has("temp")) {
+                data.put("temperature", dataObject.getDouble("temp"));
+            } else if (dataObject.has(param)) {
+                data.put(param, dataObject.getDouble(param));
+            }
+        }
+        return data;
+    }
+
 
 
     private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) {
@@ -177,7 +207,6 @@ public class WeatherDataExtractor implements DataExtractor {
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseBody = response.body().string();
-                System.out.println(responseBody);
                 currentData = parseCurrentWeatherData(responseBody, params);
             } else {
                 System.err.println("Unexpected response code: " + response.code());
@@ -220,7 +249,6 @@ public class WeatherDataExtractor implements DataExtractor {
         }
         return currentData;
     }
-
 }
 
 
