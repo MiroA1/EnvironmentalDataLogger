@@ -241,22 +241,4 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                     " " + now.format(dateFormatter));
         });
     }
-
-    private void save() {
-        String folderName = "saves";
-        File folder = new File(folderName);
-        folder.mkdir();
-
-        String filename = folder.getAbsolutePath() + "/save1.json";
-
-        GsonBuilder gsonBuilder = new GsonBuilder();
-
-        Gson gson = gsonBuilder.create();
-
-        try (FileWriter writer = new FileWriter(filename)) {
-            writer.write(gson.toJson(this.chartGrid));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
