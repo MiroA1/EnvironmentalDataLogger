@@ -16,6 +16,7 @@
             <HBox.margin>
                 <Insets left="20"/>
             </HBox.margin>
+            <ComboBox fx:id="chartTypeSelector" />
             <MenuButton fx:id="parameterSelector" text="Select Parameters">
 
             </MenuButton>

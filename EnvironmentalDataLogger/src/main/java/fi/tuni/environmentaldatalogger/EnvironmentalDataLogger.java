@@ -1,5 +1,7 @@
 package fi.tuni.environmentaldatalogger;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fi.tuni.environmentaldatalogger.gui.ChartGrid;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
 import fi.tuni.environmentaldatalogger.gui.NotificationBar;
@@ -17,6 +19,8 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -59,6 +63,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
     private static final Location DEFAULT_LOCATION = new Location("Tampere", "FI", new Coordinate(61.4978, 23.7610));
     private static Location currentLocation = DEFAULT_LOCATION;
+    private ChartGrid chartGrid;
 
     Timer temperatureTimer = new Timer(true);
     Timer clockTimer = new Timer(true);
@@ -90,6 +95,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
         try {
             var grid = new ChartGrid();
+            this.chartGrid = grid;
             chartsPane.getChildren().add(grid);
 
             Button test = new Button("View");
@@ -227,5 +233,23 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                     " " + now.format(dateFormatter));
         });
 
+    }
+
+    private void save() {
+        String folderName = "saves";
+        File folder = new File(folderName);
+        folder.mkdir();
+
+        String filename = folder.getAbsolutePath() + "/save1.json";
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+
+        Gson gson = gsonBuilder.create();
+
+        try (FileWriter writer = new FileWriter(filename)) {
+            writer.write(gson.toJson(this.chartGrid));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

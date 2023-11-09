@@ -45,7 +45,14 @@ public class Presenter {
     }
 
     public ArrayList<String> getValidParameters() {
-        return new ArrayList<>();
+
+        TreeSet<String> params = new TreeSet<>();
+
+        for (DataExtractor api : APIs) {
+            params.addAll(api.getValidParameters());
+        }
+
+        return new ArrayList<>(params);
     }
 
     public ArrayList<String> getValidWeatherParameters() {
@@ -66,7 +73,8 @@ public class Presenter {
      * @return
      */
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
-        return null;
+        // TODO: change this to something that makes sense
+        return airQualityAPIs.get(0).getValidDataRange("");
     }
 
     /**

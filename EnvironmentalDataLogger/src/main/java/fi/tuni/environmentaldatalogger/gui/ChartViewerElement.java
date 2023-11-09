@@ -21,6 +21,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
     private final String DEFAULT_RANGE = "Last 7 days";
     private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
+    private final String DEFAULT_CHART_TYPE = "Line chart";
+    private final List<String> CHART_TYPES = List.of("Line chart");
+    private final List<String> RANGES = List.of("Last 14 days", "Last 7 days", "Last 24 hours",
+            "Next 24 hours", "Next 7 days", "Next 14 days", "Custom");
 
     // TODO: remember to change this
     Presenter presenter = Presenter.getInstance();
@@ -42,6 +46,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     public HBox removeHBox;
     @FXML
     public HBox headerHBox;
+    @FXML
+    public ComboBox<String> chartTypeSelector;
 
     private final RemoveChartButton removeButton;
 
@@ -78,98 +84,168 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
         this.setPrefWidth(4000);
 
-        //MenuButton menuButton = new MenuButton("Select Parameters");
+        if (removeButton != null) {
+            removeHBox.getChildren().add(removeButton);
+        }
+
         ContextMenu contextMenu = new ContextMenu();
 
-        // TODO: change to presenter when implemented
-        for (String param : WeatherDataExtractor.getInstance().getValidParameters()) {
+        for (String param : presenter.getValidParameters()) {
             CheckMenuItem item = new CheckMenuItem(param);
             contextMenu.getItems().add(item);
         }
 
         parameterSelector.setContextMenu(contextMenu);
 
-        for (var item : contextMenu.getItems()) {
+        parameterSelector.setOnAction(event -> {
+            updateRangePicker();
+        });
+
+        loadButton.setOnAction(actionEvent -> {
+            loadChart();
+        });
+
+        rangeSelector.setOnAction(event -> {
+            updateCustomRangePicker();
+        });
+
+        chartTypeSelector.getItems().addAll(CHART_TYPES);
+        chartTypeSelector.setValue(DEFAULT_CHART_TYPE);
+
+        chartTypeSelector.setOnAction(event -> {
+            if (chartTypeSelector.getValue().equals("Line chart")) {
+                lineChartSelected();
+            }
+        });
+
+        lineChartSelected();
+
+        loadButton.fire();
+    }
+
+    private void lineChartSelected() {
+
+        this.rangeSelector.setVisible(true);
+        this.rangeSelector.setManaged(true);
+
+        this.parameterSelector.setVisible(true);
+        this.parameterSelector.setManaged(true);
+
+        // enable default params
+        for (var item : parameterSelector.getContextMenu().getItems()) {
             String text = item.getText();
             if (DEFAULT_ENABLED_PARAMETERS.contains(text)) {
                 ((CheckMenuItem) item).setSelected(true);
             }
         }
 
-        rangeSelector.getItems().addAll("Last 14 days", "Last 7 days", "Last 24 hours", "Next 24 hours", "Next 7 days", "Next 14 days", "Custom");
-        rangeSelector.setValue(DEFAULT_RANGE);
-
-        customRangePicker.setVisible(false);
-        customRangePicker.setManaged(false);
-
-        loadButton.setOnAction(actionEvent -> {
-            ArrayList<String> params = new ArrayList<>();
-
-            for (var item : contextMenu.getItems()) {
-                if (((CheckMenuItem) item).isSelected()) {
-                    params.add(item.getText());
-                }
-            }
-
-            chartBox.getChildren().clear();
-
-            var lc = presenter.getDataAsLineChart(params, getRange(), EnvironmentalDataLogger.getCurrentCoords());
-
-
-            AnchorPane.setTopAnchor(lc, 10.0);
-            AnchorPane.setLeftAnchor(lc, 0.0);
-            AnchorPane.setRightAnchor(lc, 0.0);
-            AnchorPane.setBottomAnchor(lc, 0.0);
-
-            lc.setPrefHeight(500);
-            //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
-
-            chartBox.getChildren().add(lc);
-        });
-
-        rangeSelector.setOnAction(event -> {
-            if (rangeSelector.getValue().equals("Custom")) {
-                customRangePicker.setVisible(true);
-                customRangePicker.setManaged(true);
-            } else {
-                customRangePicker.setVisible(false);
-                customRangePicker.setManaged(false);
-            }
-        });
-
-
-        if (removeButton != null) {
-            removeHBox.getChildren().add(removeButton);
-        }
-
-        loadButton.fire();
+        updateRangePicker();
     }
 
-    private Pair<LocalDateTime, LocalDateTime> getRange() {
+    private void updateRangePicker() {
+
+        var validRanges = getValidRanges();
+
+        this.rangeSelector.getItems().clear();
+        this.rangeSelector.getItems().addAll(validRanges);
+
+        if (validRanges.contains(DEFAULT_RANGE)) {
+            this.rangeSelector.setValue(DEFAULT_RANGE);
+        } else {
+            this.rangeSelector.setValue(validRanges.get(0));
+        }
+
+        updateCustomRangePicker();
+    }
+
+    private void updateCustomRangePicker() {
+        if (rangeSelector.getValue().equals("Custom")) {
+            customRangePicker.setVisible(true);
+            customRangePicker.setManaged(true);
+            customRangePicker.setRange(presenter.getValidDataRange(getSelectedParameters()));
+        } else {
+            customRangePicker.setVisible(false);
+            customRangePicker.setManaged(false);
+        }
+    }
+
+    private List<String> getValidRanges() {
+
+        List<String> validRanges = new ArrayList<>(RANGES);
+
+        Pair<LocalDateTime, LocalDateTime> validRange = presenter.getValidDataRange(getSelectedParameters());
+
+        for (var range : RANGES) {
+            if (range.equals("Custom")) {
+                continue;
+            }
+
+            Pair<LocalDateTime, LocalDateTime> rangePair = getRange(range);
+
+            if (rangePair.getKey().isBefore(validRange.getKey()) || rangePair.getValue().isAfter(validRange.getValue())) {
+                validRanges.remove(range);
+            }
+        }
+
+        return validRanges;
+    }
+
+    private ArrayList<String> getSelectedParameters() {
+
+        ArrayList<String> selectedParameters = new ArrayList<>();
+
+        for (var item : parameterSelector.getContextMenu().getItems()) {
+            if (((CheckMenuItem) item).isSelected()) {
+                selectedParameters.add(item.getText());
+            }
+        }
+
+        return selectedParameters;
+    }
+
+    private Pair<LocalDateTime, LocalDateTime> getSelectedRange() {
+
+        return getRange(rangeSelector.getValue());
+    }
+
+    private Pair<LocalDateTime, LocalDateTime> getRange(String rangeDescription) {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (rangeSelector.getValue().equals("Last 14 days")) {
-            return new Pair<>(now.minusDays(14), now);
+        return switch (rangeDescription) {
+            case "Last 14 days" -> new Pair<>(now.minusDays(14), now);
+            case "Last 7 days" -> new Pair<>(now.minusDays(7), now);
+            case "Last 24 hours" -> new Pair<>(now.minusDays(1), now);
+            case "Next 24 hours" -> new Pair<>(now, now.plusDays(1));
+            case "Next 7 days" -> new Pair<>(now, now.plusDays(7));
+            case "Next 14 days" -> new Pair<>(now, now.plusDays(14));
+            default -> customRangePicker.getRange();
+        };
+    }
 
-        } else if (rangeSelector.getValue().equals("Last 7 days")) {
-            return new Pair<>(now.minusDays(7), now);
+    private void loadChart() {
+        ArrayList<String> params = new ArrayList<>();
 
-        } else if (rangeSelector.getValue().equals("Last 24 hours")) {
-            return new Pair<>(now.minusDays(1), now);
-
-        } else if (rangeSelector.getValue().equals("Next 24 hours")) {
-            return new Pair<>(now, now.plusDays(1));
-
-        } else if (rangeSelector.getValue().equals("Next 7 days")) {
-            return new Pair<>(now, now.plusDays(7));
-
-        } else if (rangeSelector.getValue().equals("Next 14 days")) {
-            return new Pair<>(now, now.plusDays(14));
-
-        } else {
-            return customRangePicker.getRange();
+        for (var item : parameterSelector.getContextMenu().getItems()) {
+            if (((CheckMenuItem) item).isSelected()) {
+                params.add(item.getText());
+            }
         }
+
+        chartBox.getChildren().clear();
+
+        var lc = presenter.getDataAsLineChart(params, getSelectedRange(), EnvironmentalDataLogger.getCurrentCoords());
+
+
+        AnchorPane.setTopAnchor(lc, 10.0);
+        AnchorPane.setLeftAnchor(lc, 0.0);
+        AnchorPane.setRightAnchor(lc, 0.0);
+        AnchorPane.setBottomAnchor(lc, 0.0);
+
+        lc.setPrefHeight(500);
+        //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
+
+        chartBox.getChildren().add(lc);
     }
 
     @Override
