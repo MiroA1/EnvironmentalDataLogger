@@ -125,7 +125,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                 updateTime();
             }
         }, 0, 1000);
-        
+
     }
 
     public static Coordinate getCurrentCoords() {
@@ -209,7 +209,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             DateTimeFormatter clockFormatter = DateTimeFormatter.ofPattern("HH:mm");
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             timeLabel.setText(now.format(clockFormatter));
-            dateLabel.setText(now.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("en")) +
+            dateLabel.setText(now.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH) +
                     " " + now.format(dateFormatter));
         });
 

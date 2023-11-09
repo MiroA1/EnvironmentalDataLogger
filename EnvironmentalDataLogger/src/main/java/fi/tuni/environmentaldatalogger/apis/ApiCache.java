@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * A very crude caching solution for API data.
+ */
 public class ApiCache {
 
     TreeMap<String, TreeMap<LocalDateTime, Double>> cache = new TreeMap<>();
@@ -18,6 +21,11 @@ public class ApiCache {
 
     }
 
+    /**
+     * Inserts data into cache.
+     * @param location Location of the data.
+     * @param data Data to be inserted.
+     */
     public void insert(Coordinate location, TreeMap<String, TreeMap<LocalDateTime, Double>> data) {
 
         if (getCacheSize() > 10000) {
@@ -38,6 +46,14 @@ public class ApiCache {
         }
     }
 
+    /**
+     * Returns data from cache. Returns null if the whole data is not in cache.
+     * @param location
+     * @param param
+     * @param range
+     * @param margin
+     * @return
+     */
     public TreeMap<LocalDateTime, Double> get(Coordinate location, String param, Pair<LocalDateTime, LocalDateTime> range, Duration margin) {
 
         if (location != this.location) {
