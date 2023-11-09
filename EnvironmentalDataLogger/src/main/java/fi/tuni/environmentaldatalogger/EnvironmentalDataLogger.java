@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import fi.tuni.environmentaldatalogger.gui.ChartGrid;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
 import fi.tuni.environmentaldatalogger.gui.NotificationBar;
+import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.util.Location;
 import javafx.application.Application;
@@ -97,6 +98,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             var grid = new ChartGrid();
             this.chartGrid = grid;
             chartsPane.getChildren().add(grid);
+
+            SaveLoad.load(grid, "save1.json");
 
             Button test = new Button("View");
             test.setOnAction(actionEvent -> {
@@ -199,6 +202,11 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     //    infoButton.setOnAction(actionEvent -> {
     //        notificationBar.pushAlertNotification("Info button pressed!");
     //    });
+
+        infoButton.setOnAction(actionEvent -> {
+            //chartGrid.save();
+            SaveLoad.save(chartGrid, "save1.json");
+        });
 
         Group svg = new Group(
                 createPath(INFO_CIRCLE_PATH, "black", "black"),

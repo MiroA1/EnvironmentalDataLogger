@@ -1,9 +1,11 @@
 package fi.tuni.environmentaldatalogger.gui;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
-import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
+import fi.tuni.environmentaldatalogger.save.CoordinateDeserializer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -125,7 +127,11 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
         lineChartSelected();
 
-        coordinateDialogButton.setOnAction(event -> launchCoordinateDialog());
+        coordinateDialogButton.setOnAction(event -> {
+            //load();
+            //save();
+            launchCoordinateDialog();
+        });
 
         loadButton.fire();
     }
@@ -273,5 +279,45 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
             selectedCoordinates = coordinate;
             coordinateLabel.setText("Coordinates: " + coordinate.toString());
         });
+    }
+
+    public String getJson() {
+        Gson gson = new Gson();
+        SaveData saveData = new SaveData(chartTypeSelector.getValue(), rangeSelector.getValue(), getSelectedParameters(), selectedCoordinates);
+        return gson.toJson(saveData);
+    }
+
+    public void loadFromJson(String json) {
+
+        Gson gson = new GsonBuilder().registerTypeAdapter(Coordinate.class, new CoordinateDeserializer()).create();
+        SaveData saveData = gson.fromJson(json, SaveData.class);
+
+        chartTypeSelector.setValue(saveData.chartType);
+        rangeSelector.setValue(saveData.range);
+
+        for (var item : parameterSelector.getContextMenu().getItems()) {
+            ((CheckMenuItem) item).setSelected(saveData.parameters.contains(item.getText()));
+        }
+
+        selectedCoordinates = saveData.coordinates;
+
+        String selectedCoordinatesString = selectedCoordinates != null ? selectedCoordinates.toString() : "Not Set";
+        coordinateLabel.setText("Coordinates: " + selectedCoordinatesString);
+
+        loadButton.fire();
+    }
+
+    private class SaveData {
+        private final String chartType;
+        private final String range;
+        private final ArrayList<String> parameters;
+        private final Coordinate coordinates;
+
+        public SaveData(String chartType, String range, ArrayList<String> parameters, Coordinate coordinates) {
+            this.chartType = chartType;
+            this.range = range;
+            this.parameters = parameters;
+            this.coordinates = coordinates;
+        }
     }
 }

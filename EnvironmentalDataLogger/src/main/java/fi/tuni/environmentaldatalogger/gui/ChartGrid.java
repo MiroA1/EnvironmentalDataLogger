@@ -1,5 +1,7 @@
 package fi.tuni.environmentaldatalogger.gui;
 
+import com.google.gson.Gson;
+import fi.tuni.environmentaldatalogger.save.Saveable;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -7,13 +9,15 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ChartGrid extends GridPane {
+public class ChartGrid extends GridPane implements Saveable {
 
-    private final ArrayList<ArrayList<GridElement>> grid = new ArrayList<>();
+    private ArrayList<ArrayList<GridElement>> grid = new ArrayList<>();
     private boolean expandCharts = true;
 
 
@@ -166,6 +170,7 @@ public class ChartGrid extends GridPane {
 
         for (int i = getGridRowCount() - 1; i >= 0; --i) {
             if (rowIsEmpty(i)) {
+                // variable for use in lambda
                 int finalI = i;
                 grid.forEach(columnList -> columnList.remove(finalI));
             }
@@ -342,6 +347,109 @@ public class ChartGrid extends GridPane {
                 node.setVisible(true);
                 node.setManaged(true);
             }
+        }
+    }
+
+    @Override
+    public String getJson() {
+
+        ArrayList<ArrayList<String>> saveGrid = new ArrayList<>();
+
+        for (int i = 0; i < getGridColumnCount(); ++i) {
+            saveGrid.add(new ArrayList<>());
+            for (int j = 0; j < getGridRowCount(); ++j) {
+                if (grid.get(i).get(j) == null) {
+                    saveGrid.get(i).add(null);
+                } else if (grid.get(i).get(j) instanceof AddChartButton) {
+                    saveGrid.get(i).add("AddChartButton");
+                } else if (grid.get(i).get(j) instanceof ChartViewerElement) {
+                    saveGrid.get(i).add(((ChartViewerElement) grid.get(i).get(j)).getJson());
+                } else {
+                    saveGrid.get(i).add(null);
+                }
+            }
+        }
+
+        SaveData saveData = new SaveData(saveGrid, expandCharts);
+        Gson gson = new Gson();
+
+        return gson.toJson(saveData);
+    }
+
+    @Override
+    public boolean loadFromJson(String json) {
+
+            Gson gson = new Gson();
+            SaveData saveData = gson.fromJson(json, SaveData.class);
+
+            if (saveData == null) {
+                return false;
+            }
+
+            ArrayList<ArrayList<String>> saveGrid = saveData.getGrid();
+
+            int n = saveGrid.size();
+            int m = saveGrid.get(0).size();
+
+            ArrayList<ArrayList<GridElement>> emptyGrid = new ArrayList<>(n);
+
+            for (int i = 0; i < n; i++) {
+                ArrayList<GridElement> row = new ArrayList<>(Collections.nCopies(m, null));
+                emptyGrid.add(row);
+            }
+
+            this.grid = emptyGrid;
+            this.getChildren().clear();
+
+            for (int i = 0; i < saveGrid.size(); ++i) {
+                for (int j = 0; j < saveGrid.get(i).size(); ++j) {
+                    if (saveGrid.get(i).get(j) == null) {
+                        continue;
+                    } else if (saveGrid.get(i).get(j).equals("AddChartButton")) {
+                        continue;
+                    } else {
+
+                        ChartViewerElement chart;
+
+                        try {
+                            if (i == 0 && j == 0) {
+                                chart = new ChartViewerElement(i, j, null);
+                            } else {
+                                chart = new ChartViewerElement(i, j, new RemoveChartButton(i, j, this));
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
+
+                        chart.loadFromJson(saveGrid.get(i).get(j));
+                        replaceChild(chart);
+                    }
+                }
+            }
+
+            addButtons();
+
+            expandCharts = saveData.isExpandCharts();
+
+            return true;
+    }
+
+    private static class SaveData {
+        private final ArrayList<ArrayList<String>> grid;
+        private final boolean expandCharts;
+
+        public SaveData(ArrayList<ArrayList<String>> grid, boolean expandCharts) {
+            this.grid = grid;
+            this.expandCharts = expandCharts;
+        }
+
+        public ArrayList<ArrayList<String>> getGrid() {
+            return grid;
+        }
+
+        public boolean isExpandCharts() {
+            return expandCharts;
         }
     }
 }
