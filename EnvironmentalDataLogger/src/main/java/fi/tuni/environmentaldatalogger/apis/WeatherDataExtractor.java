@@ -98,7 +98,8 @@ public class WeatherDataExtractor implements DataExtractor {
     }
 
     private String constructApiUrl(Coordinate coordinates, LocalDateTime startDate, LocalDateTime endDate, ArrayList<String> params, boolean getCurrent) {
-        StringBuilder apiUrl = new StringBuilder(API_BASE_URL + "London,UK");
+        StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
+        apiUrl.append(coordinates.latitude()).append(",").append(coordinates.longitude());
 
         ArrayList<String> urlParams = new ArrayList<>(params);
         if(urlParams.contains("temperature")) {

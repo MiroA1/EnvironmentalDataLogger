@@ -3,6 +3,7 @@ package fi.tuni.environmentaldatalogger.gui;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
+import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -48,8 +49,12 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     public HBox headerHBox;
     @FXML
     public ComboBox<String> chartTypeSelector;
-
+    public Button coordinateDialogButton;
+    @FXML
+    public Label coordinateLabel;
     private final RemoveChartButton removeButton;
+
+    private Coordinate selectedCoordinates;
 
     public ChartViewerElement(int column, int row, RemoveChartButton removeButton) throws IOException {
 
@@ -119,6 +124,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         });
 
         lineChartSelected();
+
+        coordinateDialogButton.setOnAction(event -> launchCoordinateDialog());
 
         loadButton.fire();
     }
@@ -234,7 +241,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
         chartBox.getChildren().clear();
 
-        var lc = presenter.getDataAsLineChart(params, getSelectedRange(), EnvironmentalDataLogger.getCurrentCoords());
+        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : EnvironmentalDataLogger.getCurrentCoords();
+        var lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
 
 
         AnchorPane.setTopAnchor(lc, 10.0);
@@ -256,5 +264,14 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     @Override
     public int getRow() {
         return row;
+    }
+
+    private void launchCoordinateDialog() {
+        CoordinateDialog dialog = new CoordinateDialog();
+        dialog.showAndWait().ifPresent(coordinate -> {
+            System.out.println("Selected Coordinate: " + coordinate);
+            selectedCoordinates = coordinate;
+            coordinateLabel.setText("Coordinates: " + coordinate.toString());
+        });
     }
 }
