@@ -226,6 +226,5 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             dateLabel.setText(now.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("en")) +
                     " " + now.format(dateFormatter));
         });
-
     }
 }

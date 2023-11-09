@@ -23,6 +23,8 @@
 
             </ComboBox>
             <CustomDateRangePicker fx:id="customRangePicker" />
+            <Button fx:id="coordinateDialogButton" text="Set Coordinates" />
+            <Label fx:id="coordinateLabel" text="Coordinates: Not Set" />
         </HBox>
         <HBox fx:id="confirmHBox" spacing="10">
             <Button fx:id="loadButton" text="Load"/>
