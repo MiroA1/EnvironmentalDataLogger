@@ -1,8 +1,8 @@
 package fi.tuni.environmentaldatalogger;
 
-import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.gui.ChartGrid;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
+import fi.tuni.environmentaldatalogger.gui.NotificationBar;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.util.Location;
 import javafx.application.Application;
@@ -12,7 +12,6 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.SVGPath;
@@ -24,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ResourceBundle;
 
-import javafx.util.Pair;
 import java.time.LocalDateTime;
 
 import java.util.*;
@@ -41,6 +39,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     public Label timeLabel;
     public Label dateLabel;
     public AnchorPane currentDataPane;
+    public Label notificationLabel;
+    public NotificationBar notificationBar;
 
     private static final String EXIT_RECTANGLE_PATH = "M36.501,33c-0.552,0-1,0.447-1,1v20h-32V2h32v20c0,0.553," +
             "0.448,1,1,1s1-0.447,1-1V1c0-0.553-0.448-1-1-1h-34c-0.552,0-1,0.447-1,1v54c0,0.553,0.448,1,1,1h34c0.552" +
@@ -86,6 +86,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
 
         initExitButton();
         initInfoButton();
+        initNotificationBar();
 
         try {
             var grid = new ChartGrid();
@@ -126,6 +127,13 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             }
         }, 0, 1000);
         
+    }
+
+    /**
+     *  Initializes a notification bar
+     */
+    private void initNotificationBar() {
+        notificationBar = new NotificationBar(notificationLabel);
     }
 
     public static Coordinate getCurrentCoords() {
@@ -180,6 +188,12 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
     }
 
     private void initInfoButton() {
+
+    // Uncomment to test the notification bar!
+    //    infoButton.setOnAction(actionEvent -> {
+    //        notificationBar.pushAlertNotification("Info button pressed!");
+    //    });
+
         Group svg = new Group(
                 createPath(INFO_CIRCLE_PATH, "black", "black"),
                 createPath(INFO_I_PATH, "black", "gray")
