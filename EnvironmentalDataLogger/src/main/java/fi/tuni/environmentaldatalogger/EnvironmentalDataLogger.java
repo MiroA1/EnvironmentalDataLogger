@@ -126,6 +126,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
             }
         }, 0, 1000);
 
+        currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now().minusDays(5), getCurrentCoords()));
+
 
     }
 

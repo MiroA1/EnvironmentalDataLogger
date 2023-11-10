@@ -86,6 +86,8 @@ public class Presenter {
             datamap.put(param, result);
         }
 
+        datamap.putAll(AirQualityDataExtractor.getInstance().getData(params, range, coordinates));
+
         Duration duration = Duration.between(range.getKey(), range.getValue());
         DateTimeFormatter formatter = (duration.toHours() <= 24) ?
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH") :
@@ -101,10 +103,11 @@ public class Presenter {
         //lineChart.setTitle("Weather statistics");
 
         var api = weatherAPIs.get(0);
-        for (String param : datamap.keySet()) {
+
+/*        for (String param : datamap.keySet()) {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
-            // Change the first letter of param to uppercase
+            // Convert the first letter of param to uppercase
             String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
 
             for (LocalDateTime date : dateMap.keySet()) {
@@ -113,18 +116,39 @@ public class Presenter {
             }
             series.setName(paramFormatted + " " + api.getUnit(param));
             lineChart.getData().add(series);
+        }*/
+
+        for (Map.Entry<String, TreeMap<LocalDateTime, Double>> entry : datamap.entrySet()) {
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            TreeMap<LocalDateTime, Double> dateMap = entry.getValue();
+            String param = entry.getKey();
+            // Convert the first letter of param to uppercase
+            String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
+
+            if (dateMap != null) {
+                for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
+                    String dateString = innerEntry.getKey().format(formatter);
+                    series.getData().add(new XYChart.Data<>(dateString, innerEntry.getValue()));
+                }
+            }
+            series.setName(paramFormatted + " " + api.getUnit(param));
+            lineChart.getData().add(series);
         }
 
         return lineChart;
     }
 
+    /***
+     * Sets the color of a slice in a pie chart based on the value of the slice.
+     * @param slice slice of the pie chart
+     */
     private void setSliceColor(PieChart.Data slice) {
 
         String sliceName = slice.getName();
         double sliceValue = slice.getPieValue();
         Node sliceNode = slice.getNode();
 
-        if (sliceName.equals("S02")) {
+        if (sliceName.equals("SO2")) {
             if (sliceValue < 20) {
                 sliceNode.setStyle("-fx-pie-color: #33FF4C");
             } else if (20 <= sliceValue && sliceValue < 80){
@@ -139,7 +163,7 @@ public class Presenter {
         } else if (sliceName.equals("NO2")) {
             if (sliceValue < 40) {
                 sliceNode.setStyle("-fx-pie-color: #33FF4C");
-            } else if (40 <= sliceValue && sliceValue < 70){
+            } else if (40 <= sliceValue && sliceValue < 70) {
                 sliceNode.setStyle("-fx-pie-color: #FFF933");
             } else if (70 <= sliceValue && sliceValue < 150) {
                 sliceNode.setStyle("-fx-pie-color: #FFA533");
@@ -148,10 +172,36 @@ public class Presenter {
             } else if (sliceValue >= 200) {
                 sliceNode.setStyle("-fx-pie-color: #b5468b");
             }
+        } else if (sliceName.equals("O3")) {
+            if (sliceValue < 60) {
+                sliceNode.setStyle("-fx-pie-color: #33FF4C");
+            } else if (60 <= sliceValue && sliceValue < 100) {
+                sliceNode.setStyle("-fx-pie-color: #FFF933");
+            } else if (100 <= sliceValue && sliceValue < 140) {
+                sliceNode.setStyle("-fx-pie-color: #FFA533");
+            } else if (140 <= sliceValue && sliceValue < 180) {
+                sliceNode.setStyle("-fx-pie-color: #EA3F1D");
+            } else if (sliceValue >= 180) {
+                sliceNode.setStyle("-fx-pie-color: #b5468b");
+            }
+        } else if (sliceName.equals("PM10")) {
+            if (sliceValue < 20) {
+                sliceNode.setStyle("-fx-pie-color: #33FF4C");
+            } else if (20 <= sliceValue && sliceValue < 50) {
+                sliceNode.setStyle("-fx-pie-color: #FFF933");
+            } else if (50 <= sliceValue && sliceValue < 100) {
+                sliceNode.setStyle("-fx-pie-color: #FFA533");
+            } else if (100 <= sliceValue && sliceValue < 200) {
+                sliceNode.setStyle("-fx-pie-color: #EA3F1D");
+            } else if (sliceValue >= 200) {
+                sliceNode.setStyle("-fx-pie-color: #b5468b");
+            }
+        } else if (sliceName.equals("Rest")) {
+            sliceNode.setStyle("-fx-pie-color: #00B6FE");
         } else {
-            sliceNode.setStyle("-fx-pie-color: #000000");
+            sliceNode.setStyle("-fx-pie-color: #FF0000");
         }
-
+        slice.getNode().setAccessibleText(String.valueOf(sliceValue));
     }
 
 
@@ -170,16 +220,34 @@ public class Presenter {
                                                                         getData(params, range, coordinates);
 
         PieChart pieChart = new PieChart();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String dateString = date.format(formatter);
-        pieChart.setTitle(dateString);
+/*        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateString = date.format(formatter);*/
+        pieChart.setTitle("Pollutants µg/m³");
+
+        double totalValue = 0.0;
 
         for (String param : dataMap.keySet()) {
-            TreeMap<LocalDateTime, Double> dateMap = dataMap.get(param);
-            PieChart.Data slice = new PieChart.Data(param, dateMap.get(date));
-            setSliceColor(slice);
-            pieChart.getData().add(slice);
+            if (!param.equals("AQI") && !param.equals("CO")) {
+                TreeMap<LocalDateTime, Double> dateMap = dataMap.get(param);
+                double paramValue = dateMap.firstEntry().getValue();
+                PieChart.Data slice = new PieChart.Data(param, paramValue);
+                pieChart.getData().add(slice);
+                totalValue += paramValue;
+            }
         }
+
+        double restValue = 1.0 - totalValue;
+        PieChart.Data rest = new PieChart.Data("Rest", restValue);
+        pieChart.getData().add(rest);
+
+
+        for (PieChart.Data slice : pieChart.getData()) {
+            setSliceColor(slice);
+        }
+
+        // TODO: Missä SO2?
+
+        pieChart.setLegendVisible(false);
 
         return pieChart;
     }
