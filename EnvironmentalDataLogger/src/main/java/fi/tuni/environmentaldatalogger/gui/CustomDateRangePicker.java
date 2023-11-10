@@ -8,14 +8,13 @@ import javafx.util.Pair;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
 
 public class CustomDateRangePicker extends HBox {
 
     DatePicker startDatePicker = new DatePicker();
     DatePicker endDatePicker = new DatePicker();
+
+    private final Pair<LocalDate, LocalDate> DEFAULT_RANGE = new Pair<>(LocalDate.now().minusDays(7), LocalDate.now().plusDays(7));
 
     public CustomDateRangePicker() {
 
@@ -30,18 +29,8 @@ public class CustomDateRangePicker extends HBox {
         endDatePicker.getEditor().setDisable(true);
         endDatePicker.getEditor().setOpacity(1);
 
-        // Presenter.getValidDataRange
-        Pair<Date, Date> range = new Pair<>(new Date(2023 - 1900, Calendar.SEPTEMBER, 15)
-                , new Date(2023 - 1900, Calendar.OCTOBER, 10));
-
-        //Pair<LocalDateTime, LocalDateTime> range1 = new Pair<>(LocalDateTime.of(2023, 9, 15, 0, 0),
-        //        LocalDateTime.of(2023, 10, 10, 0, 0));
-
-        LocalDate minDate = range.getKey().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate maxDate = range.getValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-        //LocalDate minDate1 = range1.getKey().toLocalDate();
-        //LocalDate maxDate1 = range1.getValue().toLocalDate();
+        LocalDate minDate = DEFAULT_RANGE.getKey();
+        LocalDate maxDate = DEFAULT_RANGE.getValue();
 
         startDatePicker.setValue(minDate);
         endDatePicker.setValue(LocalDate.now());
@@ -76,5 +65,30 @@ public class CustomDateRangePicker extends HBox {
 
     public Pair<LocalDateTime, LocalDateTime> getRange() {
         return new Pair<>(this.getStartDate(), this.getEndDate());
+    }
+
+    public void setRange(Pair<LocalDateTime, LocalDateTime> range) {
+
+        Pair<LocalDate, LocalDate> dayRange = new Pair<>(range.getKey().toLocalDate(), range.getValue().toLocalDate());
+
+        startDatePicker.setDayCellFactory(getDayCellFactory(dayRange.getKey(), dayRange.getValue()));
+        endDatePicker.setDayCellFactory(getDayCellFactory(dayRange.getKey(), dayRange.getValue()));
+
+        if (startDatePicker.getValue().isBefore(dayRange.getKey())) {
+            startDatePicker.setValue(dayRange.getKey());
+        }
+
+        if (startDatePicker.getValue().isAfter(dayRange.getValue())) {
+            startDatePicker.setValue(dayRange.getValue());
+        }
+
+        if (endDatePicker.getValue().isBefore(dayRange.getKey())) {
+            endDatePicker.setValue(dayRange.getKey());
+        }
+
+        if (endDatePicker.getValue().isAfter(dayRange.getValue())) {
+            endDatePicker.setValue(dayRange.getValue());
+        }
+
     }
 }
