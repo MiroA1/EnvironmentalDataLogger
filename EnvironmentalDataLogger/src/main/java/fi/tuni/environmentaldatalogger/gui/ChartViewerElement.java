@@ -289,7 +289,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
     public void loadFromJson(String json) {
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(Coordinate.class, new CoordinateDeserializer()).create();
+        Gson gson = new Gson(); //new GsonBuilder().registerTypeAdapter(Coordinate.class, new CoordinateDeserializer()).create();
         SaveData saveData = gson.fromJson(json, SaveData.class);
 
         chartTypeSelector.setValue(saveData.chartType);

@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.apis;
 
+import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import okhttp3.*;
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -23,8 +25,13 @@ public class WeatherDataExtractor implements DataExtractor {
     private OkHttpClient httpClient;
     private static WeatherDataExtractor instance;
 
+    private final ApiCache cache;
+
     private WeatherDataExtractor() {
         this.httpClient = new OkHttpClient();
+        this.cache = new ApiCache();
+
+        SaveLoad.load(this.cache, "weather_cache.json");
     }
 
     public static WeatherDataExtractor getInstance() {
@@ -63,17 +70,47 @@ public class WeatherDataExtractor implements DataExtractor {
 
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
-        String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), params, false);
-        TreeMap<LocalDateTime, TreeMap<String, Double>> fetchedData = fetchDataMultipleParams(apiUrl, params);
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> resultMap = new TreeMap<>();
+
+        ArrayList<String> remainingParams = new ArrayList<>();
+
+        // TODO: there's probably a better way of doing this
+        Duration margin = Duration.ofDays(1);
+        if (!range.getValue().isAfter(range.getKey().plusDays(1))) {
+            margin = Duration.ofHours(1);
+        }
+
         for (String param : params) {
+            var cachedData = this.cache.get(coordinates, param, range, margin);
+
+            if (cachedData != null) {
+                resultMap.put(param, cachedData);
+            } else {
+                remainingParams.add(param);
+            }
+        }
+
+        if (remainingParams.isEmpty()) {
+            return resultMap;
+        }
+
+        String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), remainingParams, false);
+        TreeMap<LocalDateTime, TreeMap<String, Double>> fetchedData = fetchDataMultipleParams(apiUrl, remainingParams);
+
+        TreeMap<String, TreeMap<LocalDateTime, Double>> cacheInsertData = new TreeMap<>();
+
+        for (String param : remainingParams) {
             TreeMap<LocalDateTime, Double> paramData = new TreeMap<>();
             for (Map.Entry<LocalDateTime, TreeMap<String, Double>> entry : fetchedData.entrySet()) {
                 paramData.put(entry.getKey(), entry.getValue().get(param));
             }
             resultMap.put(param, paramData);
+            cacheInsertData.put(param, paramData);
         }
+
+        this.cache.insert(coordinates, cacheInsertData);
+        SaveLoad.save(this.cache, "weather_cache.json");
 
         return resultMap;
     }

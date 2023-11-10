@@ -135,7 +135,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                 updateTime();
             }
         }, 0, 1000);
-
+        
     }
 
     /**
