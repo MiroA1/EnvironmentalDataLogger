@@ -247,7 +247,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
         chartBox.getChildren().clear();
 
-        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : EnvironmentalDataLogger.getCurrentCoords();
+        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
         var lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
 
 
