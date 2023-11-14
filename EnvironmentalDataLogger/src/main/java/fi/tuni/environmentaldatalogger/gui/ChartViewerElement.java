@@ -265,7 +265,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
             }
         }
 
-        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : EnvironmentalDataLogger.getCurrentCoords();
+        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
+
         var lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
 
 
@@ -282,7 +283,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
     private void loadPieChart() {
 
-        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : EnvironmentalDataLogger.getCurrentCoords();
+        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
         var pc = presenter.getDataAsPieChart(presenter.getValidAirQualityParameters(), LocalDateTime.now(), coords);
 
         AnchorPane.setTopAnchor(pc, 10.0);
