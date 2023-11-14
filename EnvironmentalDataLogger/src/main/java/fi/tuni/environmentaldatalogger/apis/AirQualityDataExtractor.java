@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.apis;
 
+import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.util.Pair;
@@ -128,7 +129,7 @@ public class AirQualityDataExtractor implements DataExtractor {
             for (AirQualityParameter ap : AirQualityParameter.values()){
                 if (ap.getAbbreviation().equals(param)){
 
-                    var cachedData = this.cache.get(coordinates, param, range, margin);
+                    var cachedData = this.cache.get(coordinates, param, range, margin, margin);
 
                     if (cachedData != null) {
                         data.put(param, cachedData);
@@ -152,6 +153,7 @@ public class AirQualityDataExtractor implements DataExtractor {
         if (!queryWords.isEmpty()) {
             var apiData = fetchData(url.toString(), queryWords);
             cache.insert(coordinates, apiData);
+            SaveLoad.save(this.cache, "air_quality_cache.json");
             data.putAll(apiData);
         }
 
@@ -194,7 +196,11 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     @Override
     public String getUnit(String param) {
-        // TODO: add proper units
+        for (AirQualityParameter ap : AirQualityParameter.values()){
+            if (ap.getAbbreviation().equals(param)){
+                return ap.getUnit();
+            }
+        }
         return "";
     }
 
@@ -322,6 +328,8 @@ public class AirQualityDataExtractor implements DataExtractor {
     private AirQualityDataExtractor() {
         this.httpClient = new OkHttpClient();
         this.cache = new ApiCache();
+
+        SaveLoad.load(this.cache, "air_quality_cache.json");
     }
 
     private final OkHttpClient httpClient;

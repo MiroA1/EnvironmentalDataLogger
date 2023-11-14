@@ -82,7 +82,7 @@ public class WeatherDataExtractor implements DataExtractor {
         }
 
         for (String param : params) {
-            var cachedData = this.cache.get(coordinates, param, range, margin);
+            var cachedData = this.cache.get(coordinates, param, range, margin, margin);
 
             if (cachedData != null) {
                 resultMap.put(param, cachedData);

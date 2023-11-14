@@ -11,6 +11,7 @@ import javafx.util.Pair;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -22,7 +23,7 @@ import java.util.TreeMap;
  */
 public class ApiCache implements Saveable, Loadable {
 
-    TreeMap<String, TreeMap<LocalDateTime, Double>> cache = new TreeMap<>();
+    HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache = new HashMap<>();
     Coordinate location = null;
 
     public ApiCache() {
@@ -36,20 +37,24 @@ public class ApiCache implements Saveable, Loadable {
      */
     public void insert(Coordinate location, TreeMap<String, TreeMap<LocalDateTime, Double>> data) {
 
+        // just nuke the whole thing if it gets too big, partial deletion has its own problems
         if (getCacheSize() > 10000) {
             cache.clear();
         }
 
-        if (this.location != location) {
-            cache.clear();
-            this.location = location;
+        Coordinate locationKey = getLocationKey(location);
+
+        if (locationKey == null) {
+            cache.put(location, new TreeMap<>());
         }
 
+        var cacheForLocation = cache.get(location);
+
         for (String param : data.keySet()) {
-            if (cache.containsKey(param)) {
-                cache.get(param).putAll(data.get(param));
+            if (cacheForLocation.containsKey(param)) {
+                cacheForLocation.get(param).putAll(data.get(param));
             } else {
-                cache.put(param, data.get(param));
+                cacheForLocation.put(param, data.get(param));
             }
         }
     }
@@ -62,14 +67,16 @@ public class ApiCache implements Saveable, Loadable {
      * @param margin
      * @return
      */
-    public TreeMap<LocalDateTime, Double> get(Coordinate location, String param, Pair<LocalDateTime, LocalDateTime> range, Duration margin) {
+    public TreeMap<LocalDateTime, Double> get(Coordinate location, String param, Pair<LocalDateTime, LocalDateTime> range, Duration margin, Duration resolution) {
 
-        if (!location.isCloseEnoughTo(this.location)) {
-            System.out.println("Cache miss: wrong location: " + location + ", cache: " + this.location);
+        Coordinate locationKey = getLocationKey(location);
+
+        if (locationKey == null) {
+            System.out.println("Cache miss: no cache for location " + location);
             return null;
         }
 
-        var data = cache.get(param);
+        var data = cache.get(locationKey).get(param);
 
         if (data == null) {
             System.out.println("Cache miss: cache does not contain data for " + param);
@@ -88,17 +95,60 @@ public class ApiCache implements Saveable, Loadable {
 
         SortedMap<LocalDateTime, Double> subMap = data.subMap(TimeUtils.getStartOfDay(range.getKey()), TimeUtils.getEndOfDay(range.getValue()));
 
-        System.out.println("Cache hit: " + param + " " + subMap.size() + " " + subMap.firstKey() + " " + subMap.lastKey());
-        return new TreeMap<>(subMap);
+        TreeMap<LocalDateTime, Double> result = new TreeMap<>();
+
+        for (var key : subMap.keySet()) {
+
+            if (result.isEmpty()) {
+                result.put(key, subMap.get(key));
+                continue;
+            }
+
+            long resolutionDiff = Duration.between(result.lastKey(), key).minus(resolution).toMinutes();
+            double minDiff = -10;
+            double maxDiff = resolution.toMinutes() * 0.1;
+
+            if (resolutionDiff < minDiff) {
+                continue;
+            }
+
+            if (resolutionDiff > maxDiff) {
+                System.out.println("Cache miss: resolution too low for " + param + " " + resolutionDiff + " " + minDiff + " " + maxDiff);
+                return null;
+            }
+
+            result.put(key, subMap.get(key));
+        }
+
+        System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
+        return result;
+    }
+
+    private Coordinate getLocationKey(Coordinate location) {
+
+        if (!cache.containsKey(location)) {
+            for (Coordinate coord : cache.keySet()) {
+                if (coord.isCloseEnoughTo(location)) {
+                    return coord;
+                }
+            }
+        } else {
+            return location;
+        }
+
+        return null;
     }
 
     private int getCacheSize() {
 
         int size = 0;
 
-        for (String param : cache.keySet()) {
-            size += cache.get(param).size();
+        for(Coordinate location : cache.keySet()) {
+            for (String param : cache.get(location).keySet()) {
+                size += cache.get(location).get(param).size();
+            }
         }
+
 
         return size;
     }
@@ -106,26 +156,30 @@ public class ApiCache implements Saveable, Loadable {
     @Override
     public String getJson() {
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
-        return gson.toJson(new SaveData(cache, location));
+        return gson.toJson(new SaveData(cache));
     }
 
     @Override
     public boolean loadFromJson(String json) {
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
-        SaveData data = gson.fromJson(json, SaveData.class);
+        try {
+            SaveData data = gson.fromJson(json, SaveData.class);
 
-        if (data == null) {
+            if (data == null) {
+                return false;
+            }
+
+            cache = data.cache;
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
-
-        cache = data.cache;
-        location = data.location;
 
         return true;
     }
 
-    private record SaveData(TreeMap<String, TreeMap<LocalDateTime, Double>> cache, Coordinate location) {
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).enableComplexMapKeySerialization().create();
+
+    private record SaveData(HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache) {
     }
 }

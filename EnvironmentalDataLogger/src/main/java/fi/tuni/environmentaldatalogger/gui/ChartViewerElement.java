@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.save.Loadable;
+import fi.tuni.environmentaldatalogger.save.Saveable;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,12 +21,12 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class ChartViewerElement extends VBox implements Initializable, GridElement {
+public class ChartViewerElement extends VBox implements Initializable, GridElement, Saveable, Loadable {
 
     private final String DEFAULT_RANGE = "Last 7 days";
     private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
     private final String DEFAULT_CHART_TYPE = "Line chart";
-    private final List<String> CHART_TYPES = List.of("Line chart");
+    private final List<String> CHART_TYPES = List.of("Line chart", "Pie chart");
     private final List<String> RANGES = List.of("Last 14 days", "Last 7 days", "Last 24 hours",
             "Next 24 hours", "Next 7 days", "Next 14 days", "Custom");
 
@@ -121,14 +123,14 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         chartTypeSelector.setOnAction(event -> {
             if (chartTypeSelector.getValue().equals("Line chart")) {
                 lineChartSelected();
+            } else if (chartTypeSelector.getValue().equals("Pie chart")) {
+                pieChartSelected();
             }
         });
 
         lineChartSelected();
 
         coordinateDialogButton.setOnAction(event -> {
-            //load();
-            //save();
             launchCoordinateDialog();
         });
 
@@ -152,6 +154,14 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         }
 
         updateRangePicker();
+    }
+
+    private void pieChartSelected() {
+        this.rangeSelector.setVisible(false);
+        this.rangeSelector.setManaged(false);
+
+        this.parameterSelector.setVisible(false);
+        this.parameterSelector.setManaged(false);
     }
 
     private void updateRangePicker() {
@@ -236,6 +246,17 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     }
 
     private void loadChart() {
+
+        chartBox.getChildren().clear();
+
+        if (chartTypeSelector.getValue().equals("Line chart")) {
+            loadLineChart();
+        } else if (chartTypeSelector.getValue().equals("Pie chart")) {
+            loadPieChart();
+        }
+    }
+
+    private void loadLineChart() {
         ArrayList<String> params = new ArrayList<>();
 
         for (var item : parameterSelector.getContextMenu().getItems()) {
@@ -243,8 +264,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
                 params.add(item.getText());
             }
         }
-
-        chartBox.getChildren().clear();
 
         Coordinate coords = selectedCoordinates != null ? selectedCoordinates : EnvironmentalDataLogger.getCurrentCoords();
         var lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
@@ -259,6 +278,23 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
 
         chartBox.getChildren().add(lc);
+    }
+
+    private void loadPieChart() {
+
+        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : EnvironmentalDataLogger.getCurrentCoords();
+        var pc = presenter.getDataAsPieChart(presenter.getValidAirQualityParameters(), LocalDateTime.now(), coords);
+
+        AnchorPane.setTopAnchor(pc, 10.0);
+        AnchorPane.setLeftAnchor(pc, 0.0);
+        AnchorPane.setRightAnchor(pc, 0.0);
+        AnchorPane.setBottomAnchor(pc, 0.0);
+
+        pc.setPrefHeight(500);
+        pc.setPrefWidth(500);
+        //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
+
+        chartBox.getChildren().add(pc);
     }
 
     @Override
@@ -286,10 +322,18 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         return gson.toJson(saveData);
     }
 
-    public void loadFromJson(String json) {
+    public boolean loadFromJson(String json) {
 
         Gson gson = new Gson(); //new GsonBuilder().registerTypeAdapter(Coordinate.class, new CoordinateDeserializer()).create();
-        SaveData saveData = gson.fromJson(json, SaveData.class);
+
+        SaveData saveData;
+
+        try {
+            saveData = gson.fromJson(json, SaveData.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
 
         chartTypeSelector.setValue(saveData.chartType);
         rangeSelector.setValue(saveData.range);
@@ -304,6 +348,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         coordinateLabel.setText("Coordinates: " + selectedCoordinatesString);
 
         loadButton.fire();
+
+        return true;
     }
 
     private record SaveData(String chartType, String range, ArrayList<String> parameters, Coordinate coordinates) {

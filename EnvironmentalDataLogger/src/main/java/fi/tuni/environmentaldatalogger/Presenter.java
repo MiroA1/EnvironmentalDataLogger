@@ -59,11 +59,25 @@ public class Presenter {
     }
 
     public ArrayList<String> getValidWeatherParameters() {
-        return new ArrayList<>();
+
+        HashSet<String> params = new HashSet<>();
+
+        for (DataExtractor api : weatherAPIs) {
+            params.addAll(api.getValidParameters());
+        }
+
+        return new ArrayList<>(params);
     }
 
     public ArrayList<String> getValidAirQualityParameters() {
-        return new ArrayList<>();
+
+        HashSet<String> params = new HashSet<>();
+
+        for (DataExtractor api : airQualityAPIs) {
+            params.addAll(api.getValidParameters());
+        }
+
+        return new ArrayList<>(params);
     }
 
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
@@ -99,25 +113,50 @@ public class Presenter {
         }
 
          */
+        var apiMap = matchParamsAndAPIs(params);
+        TreeMap<String, String> units = new TreeMap<>();
 
-        datamap.putAll(WeatherDataExtractor.getInstance().getData(params, range, coordinates));
-        datamap.putAll(AirQualityDataExtractor.getInstance().getData(params, range, coordinates));
+        for (DataExtractor api : apiMap.keySet()) {
+            TreeMap<String, TreeMap<LocalDateTime, Double>> result = api.getData(apiMap.get(api), range, coordinates);
+            datamap.putAll(result);
+
+            for (String param : apiMap.get(api)) {
+                units.put(param, api.getUnit(param));
+            }
+        }
 
         Duration duration = Duration.between(range.getKey(), range.getValue());
-        DateTimeFormatter formatter = (duration.toHours() <= 24) ?
-                DateTimeFormatter.ofPattern("HH:mm") :
-                DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter;
+
+        if (duration.toHours() > 120) {
+            formatter = DateTimeFormatter.ofPattern("dd.MM");
+        } else if (duration.toHours() > 24) {
+            formatter = DateTimeFormatter.ofPattern("dd.MM HH:mm");
+        } else {
+            formatter = DateTimeFormatter.ofPattern("HH:mm");
+        }
 
         NumberAxis yAxis = new NumberAxis();
         NumberAxis xAxis = new NumberAxis();
 
+        xAxis.setForceZeroInRange(false);
+        xAxis.setAutoRanging(false);
+
         if (duration.toHours() > 120) {
+            xAxis.setLowerBound(TimeUtils.getEpochSecond(TimeUtils.getStartOfDay(range.getKey().minusDays(1))));
+            xAxis.setUpperBound(TimeUtils.getEpochSecond(TimeUtils.getEndOfDay(range.getValue().plusDays(1))));
             xAxis.setTickUnit(86400);
         } else if (duration.toHours() > 48) {
+            xAxis.setLowerBound(TimeUtils.getEpochSecond(TimeUtils.getStartOfHour(range.getKey().minusHours(1))));
+            xAxis.setUpperBound(TimeUtils.getEpochSecond(TimeUtils.getEndOfHour(range.getValue().plusHours(1))));
             xAxis.setTickUnit(21600);
         } else if (duration.toHours() > 24) {
+            xAxis.setLowerBound(TimeUtils.getEpochSecond(TimeUtils.getStartOfHour(range.getKey().minusHours(1))));
+            xAxis.setUpperBound(TimeUtils.getEpochSecond(TimeUtils.getEndOfHour(range.getValue().plusHours(1))));
             xAxis.setTickUnit(14400);
         } else {
+            xAxis.setLowerBound(TimeUtils.getEpochSecond(TimeUtils.getStartOfHour(range.getKey().minusHours(1))));
+            xAxis.setUpperBound(TimeUtils.getEpochSecond(TimeUtils.getEndOfHour(range.getValue().plusHours(1))));
             xAxis.setTickUnit(3600);
         }
 
@@ -139,8 +178,6 @@ public class Presenter {
         LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         //lineChart.setTitle("Weather statistics");
 
-        var api = weatherAPIs.get(0);
-
 /*        for (String param : datamap.keySet()) {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
             TreeMap<LocalDateTime, Double> dateMap = datamap.get(param);
@@ -154,8 +191,6 @@ public class Presenter {
             series.setName(paramFormatted + " " + api.getUnit(param));
             lineChart.getData().add(series);
         }*/
-
-        xAxis.setForceZeroInRange(false);
 
         for (Map.Entry<String, TreeMap<LocalDateTime, Double>> entry : datamap.entrySet()) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
@@ -175,14 +210,14 @@ public class Presenter {
 
             for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
                 //String dateString = innerEntry.getKey().format(formatter);
-                series.getData().add(new XYChart.Data<>(innerEntry.getKey().toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(innerEntry.getKey())), innerEntry.getValue()));
+                series.getData().add(new XYChart.Data<>(TimeUtils.getEpochSecond(innerEntry.getKey()), innerEntry.getValue()));
             }
 
             if (dateMap.size() > 49) {
                 lineChart.setCreateSymbols(false);
             }
 
-            series.setName(paramFormatted + " " + api.getUnit(param));
+            series.setName(paramFormatted + " " + units.get(param));
             lineChart.getData().add(series);
         }
 
@@ -323,4 +358,24 @@ public class Presenter {
         return result;
     }
 
+    private HashMap<DataExtractor, ArrayList<String>> matchParamsAndAPIs(ArrayList<String> params) {
+
+            HashMap<DataExtractor, ArrayList<String>> result = new HashMap<>();
+
+            for (String param : params) {
+                for (DataExtractor api : APIs) {
+                    if (api.getValidParameters().contains(param)) {
+                        if (result.containsKey(api)) {
+                            result.get(api).add(param);
+                        } else {
+                            ArrayList<String> list = new ArrayList<>();
+                            list.add(param);
+                            result.put(api, list);
+                        }
+                    }
+                }
+            }
+
+            return result;
+    }
 }
