@@ -1,6 +1,7 @@
 package fi.tuni.environmentaldatalogger.gui;
 
 import com.google.gson.Gson;
+import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -9,13 +10,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ChartGrid extends GridPane implements Saveable {
+public class ChartGrid extends GridPane implements Saveable, Loadable {
 
     private ArrayList<ArrayList<GridElement>> grid = new ArrayList<>();
     private boolean expandCharts = true;
@@ -386,7 +385,7 @@ public class ChartGrid extends GridPane implements Saveable {
                 return false;
             }
 
-            ArrayList<ArrayList<String>> saveGrid = saveData.getGrid();
+            ArrayList<ArrayList<String>> saveGrid = saveData.grid();
 
             int n = saveGrid.size();
             int m = saveGrid.get(0).size();
@@ -430,26 +429,11 @@ public class ChartGrid extends GridPane implements Saveable {
 
             addButtons();
 
-            expandCharts = saveData.isExpandCharts();
+            expandCharts = saveData.expandCharts();
 
             return true;
     }
 
-    private static class SaveData {
-        private final ArrayList<ArrayList<String>> grid;
-        private final boolean expandCharts;
-
-        public SaveData(ArrayList<ArrayList<String>> grid, boolean expandCharts) {
-            this.grid = grid;
-            this.expandCharts = expandCharts;
-        }
-
-        public ArrayList<ArrayList<String>> getGrid() {
-            return grid;
-        }
-
-        public boolean isExpandCharts() {
-            return expandCharts;
-        }
+    private record SaveData(ArrayList<ArrayList<String>> grid, boolean expandCharts) {
     }
 }

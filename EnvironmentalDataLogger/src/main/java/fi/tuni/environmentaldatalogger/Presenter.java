@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.util.TimeUtils;
 import javafx.scene.Node;
 import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.DataExtractor;
@@ -10,6 +11,7 @@ import javafx.scene.chart.*;
 import javafx.util.Pair;
 
 import java.time.Duration;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -86,29 +88,55 @@ public class Presenter {
      * @param coordinates coordinates for the geographic location of data
      * @return line chart of the given parameters
      */
-    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public LineChart<Number, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
 
+        /*
         for (String param : params) {
             TreeMap<LocalDateTime, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
             datamap.put(param, result);
         }
 
+         */
+
+        datamap.putAll(WeatherDataExtractor.getInstance().getData(params, range, coordinates));
         datamap.putAll(AirQualityDataExtractor.getInstance().getData(params, range, coordinates));
 
         Duration duration = Duration.between(range.getKey(), range.getValue());
         DateTimeFormatter formatter = (duration.toHours() <= 24) ?
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH") :
+                DateTimeFormatter.ofPattern("HH:mm") :
                 DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         NumberAxis yAxis = new NumberAxis();
-        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis xAxis = new NumberAxis();
+
+        if (duration.toHours() > 120) {
+            xAxis.setTickUnit(86400);
+        } else if (duration.toHours() > 48) {
+            xAxis.setTickUnit(21600);
+        } else if (duration.toHours() > 24) {
+            xAxis.setTickUnit(14400);
+        } else {
+            xAxis.setTickUnit(3600);
+        }
+
+        xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis, null, "s") {
+            @Override
+            public String toString(Number object) {
+                // Convert back to LocalDateTime and format
+                LocalDateTime date = LocalDateTime.ofEpochSecond(object.longValue(), 0, ZoneOffset.UTC);
+                return date.format(formatter); // You can format it as you like
+            }
+        });
+
+        /*
         xAxis.setGapStartAndEnd(false);
         xAxis.setStartMargin(10);
         xAxis.setEndMargin(50);
+        */
 
-        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         //lineChart.setTitle("Weather statistics");
 
         var api = weatherAPIs.get(0);
@@ -127,19 +155,33 @@ public class Presenter {
             lineChart.getData().add(series);
         }*/
 
+        xAxis.setForceZeroInRange(false);
+
         for (Map.Entry<String, TreeMap<LocalDateTime, Double>> entry : datamap.entrySet()) {
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             TreeMap<LocalDateTime, Double> dateMap = entry.getValue();
             String param = entry.getKey();
+
+            if (dateMap == null || dateMap.isEmpty()) {
+                continue;
+            }
+
+            // discard data outside of range
+            SortedMap<LocalDateTime, Double> subMap = dateMap.subMap(range.getKey().minusHours(1), range.getValue().plusHours(1));
+            dateMap = new TreeMap<>(subMap);
+
             // Convert the first letter of param to uppercase
             String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
 
-            if (dateMap != null) {
-                for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
-                    String dateString = innerEntry.getKey().format(formatter);
-                    series.getData().add(new XYChart.Data<>(dateString, innerEntry.getValue()));
-                }
+            for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
+                //String dateString = innerEntry.getKey().format(formatter);
+                series.getData().add(new XYChart.Data<>(innerEntry.getKey().toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(innerEntry.getKey())), innerEntry.getValue()));
             }
+
+            if (dateMap.size() > 49) {
+                lineChart.setCreateSymbols(false);
+            }
+
             series.setName(paramFormatted + " " + api.getUnit(param));
             lineChart.getData().add(series);
         }

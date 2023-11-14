@@ -22,7 +22,7 @@ public class SaveLoad {
         }
     }
 
-    public static boolean load(Saveable saveable, String filename) {
+    public static boolean load(Loadable loadable, String filename) {
 
         String filePath = "saves/" + filename;
 
@@ -36,10 +36,9 @@ public class SaveLoad {
             }
 
             String json = content.toString();
-            return saveable.loadFromJson(json);
+            return loadable.loadFromJson(json);
 
         } catch (IOException e) {
-            e.printStackTrace();
             return false;
         }
     }

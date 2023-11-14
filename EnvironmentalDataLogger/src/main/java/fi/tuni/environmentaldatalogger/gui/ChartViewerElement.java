@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
-import fi.tuni.environmentaldatalogger.save.CoordinateDeserializer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -307,17 +306,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         loadButton.fire();
     }
 
-    private class SaveData {
-        private final String chartType;
-        private final String range;
-        private final ArrayList<String> parameters;
-        private final Coordinate coordinates;
-
-        public SaveData(String chartType, String range, ArrayList<String> parameters, Coordinate coordinates) {
-            this.chartType = chartType;
-            this.range = range;
-            this.parameters = parameters;
-            this.coordinates = coordinates;
-        }
+    private record SaveData(String chartType, String range, ArrayList<String> parameters, Coordinate coordinates) {
     }
 }

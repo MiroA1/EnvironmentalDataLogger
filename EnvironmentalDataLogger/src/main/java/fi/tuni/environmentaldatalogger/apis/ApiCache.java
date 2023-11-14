@@ -2,6 +2,7 @@ package fi.tuni.environmentaldatalogger.apis;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.LocalDateTimeAdapter;
 import fi.tuni.environmentaldatalogger.save.Saveable;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
@@ -19,7 +20,7 @@ import java.util.TreeMap;
 /**
  * A very crude caching solution for API data.
  */
-public class ApiCache implements Saveable {
+public class ApiCache implements Saveable, Loadable {
 
     TreeMap<String, TreeMap<LocalDateTime, Double>> cache = new TreeMap<>();
     Coordinate location = null;
@@ -64,14 +65,19 @@ public class ApiCache implements Saveable {
     public TreeMap<LocalDateTime, Double> get(Coordinate location, String param, Pair<LocalDateTime, LocalDateTime> range, Duration margin) {
 
         if (!location.isCloseEnoughTo(this.location)) {
-            System.out.println("Cache miss: wrong location, " + location + " " + this.location);
+            System.out.println("Cache miss: wrong location: " + location + ", cache: " + this.location);
             return null;
         }
 
         var data = cache.get(param);
 
         if (data == null) {
-            System.out.println("Cache miss: no data for " + param);
+            System.out.println("Cache miss: cache does not contain data for " + param);
+            return null;
+        }
+
+        if (data.isEmpty()) {
+            System.out.println("Cache miss: 0 entries for  " + param);
             return null;
         }
 
