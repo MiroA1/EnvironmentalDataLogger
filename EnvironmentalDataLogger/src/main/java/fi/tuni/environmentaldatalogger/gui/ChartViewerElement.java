@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.save.CoordinateDeserializer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -248,7 +250,13 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         chartBox.getChildren().clear();
 
         Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
-        var lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
+        LineChart<String, Number> lc = null;
+        try {
+            lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
+        } catch (ApiException e) {
+            MainView.getInstance();
+            MainView.notificationBar.pushAlertNotification(e.getMessage());
+        }
 
 
         AnchorPane.setTopAnchor(lc, 10.0);
