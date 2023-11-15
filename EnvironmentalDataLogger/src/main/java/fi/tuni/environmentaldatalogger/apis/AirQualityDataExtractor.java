@@ -268,11 +268,11 @@ public class AirQualityDataExtractor implements DataExtractor {
                 airQualityData = parseCurrentAirQualityData(responseBody, params);
             } else {
                 throw new ApiException("Received unexpected response code " + response.code() +
-                        " from API server. Unable to fetch data.",
+                        " from air quality server. Unable to fetch data.",
                         ApiException.ErrorCode.INVALID_RESPONSE);
             }
         } catch (IOException e) {
-            throw new ApiException("Failed to connect to API server. Check internet connection.",
+            throw new ApiException("Failed to connect to air quality server. Check the internet connection.",
                     ApiException.ErrorCode.CONNECTION_ERROR);
         }
 
