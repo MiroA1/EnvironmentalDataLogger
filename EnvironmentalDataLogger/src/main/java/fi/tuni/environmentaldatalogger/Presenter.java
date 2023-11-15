@@ -1,5 +1,7 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.apis.ApiException;
+import fi.tuni.environmentaldatalogger.gui.MainView;
 import javafx.scene.Node;
 import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.DataExtractor;
@@ -86,16 +88,26 @@ public class Presenter {
      * @param coordinates coordinates for the geographic location of data
      * @return line chart of the given parameters
      */
-    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public LineChart<String, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime>
+                                                        range, Coordinate coordinates) {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
 
         for (String param : params) {
-            TreeMap<LocalDateTime, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
+            TreeMap<LocalDateTime, Double> result = null;
+            try {
+                result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
+            } catch (ApiException e) {
+                MainView.getInstance().notificationBar.pushAlertNotification(e.getMessage());
+                return null;
+            }
             datamap.put(param, result);
         }
-
-        datamap.putAll(AirQualityDataExtractor.getInstance().getData(params, range, coordinates));
+        try {
+            datamap.putAll(AirQualityDataExtractor.getInstance().getData(params, range, coordinates));
+        } catch (ApiException e) {
+            MainView.getInstance().notificationBar.pushAlertNotification(e.getMessage());
+        }
 
         Duration duration = Duration.between(range.getKey(), range.getValue());
         DateTimeFormatter formatter = (duration.toHours() <= 24) ?
@@ -224,9 +236,13 @@ public class Presenter {
     public PieChart getDataAsPieChart(ArrayList<String> params, LocalDateTime date, Coordinate coordinates) {
 
         Pair<LocalDateTime, LocalDateTime> range = new Pair<>(date, date);
-
-        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap = AirQualityDataExtractor.getInstance().
-                                                                        getData(params, range, coordinates);
+        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap;
+        try {
+            dataMap = AirQualityDataExtractor.getInstance().getData(params, range, coordinates);
+        } catch (ApiException e) {
+            MainView.getInstance().notificationBar.pushAlertNotification(e.getMessage());
+            return null; // TODO: Is null sufficient here?
+        }
 
         PieChart pieChart = new PieChart();
 /*        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -270,7 +286,13 @@ public class Presenter {
     public TreeMap<String, String> getCurrentData(ArrayList<String> params, Coordinate coordinates) {
 
         var api = weatherAPIs.get(0);
-        TreeMap<String, Double> currentData = api.getCurrentData(params, coordinates);
+        TreeMap<String, Double> currentData;
+        try {
+            currentData = api.getCurrentData(params, coordinates);
+        } catch (ApiException e) {
+            MainView.getInstance().notificationBar.pushAlertNotification(e.getMessage());
+            return null;
+        }
 
         TreeMap<String, String> result = new TreeMap<>();
 
