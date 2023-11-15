@@ -34,7 +34,7 @@ public class WeatherDataExtractor implements DataExtractor {
         SaveLoad.load(this.cache, "weather_cache.json");
     }
 
-    public static WeatherDataExtractor getInstance() {
+    public static synchronized WeatherDataExtractor getInstance() {
         if (instance == null) {
             instance = new WeatherDataExtractor();
         }
@@ -50,22 +50,8 @@ public class WeatherDataExtractor implements DataExtractor {
     }
 
     @Override
-    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
-        return new Pair<>(LocalDateTime.now().minusDays(30), LocalDateTime.now());
-    }
-
-    @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
-        ArrayList<String> params = new ArrayList<>();
-        params.add(param);
-        TreeMap<String, TreeMap<LocalDateTime, Double>> combinedData = getData(params, range, coordinates);
-        return combinedData.get(param);
-    }
-
-    @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) {
-        Pair<LocalDateTime, LocalDateTime> range = getValidDataRange(param);
-        return getData(param, range, coordinates);
+    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
+        return new Pair<>(LocalDateTime.now().minusDays(30), LocalDateTime.now().plusDays(15));
     }
 
     @Override

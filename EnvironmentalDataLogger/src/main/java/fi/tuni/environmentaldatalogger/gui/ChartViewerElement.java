@@ -7,6 +7,8 @@ import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -27,8 +29,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     private final List<String> DEFAULT_ENABLED_PARAMETERS = List.of("temperature");
     private final String DEFAULT_CHART_TYPE = "Line chart";
     private final List<String> CHART_TYPES = List.of("Line chart", "Pie chart");
-    private final List<String> RANGES = List.of("Last 14 days", "Last 7 days", "Last 24 hours",
-            "Next 24 hours", "Next 7 days", "Next 14 days", "Custom");
+    private final List<String> RANGES = List.of("Last 14 days", "Last 7 days", "Last 3 days", "Last 24 hours",
+            "Next 24 hours", "Next 3 days", "Next 7 days", "Next 14 days", "Custom");
 
     // TODO: remember to change this
     Presenter presenter = Presenter.getInstance();
@@ -105,7 +107,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
         parameterSelector.setContextMenu(contextMenu);
 
-        parameterSelector.setOnAction(event -> {
+        contextMenu.setOnAction(event -> {
             updateRangePicker();
         });
 
@@ -160,6 +162,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         this.rangeSelector.setVisible(false);
         this.rangeSelector.setManaged(false);
 
+        this.customRangePicker.setVisible(false);
+        this.customRangePicker.setManaged(false);
+
         this.parameterSelector.setVisible(false);
         this.parameterSelector.setManaged(false);
     }
@@ -168,20 +173,29 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
 
         var validRanges = getValidRanges();
 
-        this.rangeSelector.getItems().clear();
-        this.rangeSelector.getItems().addAll(validRanges);
+        String currentSelection = this.rangeSelector.getValue();
 
-        if (validRanges.contains(DEFAULT_RANGE)) {
-            this.rangeSelector.setValue(DEFAULT_RANGE);
+        if (currentSelection == null) {
+            currentSelection = DEFAULT_RANGE;
+        }
+
+        //this.rangeSelector.getItems().clear();
+        //this.rangeSelector.getItems().addAll(validRanges);
+        this.rangeSelector.setItems(FXCollections.observableList(validRanges));
+
+        if (validRanges.contains(currentSelection)) {
+            this.rangeSelector.setValue(currentSelection);
         } else {
             this.rangeSelector.setValue(validRanges.get(0));
         }
+
+        rangeSelector.requestLayout();
 
         updateCustomRangePicker();
     }
 
     private void updateCustomRangePicker() {
-        if (rangeSelector.getValue().equals("Custom")) {
+        if (Objects.equals(rangeSelector.getValue(), "Custom")) {
             customRangePicker.setVisible(true);
             customRangePicker.setManaged(true);
             customRangePicker.setRange(presenter.getValidDataRange(getSelectedParameters()));
@@ -237,8 +251,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         return switch (rangeDescription) {
             case "Last 14 days" -> new Pair<>(now.minusDays(14), now);
             case "Last 7 days" -> new Pair<>(now.minusDays(7), now);
+            case "Last 3 days" -> new Pair<>(now.minusDays(3), now);
             case "Last 24 hours" -> new Pair<>(now.minusDays(1), now);
             case "Next 24 hours" -> new Pair<>(now, now.plusDays(1));
+            case "Next 3 days" -> new Pair<>(now, now.plusDays(3));
             case "Next 7 days" -> new Pair<>(now, now.plusDays(7));
             case "Next 14 days" -> new Pair<>(now, now.plusDays(14));
             default -> customRangePicker.getRange();
@@ -348,7 +364,14 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         String selectedCoordinatesString = selectedCoordinates != null ? selectedCoordinates.toString() : "Not Set";
         coordinateLabel.setText("Coordinates: " + selectedCoordinatesString);
 
+        if (chartTypeSelector.getValue().equals("Line chart")) {
+            lineChartSelected();
+        } else if (chartTypeSelector.getValue().equals("Pie chart")) {
+            pieChartSelected();
+        }
+
         loadButton.fire();
+        updateRangePicker();
 
         return true;
     }

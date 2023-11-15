@@ -14,9 +14,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 // TODO: separate forecast and history caches
-// TODO: make sure data resolution is right for query
 
 /**
  * A very crude caching solution for API data.
@@ -24,7 +25,7 @@ import java.util.TreeMap;
 public class ApiCache implements Saveable, Loadable {
 
     HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache = new HashMap<>();
-    Coordinate location = null;
+    Lock lock;
 
     public ApiCache() {
 
@@ -37,7 +38,11 @@ public class ApiCache implements Saveable, Loadable {
      */
     public void insert(Coordinate location, TreeMap<String, TreeMap<LocalDateTime, Double>> data) {
 
-        // just nuke the whole thing if it gets too big, partial deletion has its own problems
+        if (!getLock()) {
+            return;
+        }
+
+        // just nuke the whole thing if it gets too big, partial deletion has its own problems, not worth the time
         if (getCacheSize() > 10000) {
             cache.clear();
         }
@@ -57,6 +62,8 @@ public class ApiCache implements Saveable, Loadable {
                 cacheForLocation.put(param, data.get(param));
             }
         }
+
+        lock.unlock();
     }
 
     /**
@@ -69,10 +76,15 @@ public class ApiCache implements Saveable, Loadable {
      */
     public TreeMap<LocalDateTime, Double> get(Coordinate location, String param, Pair<LocalDateTime, LocalDateTime> range, Duration margin, Duration resolution) {
 
+        if (!getLock()) {
+            return null;
+        }
+
         Coordinate locationKey = getLocationKey(location);
 
         if (locationKey == null) {
             System.out.println("Cache miss: no cache for location " + location);
+            lock.unlock();
             return null;
         }
 
@@ -80,16 +92,20 @@ public class ApiCache implements Saveable, Loadable {
 
         if (data == null) {
             System.out.println("Cache miss: cache does not contain data for " + param);
+            lock.unlock();
             return null;
         }
 
         if (data.isEmpty()) {
             System.out.println("Cache miss: 0 entries for  " + param);
+            lock.unlock();
             return null;
         }
 
-        if (data.firstKey().isAfter(range.getKey().plus(margin)) || data.lastKey().isBefore(range.getValue().minus(margin))) {
+        if (data.firstKey().isAfter(range.getKey().plus(margin)) ||
+                data.lastKey().isBefore(range.getValue().minus(margin))) {
             System.out.println("Cache miss: not enough data for " + param + " " + data.firstKey() + " " + data.lastKey() + " " + range.getKey() + " " + range.getValue());
+            lock.unlock();
             return null;
         }
 
@@ -114,14 +130,18 @@ public class ApiCache implements Saveable, Loadable {
 
             if (resolutionDiff > maxDiff) {
                 System.out.println("Cache miss: resolution too low for " + param + " " + resolutionDiff + " " + minDiff + " " + maxDiff);
+                lock.unlock();
                 return null;
             }
 
             result.put(key, subMap.get(key));
         }
 
+        lock.unlock();
+
         System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
         return result;
+
     }
 
     private Coordinate getLocationKey(Coordinate location) {
@@ -156,21 +176,52 @@ public class ApiCache implements Saveable, Loadable {
     @Override
     public String getJson() {
 
-        return gson.toJson(new SaveData(cache));
+        if (!getLock()) {
+            return null;
+        }
+
+        String result = gson.toJson(new SaveData(cache));
+
+        lock.unlock();
+
+        return result;
     }
 
     @Override
     public boolean loadFromJson(String json) {
 
+        if (!getLock()) {
+            return false;
+        }
+
         try {
             SaveData data = gson.fromJson(json, SaveData.class);
 
             if (data == null) {
+                lock.unlock();
                 return false;
             }
 
             cache = data.cache;
+
         } catch (Exception e) {
+            e.printStackTrace();
+            lock.unlock();
+            return false;
+        }
+
+        lock.unlock();
+        return true;
+    }
+
+    private boolean getLock() {
+
+        try {
+            if (!lock.tryLock(1, TimeUnit.SECONDS)) {
+                System.out.println("Thread failed to acquire cache lock");
+                return false;
+            }
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
         }
@@ -178,7 +229,8 @@ public class ApiCache implements Saveable, Loadable {
         return true;
     }
 
-    private static final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).enableComplexMapKeySerialization().create();
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(
+            LocalDateTime.class, new LocalDateTimeAdapter()).enableComplexMapKeySerialization().create();
 
     private record SaveData(HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache) {
     }

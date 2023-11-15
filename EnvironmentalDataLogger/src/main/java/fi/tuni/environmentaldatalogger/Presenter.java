@@ -80,18 +80,34 @@ public class Presenter {
         return new ArrayList<>(params);
     }
 
-    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
-        return null;
-    }
-
     /**
      * Returns the maximum range of data available for the given set of parameters.
      * @param params
      * @return
      */
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
-        // TODO: change this to something that makes sense
-        return airQualityAPIs.get(0).getValidDataRange("");
+
+        var apiMap = matchParamsAndAPIs(params);
+
+        Pair<LocalDateTime, LocalDateTime> result = null;
+
+        for (DataExtractor api : apiMap.keySet()) {
+            Pair<LocalDateTime, LocalDateTime> range = api.getValidDataRange(apiMap.get(api));
+
+            if (result == null) {
+                result = range;
+            } else {
+                var start = range.getKey().isBefore(result.getKey()) ? result.getKey() : range.getKey();
+                var end = range.getValue().isAfter(result.getValue()) ? result.getValue() : range.getValue();
+                result = new Pair<>(start, end);
+            }
+        }
+
+        if (result == null) {
+            return new Pair<>(LocalDateTime.now(), LocalDateTime.now());
+        }
+
+        return result;
     }
 
     /**
