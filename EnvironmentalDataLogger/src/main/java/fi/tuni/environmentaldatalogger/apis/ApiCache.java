@@ -42,8 +42,9 @@ public class ApiCache implements Saveable, Loadable {
             return;
         }
 
-        // just nuke the whole thing if it gets too big, partial deletion has its own problems, not worth the time
+        // just nuke the entire thing if it gets too big, partial deletion has its own problems, not worth the time
         if (getCacheSize() > 10000) {
+            System.out.println("Cache deleted");
             cache.clear();
         }
 
