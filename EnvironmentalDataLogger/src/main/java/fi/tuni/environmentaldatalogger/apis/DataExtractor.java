@@ -32,7 +32,8 @@ public interface DataExtractor {
      * @param range
      * @return
      */
-    TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates);
+    TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range,
+                                           Coordinate coordinates) throws ApiException;
 
     /**
      * Returns all available data for a given parameter.
@@ -40,7 +41,7 @@ public interface DataExtractor {
      * @param param
      * @return
      */
-    TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates);
+    TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) throws ApiException;
 
     /**
      * Returns data for a givens parameters within specified time range.
@@ -50,7 +51,8 @@ public interface DataExtractor {
      * @param coordinates
      * @return
      */
-    TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates);
+    TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime,
+            LocalDateTime> range, Coordinate coordinates) throws ApiException;
 
     /**
      * Returns real-time data of given parameters
@@ -59,7 +61,7 @@ public interface DataExtractor {
      * @param coordinates
      * @return map(param, value)
      */
-    TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates);
+    TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException;
 
     /**
      * Returns the unit used for given parameter (e.g. "°C")
