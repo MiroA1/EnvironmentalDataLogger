@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.apis;
 
+import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import okhttp3.*;
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -23,11 +25,16 @@ public class WeatherDataExtractor implements DataExtractor {
     private OkHttpClient httpClient;
     private static WeatherDataExtractor instance;
 
+    private final ApiCache cache;
+
     private WeatherDataExtractor() {
         this.httpClient = new OkHttpClient();
+        this.cache = new ApiCache();
+
+        SaveLoad.load(this.cache, "weather_cache.json");
     }
 
-    public static WeatherDataExtractor getInstance() {
+    public static synchronized WeatherDataExtractor getInstance() {
         if (instance == null) {
             instance = new WeatherDataExtractor();
         }
@@ -43,40 +50,53 @@ public class WeatherDataExtractor implements DataExtractor {
     }
 
     @Override
-    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
-        return new Pair<>(LocalDateTime.now().minusDays(30), LocalDateTime.now());
+    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
+        return new Pair<>(LocalDateTime.now().minusDays(30), LocalDateTime.now().plusDays(15));
     }
 
     @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range,
-                                                  Coordinate coordinates) throws ApiException {
-        ArrayList<String> params = new ArrayList<>();
-        params.add(param);
-        TreeMap<String, TreeMap<LocalDateTime, Double>> combinedData = getData(params, range, coordinates);
-        return combinedData.get(param);
-    }
-
-    @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) throws ApiException {
-        Pair<LocalDateTime, LocalDateTime> range = getValidDataRange(param);
-        return getData(param, range, coordinates);
-    }
-
-    @Override
-    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params,
-                                                                   Pair<LocalDateTime, LocalDateTime> range,
-                                                                   Coordinate coordinates) throws ApiException {
-        String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), params, false);
-        TreeMap<LocalDateTime, TreeMap<String, Double>> fetchedData = fetchDataMultipleParams(apiUrl, params);
+    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) throws ApiException {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> resultMap = new TreeMap<>();
+
+        ArrayList<String> remainingParams = new ArrayList<>();
+
+        // TODO: there's probably a better way of doing this
+        Duration margin = Duration.ofDays(1);
+        if (!range.getValue().isAfter(range.getKey().plusDays(1))) {
+            margin = Duration.ofHours(1);
+        }
+
         for (String param : params) {
+            var cachedData = this.cache.get(coordinates, param, range, margin, margin);
+
+            if (cachedData != null) {
+                resultMap.put(param, cachedData);
+            } else {
+                remainingParams.add(param);
+            }
+        }
+
+        if (remainingParams.isEmpty()) {
+            return resultMap;
+        }
+
+        String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), remainingParams, false);
+        TreeMap<LocalDateTime, TreeMap<String, Double>> fetchedData = fetchDataMultipleParams(apiUrl, remainingParams);
+
+        TreeMap<String, TreeMap<LocalDateTime, Double>> cacheInsertData = new TreeMap<>();
+
+        for (String param : remainingParams) {
             TreeMap<LocalDateTime, Double> paramData = new TreeMap<>();
             for (Map.Entry<LocalDateTime, TreeMap<String, Double>> entry : fetchedData.entrySet()) {
                 paramData.put(entry.getKey(), entry.getValue().get(param));
             }
             resultMap.put(param, paramData);
+            cacheInsertData.put(param, paramData);
         }
+
+        this.cache.insert(coordinates, cacheInsertData);
+        SaveLoad.save(this.cache, "weather_cache.json");
 
         return resultMap;
     }

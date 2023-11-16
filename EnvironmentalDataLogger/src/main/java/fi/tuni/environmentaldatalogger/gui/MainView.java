@@ -83,7 +83,7 @@ public class MainView {
             this.chartGrid = grid;
             chartsPane.getChildren().add(grid);
 
-            //SaveLoad.load(grid, "save1.json");
+            SaveLoad.load(grid, "save1.json");
 
             Button test = new Button("View");
             test.setOnAction(actionEvent -> {
@@ -104,21 +104,21 @@ public class MainView {
             MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
         }
 
-    // update temperature label every 10 minutes
+        // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
-        @Override
-        public void run() {
-            updateTemperatureLabel();
-        }
-    }, 0, 600000);
+            @Override
+            public void run() {
+                updateTemperatureLabel();
+            }
+            }, 0, 600000);
 
-    // update time and date labels every second
+        // update time and date labels every second
         clockTimer.scheduleAtFixedRate(new TimerTask() {
-        @Override
-        public void run() {
-            updateTime();
-        }
-    }, 0, 1000);
+            @Override
+            public void run() {
+                updateTime();
+            }
+        }, 0, 1000);
 
         try {
             currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now().minusDays(5), getCurrentCoords()));

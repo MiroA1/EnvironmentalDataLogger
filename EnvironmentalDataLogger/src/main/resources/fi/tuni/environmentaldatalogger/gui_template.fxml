@@ -45,7 +45,7 @@
                <HBox.margin>
                    <Insets top="50.0" />
                </HBox.margin>
-               <Label fx:id="temperatureLabel" text="+- Deg °C">
+               <Label fx:id="temperatureLabel" text="0 °C">
                    <font>
                        <Font size="48.0" />
                    </font>

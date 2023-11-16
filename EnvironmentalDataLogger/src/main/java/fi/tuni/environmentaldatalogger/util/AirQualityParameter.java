@@ -5,23 +5,25 @@ package fi.tuni.environmentaldatalogger.util;
  */
 public enum AirQualityParameter {
     // Currently used air quality parameters, open-meteo
-    SO2("SO2","Sulphur dioxide", "sulphur_dioxide"),
-    NO2("NO2","Nitrogen dioxide", "nitrogen_dioxide"),
-    O3("O3","Ozone", "ozone"),
-    CO("CO","Carbon monoxide", "carbon_monoxide"),
-    PM10("PM10","Particulate matter, diameter 10µm", "pm10"),
-    PM2_5("PM2.5","Particulate matter, diameter 2.5µm", "pm2_5"),
+    SO2("SO2","Sulphur dioxide", "sulphur_dioxide", "µg/m³"),
+    NO2("NO2","Nitrogen dioxide", "nitrogen_dioxide", "µg/m³"),
+    O3("O3","Ozone", "ozone", "µg/m³"),
+    CO("CO","Carbon monoxide", "carbon_monoxide", "µg/m³"),
+    PM10("PM10","Particulate matter, diameter 10µm", "pm10", "µg/m³"),
+    PM2_5("PM2.5","Particulate matter, diameter 2.5µm", "pm2_5", "µg/m³"),
     AIR_QUALITY_INDEX("AQI","European Air Quality Index (AQI)",
-            "european_aqi");
+            "european_aqi", "");
 
     private final String abbreviation;
     private final String name;
     private final String queryWord;
+    private final String unit;
 
-    AirQualityParameter(String abbreviation, String name, String queryWord) {
+    AirQualityParameter(String abbreviation, String name, String queryWord, String unit) {
         this.abbreviation = abbreviation;
         this.name = name;
         this.queryWord = queryWord;
+        this.unit = unit;
     }
     public String getAbbreviation(){
         return abbreviation;
@@ -31,6 +33,9 @@ public enum AirQualityParameter {
     }
     public String getQueryWord(){
         return queryWord;
+    }
+    public String getUnit(){
+        return unit;
     }
 
     public static AirQualityParameter fromName(String name) {

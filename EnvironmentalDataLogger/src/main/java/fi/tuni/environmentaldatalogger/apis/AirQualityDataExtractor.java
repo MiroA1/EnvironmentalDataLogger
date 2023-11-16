@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.apis;
 
+import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.AirQualityParameter;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.util.Pair;
@@ -28,7 +29,7 @@ public class AirQualityDataExtractor implements DataExtractor {
      * Returns an instance of the Air Quality data extractor
      * @return AirQualityDataExtractor instance
      */
-    public static AirQualityDataExtractor getInstance() {
+    public static synchronized AirQualityDataExtractor getInstance() {
         if (instance == null) {
             instance = new AirQualityDataExtractor();
         }
@@ -49,62 +50,17 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     /**
      * Return valid time range for the data
-     * @param param the parameter of interest
+     * @param params the parameter of interest
      * @return valid time range as Date pair
      */
     @Override
-    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param) {
+    public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
         // TODO: TimeZone changes? Current API provides timestamps in GMT+0 -> https://open-meteo.com/en/docs/air-quality-api
         // For now allow only 3-day forecast; if longer period is allowed, json parsing must be improved
         LocalDateTime upperLimit = LocalDateTime.now().plusDays(MAX_FORECAST_DAYS);
         return new Pair<>(OLDEST_ENTRY, upperLimit);
     }
 
-    /**
-     * Return the data in map form
-     * @param param the parameter of interest
-     * @param range the time range for the data
-     * @param coordinates the coordinates of the place
-     * @return map of data, <Date, Double>
-     */
-    @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range,
-                                         Coordinate coordinates) {
-        /*
-        String latitude = "61.29,56.8";     // placeholder for now. TODO: Replace with coordinates, once class is implemented
-        String longitude = "23.47,13.63";   // placeholder for now
-        String url = constructApiUrl(latitude,longitude, range.getKey(),range.getValue());
-        System.out.print(url);
-        boolean validParam = false;
-        String queryWord = "";
-        for (AirQualityParameter ap : AirQualityParameter.values()){
-            if (ap.getAbbreviation().equals(param)){
-                validParam = true;
-                queryWord = ap.getQueryWord();
-                url = url + "&" + PARAMETERS + ap.getQueryWord();
-                break;
-            }
-        }
-        if (!validParam) {
-          //  throw new Exception("Invalid parameter!");
-            return null;
-        }
-        return fetchData(url, queryWord);
-
-         */
-        return null;
-    }
-
-    /**
-     * Return all available data within the given parameter
-     * @param param parameter which is queried
-     * @param coordinates coordinates of the place
-     * @return data in map form <Date, Double>
-     */
-    @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) {
-        return null;
-    }
 
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime,
@@ -128,7 +84,7 @@ public class AirQualityDataExtractor implements DataExtractor {
             for (AirQualityParameter ap : AirQualityParameter.values()){
                 if (ap.getAbbreviation().equals(param)){
 
-                    var cachedData = this.cache.get(coordinates, param, range, margin);
+                    var cachedData = this.cache.get(coordinates, param, range, margin, margin);
 
                     if (cachedData != null) {
                         data.put(param, cachedData);
@@ -147,11 +103,10 @@ public class AirQualityDataExtractor implements DataExtractor {
             }
         }
 
-        System.out.println(url);
-
         if (!queryWords.isEmpty()) {
             var apiData = fetchData(url.toString(), queryWords);
             cache.insert(coordinates, apiData);
+            SaveLoad.save(this.cache, "air_quality_cache.json");
             data.putAll(apiData);
         }
 
@@ -194,7 +149,11 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     @Override
     public String getUnit(String param) {
-        // TODO: add proper units
+        for (AirQualityParameter ap : AirQualityParameter.values()){
+            if (ap.getAbbreviation().equals(param)){
+                return ap.getUnit();
+            }
+        }
         return "";
     }
 
@@ -331,6 +290,8 @@ public class AirQualityDataExtractor implements DataExtractor {
     private AirQualityDataExtractor() {
         this.httpClient = new OkHttpClient();
         this.cache = new ApiCache();
+
+        SaveLoad.load(this.cache, "air_quality_cache.json");
     }
 
     private final OkHttpClient httpClient;

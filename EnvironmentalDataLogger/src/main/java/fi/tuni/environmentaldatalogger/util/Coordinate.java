@@ -30,7 +30,17 @@ public record Coordinate(double latitude, double longitude) {
         }
     }
 
+    public boolean isCloseEnoughTo(Coordinate another) {
+
+        if (another == null) {
+            return false;
+        }
+
+        return Math.abs(latitude - another.latitude) < 0.001 && Math.abs(longitude - another.longitude) < 0.001;
+    }
+
     public String toString() {
         return String.format("%.4f° N; %.4f° E", latitude, longitude);
     }
+
 }

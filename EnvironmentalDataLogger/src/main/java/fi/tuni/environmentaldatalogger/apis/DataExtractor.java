@@ -20,28 +20,10 @@ public interface DataExtractor {
     /**
      * Returns the time range available for data of given parameter.
      *
-     * @param param
+     * @param params
      * @return
      */
-    Pair<LocalDateTime, LocalDateTime> getValidDataRange(String param);
-
-    /**
-     * Returns data for a given parameter within specified time range.
-     *
-     * @param param
-     * @param range
-     * @return
-     */
-    TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range,
-                                           Coordinate coordinates) throws ApiException;
-
-    /**
-     * Returns all available data for a given parameter.
-     *
-     * @param param
-     * @return
-     */
-    TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) throws ApiException;
+    Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params);
 
     /**
      * Returns data for a givens parameters within specified time range.
