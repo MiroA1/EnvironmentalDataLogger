@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.DataExtractor;
 import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
+import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
 import javafx.scene.chart.*;
@@ -288,6 +289,21 @@ public class Presenter {
         }
 
         return result;
+    }
+
+    /**
+     * Converts an address to coordinates.
+     *
+     * @param address The address to convert.
+     * @return The coordinates of the address, or null if unable to convert.
+     */
+    public Coordinate getCoordinatesFromAddress(String address) {
+        try {
+            return GeocodingService.getInstance().getCoordinates(address);
+        } catch (Exception e) {
+            //TODO: Handle exceptions
+            return null;
+        }
     }
 
 }
