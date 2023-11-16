@@ -137,12 +137,13 @@ public class Presenter {
             if (dateMap != null) {
                 for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
                     String dateString = innerEntry.getKey().format(formatter);
-                    series.getData().add(new XYChart.Data<>(dateString, innerEntry.getValue()));
                 }
             }
             series.setName(paramFormatted + " " + api.getUnit(param));
             lineChart.getData().add(series);
         }
+
+
 
         return lineChart;
     }

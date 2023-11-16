@@ -2,6 +2,7 @@ package fi.tuni.environmentaldatalogger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.gui.ChartGrid;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
 import fi.tuni.environmentaldatalogger.gui.NotificationBar;
@@ -135,6 +136,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
                 updateTime();
             }
         }, 0, 1000);
+
+        currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now().minusDays(5), getCurrentCoords()));
 
     }
 
