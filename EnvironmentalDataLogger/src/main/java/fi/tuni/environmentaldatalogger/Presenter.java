@@ -1,10 +1,13 @@
 package fi.tuni.environmentaldatalogger;
 
 import fi.tuni.environmentaldatalogger.util.TimeUtils;
+import fi.tuni.environmentaldatalogger.apis.ApiException;
+import fi.tuni.environmentaldatalogger.gui.MainView;
 import javafx.scene.Node;
 import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.DataExtractor;
 import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
+import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.gui.CoordinateDialog;
 import javafx.scene.chart.*;
@@ -45,6 +48,8 @@ public class Presenter {
 
         weatherAPIs = new ArrayList<>();
         weatherAPIs.add(WeatherDataExtractor.getInstance());
+
+        MainView.getInstance();
     }
 
     public ArrayList<String> getValidParameters() {
@@ -118,13 +123,15 @@ public class Presenter {
      * @param coordinates coordinates for the geographic location of data
      * @return line chart of the given parameters
      */
-    public LineChart<Number, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+
+    public LineChart<Number, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) throws ApiException {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> datamap = new TreeMap<>();
 
         /*
         for (String param : params) {
-            TreeMap<LocalDateTime, Double> result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
+
+            result = WeatherDataExtractor.getInstance().getData(param, range, coordinates);
             datamap.put(param, result);
         }
 
@@ -314,12 +321,13 @@ public class Presenter {
      * @param coordinates coordinates for the geographic location of data
      * @return pie chart containing data of supplied parameters
      */
-    public PieChart getDataAsPieChart(ArrayList<String> params, LocalDateTime date, Coordinate coordinates) {
+    public PieChart getDataAsPieChart(ArrayList<String> params, LocalDateTime date, Coordinate coordinates) throws
+            ApiException {
 
         Pair<LocalDateTime, LocalDateTime> range = new Pair<>(date, date);
+        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap;
 
-        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap = AirQualityDataExtractor.getInstance().
-                                                                        getData(params, range, coordinates);
+        dataMap = AirQualityDataExtractor.getInstance().getData(params, range, coordinates);
 
         PieChart pieChart = new PieChart();
 /*        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -360,10 +368,12 @@ public class Presenter {
      * @param coordinates
      * @return TreeMap where key: parameter, value: value + unit (e.g. "20.1 °C")
      */
-    public TreeMap<String, String> getCurrentData(ArrayList<String> params, Coordinate coordinates) {
+    public TreeMap<String, String> getCurrentData(ArrayList<String> params, Coordinate coordinates)
+            throws ApiException {
 
         var api = weatherAPIs.get(0);
-        TreeMap<String, Double> currentData = api.getCurrentData(params, coordinates);
+        TreeMap<String, Double> currentData;
+        currentData = api.getCurrentData(params, coordinates);
 
         TreeMap<String, String> result = new TreeMap<>();
 
@@ -393,5 +403,20 @@ public class Presenter {
             }
 
             return result;
+    }
+
+    /**
+     * Converts an address to coordinates.
+     *
+     * @param address The address to convert.
+     * @return The coordinates of the address, or null if unable to convert.
+     */
+    public Coordinate getCoordinatesFromAddress(String address) {
+        try {
+            return GeocodingService.getInstance().getCoordinates(address);
+        } catch (Exception e) {
+            //TODO: Handle exceptions
+            return null;
+        }
     }
 }

@@ -63,8 +63,8 @@ public class AirQualityDataExtractor implements DataExtractor {
 
 
     @Override
-    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range,
-                                                  Coordinate coordinates) {
+    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime,
+            LocalDateTime> range, Coordinate coordinates) throws ApiException {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> data = new TreeMap<>();
 
@@ -114,7 +114,7 @@ public class AirQualityDataExtractor implements DataExtractor {
     }
 
     @Override
-    public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) {
+    public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException {
 
         String latitude = String.valueOf(coordinates.latitude());
         String longitude = String.valueOf(coordinates.longitude());
@@ -196,8 +196,9 @@ public class AirQualityDataExtractor implements DataExtractor {
      * @param params the parameter which is queried
      * @return data as a Treemap (Date,Double)
      */
-    private TreeMap<String, TreeMap<LocalDateTime, Double>> fetchData(String apiUrl, ArrayList<String> params) {
-        TreeMap<String, TreeMap<LocalDateTime, Double>> airQualityData = new TreeMap<>();
+    private TreeMap<String, TreeMap<LocalDateTime, Double>> fetchData(String apiUrl, ArrayList<String> params)
+            throws ApiException {
+        TreeMap<String, TreeMap<LocalDateTime, Double>> airQualityData;
         Request request = new Request.Builder().url(apiUrl).build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -205,16 +206,19 @@ public class AirQualityDataExtractor implements DataExtractor {
                 String responseBody = response.body().string();
                 airQualityData = parseAirQualityData(responseBody, params);
             } else {
-                System.err.println("Unexpected response code: " + response.code());
+                throw new ApiException("Received unexpected response code " + response.code() +
+                        " from API server. Unable to fetch data.",
+                          ApiException.ErrorCode.INVALID_RESPONSE);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ApiException("Failed to connect to API server. Check internet connection.",
+                      ApiException.ErrorCode.CONNECTION_ERROR);
         }
         return airQualityData;
     }
 
-    private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) {
-        TreeMap<String, Double> airQualityData = new TreeMap<>();
+    private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) throws ApiException {
+        TreeMap<String, Double> airQualityData;
         Request request = new Request.Builder().url(apiUrl).build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -222,16 +226,20 @@ public class AirQualityDataExtractor implements DataExtractor {
                 String responseBody = response.body().string();
                 airQualityData = parseCurrentAirQualityData(responseBody, params);
             } else {
-                System.err.println("Unexpected response code: " + response.code());
+                throw new ApiException("Received unexpected response code " + response.code() +
+                        " from air quality server. Unable to fetch data.",
+                        ApiException.ErrorCode.INVALID_RESPONSE);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ApiException("Failed to connect to air quality server. Check the internet connection.",
+                    ApiException.ErrorCode.CONNECTION_ERROR);
         }
 
         return airQualityData;
     }
 
-    private TreeMap<String, TreeMap<LocalDateTime, Double>> parseAirQualityData(String json, ArrayList<String> params) {
+    private TreeMap<String, TreeMap<LocalDateTime, Double>> parseAirQualityData(String json, ArrayList<String> params)
+            throws ApiException {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> airQualityData = new TreeMap<>();
 
@@ -253,12 +261,13 @@ public class AirQualityDataExtractor implements DataExtractor {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new ApiException("Error in parsing the data.", ApiException.ErrorCode.PARSE_ERROR);
         }
         return airQualityData;
     }
 
-    private TreeMap<String, Double> parseCurrentAirQualityData(String json, ArrayList<String> params) {
+    private TreeMap<String, Double> parseCurrentAirQualityData(String json, ArrayList<String> params)
+            throws ApiException {
 
         TreeMap<String, Double> airQualityData = new TreeMap<>();
 
@@ -270,7 +279,7 @@ public class AirQualityDataExtractor implements DataExtractor {
                 airQualityData.put(AirQualityParameter.fromQueryWord(param).getAbbreviation(), paramValue);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new ApiException("Error in parsing the data.", ApiException.ErrorCode.PARSE_ERROR);
         }
         return airQualityData;
     }
@@ -308,7 +317,7 @@ public class AirQualityDataExtractor implements DataExtractor {
     ================================================
 
     private static final String API_BASE_URL = "https://opendata.fmi.fi/wfs?s" +
-    "ervice=WFS&version=2.0.0&request=GetFeature&storedquery_id=fmi::" +
+    "service=WFS&version=2.0.0&request=GetFeature&storedquery_id=fmi::" +
     "observations::airquality::hourly::timevaluepair";
     private static final String START = "&starttime=";
     private static final String ENDTIME = "&endtime=";

@@ -16,6 +16,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 // TODO: separate forecast and history caches
 
@@ -25,7 +26,7 @@ import java.util.concurrent.locks.Lock;
 public class ApiCache implements Saveable, Loadable {
 
     HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache = new HashMap<>();
-    Lock lock;
+    Lock lock = new ReentrantLock();
 
     public ApiCache() {
 
@@ -138,9 +139,9 @@ public class ApiCache implements Saveable, Loadable {
             result.put(key, subMap.get(key));
         }
 
-        lock.unlock();
+        //System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
 
-        System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
+        lock.unlock();
         return result;
 
     }

@@ -6,12 +6,14 @@ import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
+import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -54,12 +56,14 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     public HBox headerHBox;
     @FXML
     public ComboBox<String> chartTypeSelector;
-    public Button coordinateDialogButton;
     @FXML
     public Label coordinateLabel;
     private final RemoveChartButton removeButton;
 
     private Coordinate selectedCoordinates;
+    @FXML
+    public TextField locationTextField;
+
 
     public ChartViewerElement(int column, int row, RemoveChartButton removeButton) throws IOException {
 
@@ -131,10 +135,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         });
 
         lineChartSelected();
-
-        coordinateDialogButton.setOnAction(event -> {
-            launchCoordinateDialog();
-        });
 
         loadButton.fire();
     }
@@ -273,45 +273,58 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     }
 
     private void loadLineChart() {
-        ArrayList<String> params = new ArrayList<>();
 
-        for (var item : parameterSelector.getContextMenu().getItems()) {
-            if (((CheckMenuItem) item).isSelected()) {
-                params.add(item.getText());
+        String location = locationTextField.getText();
+        Coordinate coords = null;
+        if (!location.isEmpty()) {
+            coords = presenter.getCoordinatesFromAddress(location);
+            if (coords != null) {
+                selectedCoordinates = coords;
+                coordinateLabel.setText("Coordinates: " + coords.toString());
+            } else {
+                coordinateLabel.setText("Coordinates: Not found");
+                return;
             }
+        } else {
+            coords = MainView.getCurrentCoords(); // Default coordinates or previously selected
         }
 
-        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
+        ArrayList<String> params = getSelectedParameters();
+        chartBox.getChildren().clear();
 
-        var lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
-
-
-        AnchorPane.setTopAnchor(lc, 10.0);
-        AnchorPane.setLeftAnchor(lc, 0.0);
-        AnchorPane.setRightAnchor(lc, 0.0);
-        AnchorPane.setBottomAnchor(lc, 0.0);
-
-        lc.setPrefHeight(500);
-        //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
-
-        chartBox.getChildren().add(lc);
+        try {
+            LineChart<Number, Number> lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
+            AnchorPane.setTopAnchor(lc, 10.0);
+            AnchorPane.setLeftAnchor(lc, 0.0);
+            AnchorPane.setRightAnchor(lc, 0.0);
+            AnchorPane.setBottomAnchor(lc, 0.0);
+            lc.setPrefHeight(500);
+            chartBox.getChildren().add(lc);
+        } catch (ApiException e) {
+            MainView.notificationBar.pushAlertNotification(e.getMessage());
+        }
     }
 
     private void loadPieChart() {
 
         Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
-        var pc = presenter.getDataAsPieChart(presenter.getValidAirQualityParameters(), LocalDateTime.now(), coords);
 
-        AnchorPane.setTopAnchor(pc, 10.0);
-        AnchorPane.setLeftAnchor(pc, 0.0);
-        AnchorPane.setRightAnchor(pc, 0.0);
-        AnchorPane.setBottomAnchor(pc, 0.0);
+        try {
+            var pc = presenter.getDataAsPieChart(presenter.getValidAirQualityParameters(), LocalDateTime.now(), coords);
 
-        pc.setPrefHeight(500);
-        pc.setPrefWidth(500);
-        //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
+            AnchorPane.setTopAnchor(pc, 10.0);
+            AnchorPane.setLeftAnchor(pc, 0.0);
+            AnchorPane.setRightAnchor(pc, 0.0);
+            AnchorPane.setBottomAnchor(pc, 0.0);
 
-        chartBox.getChildren().add(pc);
+            pc.setPrefHeight(500);
+            pc.setPrefWidth(500);
+
+            chartBox.getChildren().add(pc);
+        } catch (ApiException e) {
+            MainView.notificationBar.pushAlertNotification(e.getMessage());
+        }
+
     }
 
     @Override
@@ -322,15 +335,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     @Override
     public int getRow() {
         return row;
-    }
-
-    private void launchCoordinateDialog() {
-        CoordinateDialog dialog = new CoordinateDialog();
-        dialog.showAndWait().ifPresent(coordinate -> {
-            System.out.println("Selected Coordinate: " + coordinate);
-            selectedCoordinates = coordinate;
-            coordinateLabel.setText("Coordinates: " + coordinate.toString());
-        });
     }
 
     public String getJson() {

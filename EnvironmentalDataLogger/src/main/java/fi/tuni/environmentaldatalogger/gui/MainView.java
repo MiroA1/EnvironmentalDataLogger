@@ -1,6 +1,7 @@
 package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.util.Location;
@@ -35,7 +36,7 @@ public class MainView {
     public Label dateLabel;
     public AnchorPane currentDataPane;
     public Label notificationLabel;
-    public NotificationBar notificationBar;
+    public static NotificationBar notificationBar;
 
     private static MainView instance;
     public static MainView getInstance() {
@@ -75,6 +76,7 @@ public class MainView {
         initInfoButton();
         initNotificationBar();
 
+        // TODO: add an own init function for the chart grid, to improve readability
         try {
             var grid = new ChartGrid();
             this.chartGrid = grid;
@@ -97,9 +99,8 @@ public class MainView {
             AnchorPane.setRightAnchor(test, 5.0);
 
             chartsPane.getChildren().add(test);
-        } catch (
-        IOException e) {
-            throw new RuntimeException(e);
+        } catch ( IOException e) {
+            MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
         }
 
         // update temperature label every 10 minutes
@@ -185,11 +186,6 @@ public class MainView {
         //        notificationBar.pushAlertNotification("Info button pressed!");
         //    });
 
-        infoButton.setOnAction(actionEvent -> {
-            //chartGrid.save();
-            SaveLoad.save(chartGrid, "save1.json");
-        });
-
         Group svg = new Group(
                 createPath(INFO_CIRCLE_PATH, "black", "black"),
                 createPath(INFO_I_PATH, "black", "gray")
@@ -207,8 +203,13 @@ public class MainView {
     }
 
     private void updateTemperatureLabel() {
-        String str = Presenter.getInstance().getCurrentData(new ArrayList<>(List.of("temperature")), getCurrentCoords()).get("temperature");
-        Platform.runLater(() -> temperatureLabel.setText(str));
+        try {
+            String str = Presenter.getInstance().getCurrentData(new ArrayList<>(List.of("temperature")),
+                            getCurrentCoords()).get("temperature");
+            Platform.runLater(() -> temperatureLabel.setText(str));
+        } catch (ApiException e) {
+            notificationBar.pushAlertNotification(e.getMessage());
+        }
     }
 
     private void updateTime() {
