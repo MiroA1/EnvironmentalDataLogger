@@ -48,7 +48,8 @@ public class WeatherDataExtractor implements DataExtractor {
     }
 
     @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public TreeMap<LocalDateTime, Double> getData(String param, Pair<LocalDateTime, LocalDateTime> range,
+                                                  Coordinate coordinates) throws ApiException {
         ArrayList<String> params = new ArrayList<>();
         params.add(param);
         TreeMap<String, TreeMap<LocalDateTime, Double>> combinedData = getData(params, range, coordinates);
@@ -56,13 +57,15 @@ public class WeatherDataExtractor implements DataExtractor {
     }
 
     @Override
-    public TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) {
+    public TreeMap<LocalDateTime, Double> getData(String param, Coordinate coordinates) throws ApiException {
         Pair<LocalDateTime, LocalDateTime> range = getValidDataRange(param);
         return getData(param, range, coordinates);
     }
 
     @Override
-    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) {
+    public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params,
+                                                                   Pair<LocalDateTime, LocalDateTime> range,
+                                                                   Coordinate coordinates) throws ApiException {
         String apiUrl = constructApiUrl(coordinates, range.getKey(), range.getValue(), params, false);
         TreeMap<LocalDateTime, TreeMap<String, Double>> fetchedData = fetchDataMultipleParams(apiUrl, params);
 
@@ -79,7 +82,7 @@ public class WeatherDataExtractor implements DataExtractor {
     }
 
     @Override
-    public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) {
+    public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException {
         String apiUrl = constructApiUrl(coordinates, LocalDateTime.now(), LocalDateTime.now(), params, true);
         TreeMap<String, Double> currentData = fetchCurrentData(apiUrl, params);
         return currentData;
@@ -129,7 +132,9 @@ public class WeatherDataExtractor implements DataExtractor {
         return apiUrl.toString();
     }
 
-    private TreeMap<LocalDateTime, TreeMap<String, Double>> fetchDataMultipleParams(String apiUrl, ArrayList<String> params) {
+    private TreeMap<LocalDateTime, TreeMap<String, Double>> fetchDataMultipleParams(String apiUrl,
+                                                                                    ArrayList<String> params)
+                                                                                    throws ApiException {
         TreeMap<LocalDateTime, TreeMap<String, Double>> weatherData = new TreeMap<>();
         Request request = new Request.Builder().url(apiUrl).build();
 
@@ -139,15 +144,18 @@ public class WeatherDataExtractor implements DataExtractor {
                 System.out.println(responseBody);
                 weatherData = parseWeatherDataMultipleParams(responseBody, params);
             } else {
-                System.err.println("Unexpected response code: " + response.code());
+                throw new ApiException("Received unexpected response code " + response.code() +
+                        " from weather server. Unable to fetch data.",
+                        ApiException.ErrorCode.INVALID_RESPONSE);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ApiException("Failed to connect to weather server. Check the internet connection.",
+                    ApiException.ErrorCode.CONNECTION_ERROR);
         }
         return weatherData;
     }
 
-    private TreeMap<LocalDateTime, TreeMap<String, Double>> parseWeatherDataMultipleParams(String json, ArrayList<String> params) {
+    private TreeMap<LocalDateTime, TreeMap<String, Double>> parseWeatherDataMultipleParams(String json, ArrayList<String> params) throws ApiException {
         TreeMap<LocalDateTime, TreeMap<String, Double>> weatherData = new TreeMap<>();
 
         try {
@@ -177,7 +185,7 @@ public class WeatherDataExtractor implements DataExtractor {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ApiException("Error in parsing the weather data.", ApiException.ErrorCode.PARSE_ERROR);
         }
         return weatherData;
     }
@@ -196,7 +204,7 @@ public class WeatherDataExtractor implements DataExtractor {
 
 
 
-    private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) {
+    private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) throws ApiException {
         TreeMap<String, Double> currentData = new TreeMap<>();
         Request request = new Request.Builder().url(apiUrl).build();
 
@@ -205,27 +213,29 @@ public class WeatherDataExtractor implements DataExtractor {
                 String responseBody = response.body().string();
                 currentData = parseCurrentWeatherData(responseBody, params);
             } else {
-                System.err.println("Unexpected response code: " + response.code());
+                throw new ApiException("Received unexpected response code " + response.code() +
+                        " from weather server. Unable to fetch data.",
+                        ApiException.ErrorCode.INVALID_RESPONSE);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ApiException("Failed to connect to weather server. Check the internet connection.",
+                                    ApiException.ErrorCode.CONNECTION_ERROR);
         }
         return currentData;
     }
 
 
-    private LocalDateTime parseDate(String datetime) {
+    private LocalDateTime parseDate(String datetime) throws ApiException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date date = dateFormat.parse(datetime);
             return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
+            throw new ApiException("Error in parsing the data.", ApiException.ErrorCode.PARSE_ERROR);
         }
     }
 
-    private TreeMap<String, Double> parseCurrentWeatherData(String json, ArrayList<String> params) {
+    private TreeMap<String, Double> parseCurrentWeatherData(String json, ArrayList<String> params) throws ApiException {
         TreeMap<String, Double> currentData = new TreeMap<>();
 
         try {
@@ -241,7 +251,7 @@ public class WeatherDataExtractor implements DataExtractor {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ApiException("Error in parsing the current weather data.", ApiException.ErrorCode.PARSE_ERROR);
         }
         return currentData;
     }
