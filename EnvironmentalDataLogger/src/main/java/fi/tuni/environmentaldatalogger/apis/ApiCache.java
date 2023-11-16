@@ -139,7 +139,7 @@ public class ApiCache implements Saveable, Loadable {
             result.put(key, subMap.get(key));
         }
 
-        //System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
+        System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
 
         lock.unlock();
         return result;
