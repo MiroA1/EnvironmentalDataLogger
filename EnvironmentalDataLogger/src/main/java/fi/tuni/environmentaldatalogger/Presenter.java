@@ -143,6 +143,7 @@ public class Presenter {
             if (dateMap != null) {
                 for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
                     String dateString = innerEntry.getKey().format(formatter);
+                    series.getData().add(new XYChart.Data<>(dateString, innerEntry.getValue()));
                 }
             }
             series.setName(paramFormatted + " " + api.getUnit(param));
@@ -212,8 +213,6 @@ public class Presenter {
             } else if (sliceValue >= 200) {
                 sliceNode.setStyle("-fx-pie-color: #b5468b");
             }
-        } else if (sliceName.equals("Rest")) {
-            sliceNode.setStyle("-fx-pie-color: #00B6FE");
         } else {
             sliceNode.setStyle("-fx-pie-color: #FF0000");
         }
@@ -253,16 +252,14 @@ public class Presenter {
             }
         }
 
-        double restValue = 1.0 - totalValue;
+/*        double restValue = 1.0 - totalValue;
         PieChart.Data rest = new PieChart.Data("Rest", restValue);
-        pieChart.getData().add(rest);
+        pieChart.getData().add(rest);*/
 
 
         for (PieChart.Data slice : pieChart.getData()) {
             setSliceColor(slice);
         }
-
-        // TODO: Missä SO2?
 
         pieChart.setLegendVisible(false);
 

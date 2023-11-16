@@ -1,6 +1,7 @@
 package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
@@ -119,7 +120,14 @@ public class MainView {
         }
     }, 0, 1000);
 
-}
+        try {
+            currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now().minusDays(5), getCurrentCoords()));
+        } catch (ApiException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
 
     /**
      *  Initializes a notification bar
