@@ -53,12 +53,14 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     public HBox headerHBox;
     @FXML
     public ComboBox<String> chartTypeSelector;
-    public Button coordinateDialogButton;
     @FXML
     public Label coordinateLabel;
     private final RemoveChartButton removeButton;
 
     private Coordinate selectedCoordinates;
+    @FXML
+    public TextField locationTextField;
+
 
     public ChartViewerElement(int column, int row, RemoveChartButton removeButton) throws IOException {
 
@@ -128,12 +130,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         });
 
         lineChartSelected();
-
-        coordinateDialogButton.setOnAction(event -> {
-            //load();
-            //save();
-            launchCoordinateDialog();
-        });
 
         loadButton.fire();
     }
@@ -239,35 +235,35 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     }
 
     private void loadChart() {
-        ArrayList<String> params = new ArrayList<>();
-
-        for (var item : parameterSelector.getContextMenu().getItems()) {
-            if (((CheckMenuItem) item).isSelected()) {
-                params.add(item.getText());
+        String location = locationTextField.getText();
+        Coordinate coords = null;
+        if (!location.isEmpty()) {
+            coords = presenter.getCoordinatesFromAddress(location);
+            if (coords != null) {
+                selectedCoordinates = coords;
+                coordinateLabel.setText("Coordinates: " + coords.toString());
+            } else {
+                coordinateLabel.setText("Coordinates: Not found");
+                return;
             }
+        } else {
+            coords = MainView.getCurrentCoords(); // Default coordinates or previously selected
         }
 
+        ArrayList<String> params = getSelectedParameters();
         chartBox.getChildren().clear();
 
-        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
-        LineChart<String, Number> lc = null;
         try {
-            lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
+            LineChart<String, Number> lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
+            AnchorPane.setTopAnchor(lc, 10.0);
+            AnchorPane.setLeftAnchor(lc, 0.0);
+            AnchorPane.setRightAnchor(lc, 0.0);
+            AnchorPane.setBottomAnchor(lc, 0.0);
+            lc.setPrefHeight(500);
+            chartBox.getChildren().add(lc);
         } catch (ApiException e) {
-            MainView.getInstance();
             MainView.notificationBar.pushAlertNotification(e.getMessage());
         }
-
-
-        AnchorPane.setTopAnchor(lc, 10.0);
-        AnchorPane.setLeftAnchor(lc, 0.0);
-        AnchorPane.setRightAnchor(lc, 0.0);
-        AnchorPane.setBottomAnchor(lc, 0.0);
-
-        lc.setPrefHeight(500);
-        //lc.prefHeightProperty().bind(Bindings.createDoubleBinding(() -> lc.getWidth() / 2, lc.widthProperty()));
-
-        chartBox.getChildren().add(lc);
     }
 
     @Override
@@ -278,15 +274,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     @Override
     public int getRow() {
         return row;
-    }
-
-    private void launchCoordinateDialog() {
-        CoordinateDialog dialog = new CoordinateDialog();
-        dialog.showAndWait().ifPresent(coordinate -> {
-            System.out.println("Selected Coordinate: " + coordinate);
-            selectedCoordinates = coordinate;
-            coordinateLabel.setText("Coordinates: " + coordinate.toString());
-        });
     }
 
     public String getJson() {

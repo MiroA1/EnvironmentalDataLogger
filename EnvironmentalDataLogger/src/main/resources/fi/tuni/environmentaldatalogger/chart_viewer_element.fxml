@@ -13,6 +13,8 @@
       spacing="10">
     <HBox fx:id="headerHBox" spacing="40">
         <HBox fx:id="optionsHBox" spacing="10">
+            <TextField fx:id="locationTextField" promptText="Enter location" />
+            <Label fx:id="coordinateLabel" text="Coordinates: Not Set" />
             <HBox.margin>
                 <Insets left="20"/>
             </HBox.margin>
@@ -24,8 +26,6 @@
 
             </ComboBox>
             <CustomDateRangePicker fx:id="customRangePicker" />
-            <Button fx:id="coordinateDialogButton" text="Set Coordinates" />
-            <Label fx:id="coordinateLabel" text="Coordinates: Not Set" />
         </HBox>
         <HBox fx:id="confirmHBox" spacing="10">
             <Button fx:id="loadButton" text="Load"/>
