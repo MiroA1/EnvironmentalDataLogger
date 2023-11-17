@@ -9,6 +9,9 @@ import javafx.util.Pair;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * A class for picking a custom date range.
+ */
 public class CustomDateRangePicker extends HBox {
 
     DatePicker startDatePicker = new DatePicker();
@@ -16,6 +19,9 @@ public class CustomDateRangePicker extends HBox {
 
     private final Pair<LocalDate, LocalDate> DEFAULT_RANGE = new Pair<>(LocalDate.now().minusDays(7), LocalDate.now().plusDays(7));
 
+    /**
+     * Constructor for CustomDateRangePicker.
+     */
     public CustomDateRangePicker() {
 
         this.setSpacing(10);
@@ -41,14 +47,28 @@ public class CustomDateRangePicker extends HBox {
         this.getChildren().addAll(startDatePicker, endDatePicker);
     }
 
+    /**
+     * Returns the start date of the date picker.
+     * @return start date of the date picker
+     */
     public LocalDateTime getStartDate() {
         return startDatePicker.getValue().atStartOfDay();
     }
 
+    /**
+     * Returns the end date of the date picker.
+     * @return end date of the date picker
+     */
     public LocalDateTime getEndDate() {
         return endDatePicker.getValue().atStartOfDay();
     }
 
+    /**
+     * Returns a Callback for DatePicker day cell factory that disables dates not in range.
+     * @param minDate minimum date
+     * @param maxDate maximum date
+     * @return Callback for DatePicker day cell factory
+     */
     private Callback<DatePicker, DateCell> getDayCellFactory(LocalDate minDate, LocalDate maxDate) {
         return datePicker -> new DateCell() {
             @Override
@@ -63,10 +83,18 @@ public class CustomDateRangePicker extends HBox {
         };
     }
 
+    /**
+     * Returns the selected range of the date picker.
+     * @return range of the date picker
+     */
     public Pair<LocalDateTime, LocalDateTime> getRange() {
         return new Pair<>(this.getStartDate(), this.getEndDate());
     }
 
+    /**
+     * Forcibly sets the selected range of the date picker.
+     * @param range range to set
+     */
     public void setRange(Pair<LocalDateTime, LocalDateTime> range) {
 
         Pair<LocalDate, LocalDate> dayRange = new Pair<>(range.getKey().toLocalDate(), range.getValue().toLocalDate());

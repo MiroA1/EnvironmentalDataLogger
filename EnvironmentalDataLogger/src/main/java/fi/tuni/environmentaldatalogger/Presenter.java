@@ -50,6 +50,10 @@ public class Presenter {
         MainView.getInstance();
     }
 
+    /**
+     * Returns all valid parameters available in the APIs.
+     * @return list of valid parameters
+     */
     public ArrayList<String> getValidParameters() {
 
         TreeSet<String> params = new TreeSet<>();
@@ -61,6 +65,10 @@ public class Presenter {
         return new ArrayList<>(params);
     }
 
+    /**
+     * Returns all valid parameters available in the weather APIs.
+     * @return list of valid parameters
+     */
     public ArrayList<String> getValidWeatherParameters() {
 
         HashSet<String> params = new HashSet<>();
@@ -72,6 +80,10 @@ public class Presenter {
         return new ArrayList<>(params);
     }
 
+    /**
+     * Returns all valid parameters available in the air quality APIs.
+     * @return list of valid parameters
+     */
     public ArrayList<String> getValidAirQualityParameters() {
 
         HashSet<String> params = new HashSet<>();
@@ -85,8 +97,8 @@ public class Presenter {
 
     /**
      * Returns the maximum range of data available for the given set of parameters.
-     * @param params
-     * @return
+     * @param params parameters to be checked
+     * @return Pair where key: start date, value: end date
      */
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
 
@@ -350,8 +362,8 @@ public class Presenter {
 
     /**
      * Return the current (or most recent available) values and units of supplied parameters as string.
-     * @param params
-     * @param coordinates
+     * @param params parameters to fetch data for
+     * @param coordinates coordinates for the geographic location of data
      * @return TreeMap where key: parameter, value: value + unit (e.g. "20.1 °C")
      */
     public TreeMap<String, String> getCurrentData(ArrayList<String> params, Coordinate coordinates)
@@ -370,6 +382,12 @@ public class Presenter {
         return result;
     }
 
+    /**
+     * Distributes parameters to the APIs that can provide data for them.
+     * Used for deciding which API to use for each parameter.
+     * @param params parameters to be distributed
+     * @return HashMap where key: API, value: list of parameters
+     */
     private HashMap<DataExtractor, ArrayList<String>> matchParamsAndAPIs(ArrayList<String> params) {
 
             HashMap<DataExtractor, ArrayList<String>> result = new HashMap<>();

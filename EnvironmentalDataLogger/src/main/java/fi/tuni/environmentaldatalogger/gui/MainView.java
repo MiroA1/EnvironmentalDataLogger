@@ -136,18 +136,33 @@ public class MainView {
         notificationBar = new NotificationBar(notificationLabel);
     }
 
+    /**
+     * Returns the current location as coordinates.
+     * @return current location as coordinates
+     */
     public static Coordinate getCurrentCoords() {
         return currentLocation.getCoordinates();
     }
 
-    private static SVGPath createPath(String d, String fill, String hoverFill) {
+    // TODO: move to an utility class?
+    /**
+     * Creates an SVGPath with the given parameters.
+     * @param pathString SVG path string
+     * @param fill fill color
+     * @param hoverFill hover fill color
+     * @return SVGPath
+     */
+    private static SVGPath createPath(String pathString, String fill, String hoverFill) {
         SVGPath path = new SVGPath();
         path.getStyleClass().add("svg");
-        path.setContent(d);
+        path.setContent(pathString);
         path.setStyle("-fill:" + fill + ";-hover-fill:" + hoverFill + ';');
         return path;
     }
 
+    /**
+     * Launches a dialog for selecting a location.
+     */
     private void launchCoordinateDialog() {
 
         CoordinateDialog dialog = new CoordinateDialog();
@@ -163,6 +178,9 @@ public class MainView {
         });
     }
 
+    /**
+     * Initializes the exit button.
+     */
     private void initExitButton() {
         exitButton.setOnAction(actionEvent -> {
             Platform.exit();
@@ -187,6 +205,9 @@ public class MainView {
         exitButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 
+    /**
+     * Initializes the info button.
+     */
     private void initInfoButton() {
 
         // Uncomment to test the notification bar!
@@ -210,6 +231,9 @@ public class MainView {
         infoButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 
+    /**
+     * Updates the temperature label with current data.
+     */
     private void updateTemperatureLabel() {
         try {
             String str = Presenter.getInstance().getCurrentData(new ArrayList<>(List.of("temperature")),
@@ -220,6 +244,9 @@ public class MainView {
         }
     }
 
+    /**
+     * Updates the time and date labels.
+     */
     private void updateTime() {
         // TODO: change to time of location
         // clock format to hh:mm

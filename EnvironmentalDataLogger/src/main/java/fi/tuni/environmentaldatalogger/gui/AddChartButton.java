@@ -7,12 +7,21 @@ import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
 
+/**
+ * Button for adding a chart to a ChartGrid.
+ */
 public class AddChartButton extends Button implements GridElement {
 
     private final int row;
     private final int column;
     private final ChartGrid parent;
 
+    /**
+     * Constructor for AddChartButton.
+     * @param column column index
+     * @param row row index
+     * @param parent parent grid
+     */
     public AddChartButton(int column, int row, ChartGrid parent) {
 
         super("+");

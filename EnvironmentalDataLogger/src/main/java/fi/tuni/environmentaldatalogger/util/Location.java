@@ -8,26 +8,44 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+/**
+ * A class for representing a location on Earth.
+ */
 public class Location {
 
     private final String name;
     private final String countryCode;
     private final Coordinate coordinates;
 
+    /**
+     * Creates a new Location object.
+     * @param name name of the location
+     * @param countryCode country code of the location
+     * @param coordinates coordinates of the location
+     */
     public Location(String name, String countryCode, Coordinate coordinates) {
         this.name = name;
         this.coordinates = coordinates;
         this.countryCode = countryCode;
     }
 
+    /**
+     * Returns the name of the location.
+     * @return name of the location
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the coordinates of the location.
+     * @return coordinates of the location
+     */
     public Coordinate getCoordinates() {
         return coordinates;
     }
 
+    @Override
     public String toString() {
         if (name.equals("")) {
             return coordinates.toString();
@@ -36,6 +54,12 @@ public class Location {
         }
     }
 
+    /**
+     * Creates a Location object based on the given coordinates using a reverse geocoding API.
+     * @param coordinates coordinates of the location
+     * @return Location object
+     * @throws IOException if an I/O error occurs
+     */
     public static Location fromCoordinates(Coordinate coordinates) throws IOException {
 
         double lat = coordinates.latitude();
@@ -56,6 +80,12 @@ public class Location {
         return new Location(placeName, countryCode, coordinates);
     }
 
+    /**
+     * Creates a Location object based on the given place name using a geocoding API.
+     * @param placeName place name
+     * @return Location object
+     * @throws IOException if an I/O error occurs
+     */
     public static Location fromPlaceName(String placeName) throws IOException {
         String urlstring = "http://api.openweathermap.org/geo/1.0/direct?q=" + placeName + "&limit=1&appid=07d06bd23d2396085f4b5fc56085fe7b";
 
