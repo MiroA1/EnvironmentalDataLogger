@@ -34,11 +34,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     private final List<String> RANGES = List.of("Last 14 days", "Last 7 days", "Last 3 days", "Last 24 hours",
             "Next 24 hours", "Next 3 days", "Next 7 days", "Next 14 days", "Custom");
 
-    // TODO: remember to change this
     Presenter presenter = Presenter.getInstance();
 
-    private int column;
-    private int row;
+    private final int column;
+    private final int row;
     
     @FXML
     public AnchorPane chartBox;
@@ -65,6 +64,13 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     public TextField locationTextField;
 
 
+    /**
+     * Constructor for ChartViewerElement.
+     * @param column Column of the element in the ChartGrid.
+     * @param row Row of the element in the ChartGrid.
+     * @param removeButton Button that removes this element from the ChartGrid.
+     * @throws IOException If the FXML file cannot be loaded.
+     */
     public ChartViewerElement(int column, int row, RemoveChartButton removeButton) throws IOException {
 
         this.removeButton = removeButton;
@@ -76,12 +82,18 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         this.getChildren().add(fxmlLoader.load());
     }
 
+    /**
+     * Sets the element to view mode, hiding the options bar.
+     */
     public void viewMode() {
         headerHBox.setVisible(false);
         headerHBox.setManaged(false);
         this.setStyle("-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;");
     }
 
+    /**
+     * Sets the element to edit mode, showing the options bar.
+     */
     public void editMode() {
         headerHBox.setVisible(true);
         headerHBox.setManaged(true);
@@ -139,6 +151,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         loadButton.fire();
     }
 
+    /**
+     * Updates options bar to show the correct options for a line chart.
+     */
     private void lineChartSelected() {
 
         this.rangeSelector.setVisible(true);
@@ -158,6 +173,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         updateRangePicker();
     }
 
+
+    /**
+     * Updates options bar to show the correct options for a pie chart.
+     */
     private void pieChartSelected() {
         this.rangeSelector.setVisible(false);
         this.rangeSelector.setManaged(false);
@@ -169,6 +188,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         this.parameterSelector.setManaged(false);
     }
 
+    /**
+     * Updates the range picker to show options that valid for current parameters.
+     */
     private void updateRangePicker() {
 
         var validRanges = getValidRanges();
@@ -194,6 +216,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         updateCustomRangePicker();
     }
 
+    /**
+     * Updates the custom range picker to be visible/invisible and to show a valid range.
+     */
     private void updateCustomRangePicker() {
         if (Objects.equals(rangeSelector.getValue(), "Custom")) {
             customRangePicker.setVisible(true);
@@ -205,6 +230,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         }
     }
 
+    /**
+     * Returns a list of valid ranges for the current parameters as String.
+     * @return List of valid ranges as String.
+     */
     private List<String> getValidRanges() {
 
         List<String> validRanges = new ArrayList<>(RANGES);
@@ -226,6 +255,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         return validRanges;
     }
 
+    /**
+     * Returns the selected parameters.
+     * @return List of selected parameters.
+     */
     private ArrayList<String> getSelectedParameters() {
 
         ArrayList<String> selectedParameters = new ArrayList<>();
@@ -239,11 +272,20 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         return selectedParameters;
     }
 
+    /**
+     * Returns the selected range.
+     * @return Pair of LocalDateTime objects representing the selected range.
+     */
     private Pair<LocalDateTime, LocalDateTime> getSelectedRange() {
 
         return getRange(rangeSelector.getValue());
     }
 
+    /**
+     * Returns a range as a Pair of LocalDateTime objects based on a String description.
+     * @param rangeDescription String description of the range.
+     * @return Pair of LocalDateTime objects representing the range.
+     */
     private Pair<LocalDateTime, LocalDateTime> getRange(String rangeDescription) {
 
         LocalDateTime now = LocalDateTime.now();
@@ -261,6 +303,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         };
     }
 
+    /**
+     * Loads a chart based on the current options.
+     */
     private void loadChart() {
 
         chartBox.getChildren().clear();
@@ -272,6 +317,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         }
     }
 
+    /**
+     * Loads a line chart based on the current options.
+     */
     private void loadLineChart() {
 
         String location = locationTextField.getText();
@@ -280,9 +328,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
             coords = presenter.getCoordinatesFromAddress(location);
             if (coords != null) {
                 selectedCoordinates = coords;
-                coordinateLabel.setText("Coordinates: " + coords.toString());
+                coordinateLabel.setText("Coords: " + coords.toString());
             } else {
-                coordinateLabel.setText("Coordinates: Not found");
+                coordinateLabel.setText("Coords: Not found");
                 return;
             }
         } else {
@@ -305,6 +353,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         }
     }
 
+    /**
+     * Loads a pie chart based on the current options.
+     */
     private void loadPieChart() {
 
         Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
@@ -337,12 +388,21 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         return row;
     }
 
+    /**
+     * Returns a JSON that can be used to save current options.
+     * @return JSON as String.
+     */
     public String getJson() {
         Gson gson = new Gson();
         SaveData saveData = new SaveData(chartTypeSelector.getValue(), rangeSelector.getValue(), getSelectedParameters(), selectedCoordinates);
         return gson.toJson(saveData);
     }
 
+    /**
+     * Loads options from a JSON.
+     * @param json JSON as String.
+     * @return True if successful, false otherwise.
+     */
     public boolean loadFromJson(String json) {
 
         Gson gson = new Gson(); //new GsonBuilder().registerTypeAdapter(Coordinate.class, new CoordinateDeserializer()).create();
@@ -366,7 +426,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         selectedCoordinates = saveData.coordinates;
 
         String selectedCoordinatesString = selectedCoordinates != null ? selectedCoordinates.toString() : "Not Set";
-        coordinateLabel.setText("Coordinates: " + selectedCoordinatesString);
+        coordinateLabel.setText("Coords: " + selectedCoordinatesString);
 
         if (chartTypeSelector.getValue().equals("Line chart")) {
             lineChartSelected();
@@ -380,6 +440,13 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         return true;
     }
 
+    /**
+     * Private class used to save options.
+     * @param chartType Type of the chart.
+     * @param range Range used for data query.
+     * @param parameters Parameters used for data query.
+     * @param coordinates Coordinates used for data query.
+     */
     private record SaveData(String chartType, String range, ArrayList<String> parameters, Coordinate coordinates) {
     }
 }

@@ -6,12 +6,23 @@ import fi.tuni.environmentaldatalogger.gui.ChartGrid;
 
 import java.io.*;
 
+/**
+ * A class for saving and loading objects to/from JSON files.
+ */
 public class SaveLoad {
 
+    /**
+     * Saves a Saveable object to a JSON file.
+     * @param saveable object to save
+     * @param filename name of the file
+     */
     public static void save(Saveable saveable, String filename) {
         String folderName = "saves";
         File folder = new File(folderName);
-        folder.mkdir();
+
+        if (folder.mkdir()) {
+            System.out.println("Created folder " + folderName);
+        }
 
         String filepath = folder.getAbsolutePath() + "/" + filename;
 
@@ -22,6 +33,12 @@ public class SaveLoad {
         }
     }
 
+    /**
+     * Loads a Loadable object from a JSON file.
+     * @param loadable object to load
+     * @param filename name of the file
+     * @return true if successful, false otherwise
+     */
     public static boolean load(Loadable loadable, String filename) {
 
         String filePath = "saves/" + filename;

@@ -2,12 +2,21 @@ package fi.tuni.environmentaldatalogger.gui;
 
 import javafx.scene.control.Button;
 
+/**
+ * Button for removing a chart from a ChartGrid.
+ */
 public class RemoveChartButton extends Button {
 
     private final int row;
     private final int column;
     private final ChartGrid parent;
 
+    /**
+     * Constructor for RemoveChartButton.
+     * @param column column index
+     * @param row row index
+     * @param parent parent grid
+     */
     public RemoveChartButton(int column, int row, ChartGrid parent) {
 
         super("X");

@@ -17,7 +17,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.time.format.DateTimeFormatter;
 
-
+/**
+ * WeatherDataExtractor class implements DataExtractor interface to fetch weather data from an API.
+ * It handles fetching both current and historical weather data, cache management, and data formatting.
+ */
 public class WeatherDataExtractor implements DataExtractor {
     private static final String API_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
     private static final String API_KEY = "NAJZYGFDHA4GEA5QXD7S4TZSL";
@@ -27,6 +30,10 @@ public class WeatherDataExtractor implements DataExtractor {
 
     private final ApiCache cache;
 
+    /**
+     * Private constructor for WeatherDataExtractor.
+     * Initializes the HTTP client and loads the cache from a saved state if available.
+     */
     private WeatherDataExtractor() {
         this.httpClient = new OkHttpClient();
         this.cache = new ApiCache();
@@ -34,6 +41,12 @@ public class WeatherDataExtractor implements DataExtractor {
         SaveLoad.load(this.cache, "weather_cache.json");
     }
 
+    /**
+     * Gets the singleton instance of WeatherDataExtractor.
+     * If the instance does not exist, it is created.
+     *
+     * @return The single instance of WeatherDataExtractor.
+     */
     public static synchronized WeatherDataExtractor getInstance() {
         if (instance == null) {
             instance = new WeatherDataExtractor();
@@ -120,6 +133,16 @@ public class WeatherDataExtractor implements DataExtractor {
         }
     }
 
+    /**
+     * Constructs the API URL for the weather data request.
+     *
+     * @param coordinates The geographical coordinates for the weather data.
+     * @param startDate The start date for the data range.
+     * @param endDate The end date for the data range.
+     * @param params The parameters for which data is requested.
+     * @param getCurrent Flag to determine if current data is being fetched.
+     * @return Constructed API URL as a String.
+     */
     private String constructApiUrl(Coordinate coordinates, LocalDateTime startDate, LocalDateTime endDate, ArrayList<String> params, boolean getCurrent) {
         StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
         apiUrl.append(coordinates.latitude()).append(",").append(coordinates.longitude());
@@ -152,6 +175,14 @@ public class WeatherDataExtractor implements DataExtractor {
         return apiUrl.toString();
     }
 
+    /**
+     * Fetches weather data for multiple parameters from the API.
+     *
+     * @param apiUrl The URL to fetch the weather data from.
+     * @param params A list of parameters to fetch data for.
+     * @return A TreeMap mapping LocalDateTime to another TreeMap mapping parameter names to their values.
+     * @throws ApiException If there is an error in the API call.
+     */
     private TreeMap<LocalDateTime, TreeMap<String, Double>> fetchDataMultipleParams(String apiUrl,
                                                                                     ArrayList<String> params)
                                                                                     throws ApiException {
@@ -175,6 +206,14 @@ public class WeatherDataExtractor implements DataExtractor {
         return weatherData;
     }
 
+    /**
+     * Parses weather data for multiple parameters from a JSON response.
+     *
+     * @param json The JSON string containing weather data.
+     * @param params The parameters included in the JSON data.
+     * @return A TreeMap mapping LocalDateTime to another TreeMap mapping parameter names to their values.
+     * @throws ApiException If there is an error in parsing the JSON data.
+     */
     private TreeMap<LocalDateTime, TreeMap<String, Double>> parseWeatherDataMultipleParams(String json, ArrayList<String> params) throws ApiException {
         TreeMap<LocalDateTime, TreeMap<String, Double>> weatherData = new TreeMap<>();
 
@@ -210,6 +249,13 @@ public class WeatherDataExtractor implements DataExtractor {
         return weatherData;
     }
 
+    /**
+     * Extracts parameter values from a JSONObject.
+     *
+     * @param dataObject The JSONObject containing weather data.
+     * @param params The list of parameters to extract.
+     * @return A TreeMap mapping parameter names to their values.
+     */
     private TreeMap<String, Double> extractParams(JSONObject dataObject, ArrayList<String> params) {
         TreeMap<String, Double> data = new TreeMap<>();
         for (String param : params) {
@@ -222,8 +268,14 @@ public class WeatherDataExtractor implements DataExtractor {
         return data;
     }
 
-
-
+    /**
+     * Fetches current weather data from the API.
+     *
+     * @param apiUrl The URL to fetch the current weather data from.
+     * @param params A list of parameters to fetch data for.
+     * @return A TreeMap mapping parameter names to their current values.
+     * @throws ApiException If there is an error in the API call.
+     */
     private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) throws ApiException {
         TreeMap<String, Double> currentData = new TreeMap<>();
         Request request = new Request.Builder().url(apiUrl).build();
@@ -244,7 +296,13 @@ public class WeatherDataExtractor implements DataExtractor {
         return currentData;
     }
 
-
+    /**
+     * Parses a date from a string.
+     *
+     * @param datetime The date string to parse.
+     * @return The parsed LocalDateTime object.
+     * @throws ApiException If there is an error in parsing the date.
+     */
     private LocalDateTime parseDate(String datetime) throws ApiException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -255,6 +313,14 @@ public class WeatherDataExtractor implements DataExtractor {
         }
     }
 
+    /**
+     * Parses current weather data from a JSON string.
+     *
+     * @param json The JSON string containing current weather data.
+     * @param params The parameters included in the JSON data.
+     * @return A TreeMap mapping parameter names to their current values.
+     * @throws ApiException If there is an error in parsing the JSON data.
+     */
     private TreeMap<String, Double> parseCurrentWeatherData(String json, ArrayList<String> params) throws ApiException {
         TreeMap<String, Double> currentData = new TreeMap<>();
 

@@ -21,16 +21,13 @@ import java.util.concurrent.locks.ReentrantLock;
 // TODO: separate forecast and history caches
 
 /**
- * A very crude caching solution for API data.
+ * A fairly crude caching solution for API data. Thread-safe.
  */
 public class ApiCache implements Saveable, Loadable {
 
     HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache = new HashMap<>();
     Lock lock = new ReentrantLock();
 
-    public ApiCache() {
-
-    }
 
     /**
      * Inserts data into cache.
@@ -44,7 +41,7 @@ public class ApiCache implements Saveable, Loadable {
         }
 
         // just nuke the entire thing if it gets too big, partial deletion has its own problems, not worth the time
-        if (getCacheSize() > 10000) {
+        if (getCacheSize() > 20000) {
             System.out.println("Cache deleted");
             cache.clear();
         }
@@ -69,12 +66,14 @@ public class ApiCache implements Saveable, Loadable {
     }
 
     /**
-     * Returns data from cache. Returns null if the whole data is not in cache.
-     * @param location
-     * @param param
-     * @param range
-     * @param margin
-     * @return
+     * Returns data from cache.
+     * Returns null if the cache does not contain data for the whole range (even if part of it is available).
+     * @param location location to get data for
+     * @param param parameter to get data for
+     * @param range range of data to get
+     * @param margin margin include in addition to the range
+     * @param resolution resolution required for the data
+     * @return data from cache
      */
     public TreeMap<LocalDateTime, Double> get(Coordinate location, String param, Pair<LocalDateTime, LocalDateTime> range, Duration margin, Duration resolution) {
 
@@ -146,6 +145,12 @@ public class ApiCache implements Saveable, Loadable {
 
     }
 
+    /**
+     * Returns the location key for the given location if it exists.
+     * Coordinates with only slight differences are considered identical.
+     * @param location location as coordinates
+     * @return location key if it exists, null otherwise
+     */
     private Coordinate getLocationKey(Coordinate location) {
 
         if (!cache.containsKey(location)) {
@@ -161,6 +166,10 @@ public class ApiCache implements Saveable, Loadable {
         return null;
     }
 
+    /**
+     * Returns the size of the cache.
+     * @return size of the cache
+     */
     private int getCacheSize() {
 
         int size = 0;
@@ -171,10 +180,13 @@ public class ApiCache implements Saveable, Loadable {
             }
         }
 
-
         return size;
     }
 
+    /**
+     * Returns cache as JSON string.
+     * @return cache as JSON string
+     */
     @Override
     public String getJson() {
 
@@ -189,6 +201,11 @@ public class ApiCache implements Saveable, Loadable {
         return result;
     }
 
+    /**
+     * Loads cache from JSON string.
+     * @param json JSON string
+     * @return true if successful, false otherwise
+     */
     @Override
     public boolean loadFromJson(String json) {
 
@@ -216,6 +233,10 @@ public class ApiCache implements Saveable, Loadable {
         return true;
     }
 
+    /**
+     * Tries to acquire the cache lock, gives up after one second.
+     * @return true if the lock was acquired, false otherwise
+     */
     private boolean getLock() {
 
         try {
@@ -234,6 +255,10 @@ public class ApiCache implements Saveable, Loadable {
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(
             LocalDateTime.class, new LocalDateTimeAdapter()).enableComplexMapKeySerialization().create();
 
+    /**
+     * A class for saving the cache.
+     * @param cache cache to be saved
+     */
     private record SaveData(HashMap<Coordinate, TreeMap<String, TreeMap<LocalDateTime, Double>>> cache) {
     }
 }

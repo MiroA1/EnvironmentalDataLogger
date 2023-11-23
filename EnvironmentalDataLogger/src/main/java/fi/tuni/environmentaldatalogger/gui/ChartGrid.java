@@ -1,6 +1,7 @@
 package fi.tuni.environmentaldatalogger.gui;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
 import javafx.collections.ObservableList;
@@ -20,6 +21,11 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
     private boolean expandCharts = true;
 
 
+    /**
+     * Creates a new ChartGrid.
+     *
+     * @throws IOException if an error occurs while loading the FXML file associated with ChartViewerElement.
+     */
     public ChartGrid() throws IOException {
         super();
 
@@ -45,6 +51,11 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return grid.get(0).size();
     }
 
+    /**
+     * Checks if the given column is empty.
+     * @param column column to check
+     * @return true if the column is empty, false otherwise
+     */
     private boolean columnIsEmpty(int column) {
 
         for (int i = 0; i < getGridRowCount(); ++i) {
@@ -56,6 +67,11 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return true;
     }
 
+    /**
+     * Checks if the given row is empty.
+     * @param row row to check
+     * @return true if the row is empty, false otherwise
+     */
     private boolean rowIsEmpty(int row) {
 
         for (int i = 0; i < getGridColumnCount(); ++i) {
@@ -67,7 +83,12 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return true;
     }
 
-
+    /**
+     * Removes the chart at the given position and removes extra AddButtons.
+     * @param column column of the chart
+     * @param row row of the chart
+     * @return true if the chart was removed, false otherwise
+     */
     public boolean removeChart(int column, int row) {
 
         if (!(grid.get(column).get(row) instanceof ChartViewerElement)) {
@@ -83,6 +104,11 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return removed;
     }
 
+    /**
+     * Removes an element from the grid.
+     * @param node element to remove
+     * @return true if the element was removed, false otherwise
+     */
     private boolean removeChild(GridElement node) {
 
         if (node == null) {
@@ -108,11 +134,23 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return true;
     }
 
+    /**
+     * Removes an element from the grid, based on its position.
+     * @param column column of the element
+     * @param row row of the element
+     * @return true if the element was removed, false otherwise
+     */
     private boolean removeChild(int column, int row) {
 
         return removeChild(grid.get(column).get(row));
     }
 
+    /**
+     * Removes an AddChartButton from the grid, based on its position.
+     * @param column column
+     * @param row row
+     * @return true if the button was removed, false otherwise
+     */
     private boolean removeButton(int column, int row) {
 
         if (!(grid.get(column).get(row) instanceof AddChartButton)) {
@@ -122,6 +160,11 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return removeChild(column, row);
     }
 
+    /**
+     * Adds a chart to the grid, replacing whatever existing element was at the position.
+     * Also updates the grid to reflect the change, adding new columns, rows and AddChartButtons as necessary.
+     * @param chart chart to add
+     */
     public void addChart(ChartViewerElement chart) {
 
         int column = chart.getColumn();
@@ -141,6 +184,11 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         addButtons();
     }
 
+    /**
+     * Replaces an element in the grid with another element.
+     * @param node element to add
+     * @return true if the element was replaced, false otherwise
+     */
     private boolean replaceChild(GridElement node) {
 
         int column = node.getColumn();
@@ -159,6 +207,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return true;
     }
 
+    /**
+     * Removes empty columns and rows from the grid.
+     */
     private void trimEmpty() {
 
         for (int i = getGridColumnCount() - 1; i >= 0; --i) {
@@ -176,6 +227,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Removes AddChartButtons that do not have a ChartViewerElement neighbour.
+     */
     private void trimButtons() {
 
         for (var pos : getExtraAddButtonPositions()) {
@@ -183,6 +237,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Adds AddChartButtons to the grid to all positions that have a neighboring ChartViewerElement.
+     */
     private void addButtons() {
 
         for (var pos : getFreePositions()) {
@@ -190,7 +247,10 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
-    // get all positions in the grid that are null and have at least one neighbour that is a ChartViewerElement
+    /**
+     * Returns all positions in the grid that are null and have at least one neighbour that is a ChartViewerElement.
+     * @return list of positions
+     */
     private ArrayList<Pair<Integer, Integer>> getFreePositions() {
 
         ArrayList<Pair<Integer, Integer>> freePositions = new ArrayList<>();
@@ -227,7 +287,10 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return freePositions;
     }
 
-    // get all positions in the grid that contain an AddChartButton that does not have a ChartViewerElement neighbour
+    /**
+     * Returns all positions in the grid that contain an AddChartButton that does not have a ChartViewerElement neighbour.
+     * @return list of positions
+     */
     private ArrayList<Pair<Integer, Integer>> getExtraAddButtonPositions() {
 
         ArrayList<Pair<Integer, Integer>> addButtonPositions = new ArrayList<>();
@@ -266,7 +329,10 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return addButtonPositions;
     }
 
-    // Get all positions in the grid that contain a ChartViewerElement with an AddChartButton to the left. The ChartViewerElement must be located at least 2 columns away from the right edge of the grid.
+    /**
+     * Returns all positions in the grid that contain a ChartViewerElement with an AddChartButton to the right.
+     * @return list of positions
+     */
     public ArrayList<Pair<Integer, Integer>> getDoubleChartPositions() {
 
         ArrayList<Pair<Integer, Integer>> chartPositions = new ArrayList<>();
@@ -293,6 +359,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return chartPositions;
     }
 
+    /**
+     * Turns on edit mode for the grid.
+     */
     public void editMode() {
         showButtons();
 
@@ -309,6 +378,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Turns on view mode for the grid.
+     */
     public void viewMode() {
         hideButtons();
 
@@ -327,6 +399,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Hides all AddChartButtons (used for view mode).
+     */
     private void hideButtons() {
         ObservableList<Node> children = this.getChildren();
 
@@ -338,6 +413,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Shows all AddChartButtons (used for edit mode).
+     */
     private void showButtons() {
         ObservableList<Node> children = this.getChildren();
 
@@ -349,6 +427,10 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Returns the grid as a JSON string (used for saving the grid).
+     * @return JSON string
+     */
     @Override
     public String getJson() {
 
@@ -375,65 +457,81 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         return gson.toJson(saveData);
     }
 
+    /**
+     * Loads the grid from a JSON string.
+     * @param json JSON string
+     * @return true if the grid was loaded successfully, false otherwise
+     */
     @Override
     public boolean loadFromJson(String json) {
 
-            Gson gson = new Gson();
-            SaveData saveData = gson.fromJson(json, SaveData.class);
+        Gson gson = new Gson();
+        SaveData saveData;
 
-            if (saveData == null) {
+        try {
+            saveData = gson.fromJson(json, SaveData.class);
+        } catch (JsonSyntaxException e) {
+            return false;
+        }
+
+        if (saveData == null) {
                 return false;
-            }
+        }
 
-            ArrayList<ArrayList<String>> saveGrid = saveData.grid();
+        ArrayList<ArrayList<String>> saveGrid = saveData.grid();
 
-            int n = saveGrid.size();
-            int m = saveGrid.get(0).size();
+        int n = saveGrid.size();
+        int m = saveGrid.get(0).size();
 
-            ArrayList<ArrayList<GridElement>> emptyGrid = new ArrayList<>(n);
+        ArrayList<ArrayList<GridElement>> emptyGrid = new ArrayList<>(n);
 
-            for (int i = 0; i < n; i++) {
-                ArrayList<GridElement> row = new ArrayList<>(Collections.nCopies(m, null));
-                emptyGrid.add(row);
-            }
+        for (int i = 0; i < n; i++) {
+            ArrayList<GridElement> row = new ArrayList<>(Collections.nCopies(m, null));
+            emptyGrid.add(row);
+        }
 
-            this.grid = emptyGrid;
-            this.getChildren().clear();
+        this.grid = emptyGrid;
+        this.getChildren().clear();
 
-            for (int i = 0; i < saveGrid.size(); ++i) {
-                for (int j = 0; j < saveGrid.get(i).size(); ++j) {
-                    if (saveGrid.get(i).get(j) == null) {
-                        continue;
-                    } else if (saveGrid.get(i).get(j).equals("AddChartButton")) {
-                        continue;
-                    } else {
+        for (int i = 0; i < saveGrid.size(); ++i) {
+            for (int j = 0; j < saveGrid.get(i).size(); ++j) {
+                if (saveGrid.get(i).get(j) == null) {
+                    continue;
+                } else if (saveGrid.get(i).get(j).equals("AddChartButton")) {
+                    continue;
+                } else {
 
-                        ChartViewerElement chart;
+                    ChartViewerElement chart;
 
-                        try {
-                            if (i == 0 && j == 0) {
-                                chart = new ChartViewerElement(i, j, null);
-                            } else {
-                                chart = new ChartViewerElement(i, j, new RemoveChartButton(i, j, this));
-                            }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                    try {
+                        if (i == 0 && j == 0) {
+                            chart = new ChartViewerElement(i, j, null);
+                        } else {
+                            chart = new ChartViewerElement(i, j, new RemoveChartButton(i, j, this));
                         }
-
-
-                        chart.loadFromJson(saveGrid.get(i).get(j));
-                        replaceChild(chart);
+                    } catch (IOException e) {
+                        return false;
                     }
+
+
+                    chart.loadFromJson(saveGrid.get(i).get(j));
+                    replaceChild(chart);
                 }
             }
+        }
 
-            addButtons();
+        addButtons();
 
-            expandCharts = saveData.expandCharts();
+        expandCharts = saveData.expandCharts();
 
-            return true;
+        return true;
     }
 
+    /**
+     * Private class used for saving the grid.
+     * @param grid grid containing JSON representations of the elements
+     * @param expandCharts option to expand charts
+     */
     private record SaveData(ArrayList<ArrayList<String>> grid, boolean expandCharts) {
     }
 }
