@@ -418,7 +418,7 @@ public class Presenter {
         try {
             return GeocodingService.getInstance().getCoordinates(address);
         } catch (Exception e) {
-            //TODO: Handle exceptions
+            //Exceptions handled in GeocodingService class already
             return null;
         }
     }

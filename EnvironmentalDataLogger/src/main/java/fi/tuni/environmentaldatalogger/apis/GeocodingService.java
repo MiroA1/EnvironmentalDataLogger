@@ -45,17 +45,20 @@ public class GeocodingService {
      * @return A Coordinate object containing the latitude and longitude of the location,
      *         or null if no result is found or in case of an error.
      */
-    public Coordinate getCoordinates(String query) {
+    public Coordinate getCoordinates(String query) throws ApiException {
         JOpenCageForwardRequest request = new JOpenCageForwardRequest(query);
-        request.setLimit(1); // get only first result
+        request.setLimit(1);
 
-        JOpenCageResponse response = geocoder.forward(request);
-        if (response != null && !response.getResults().isEmpty()) {
-            JOpenCageLatLng latLng = response.getResults().get(0).getGeometry();
-            return new Coordinate(latLng.getLat(), latLng.getLng());
-        } else {
-            // Handle errors / null
-            return null;
+        try {
+            JOpenCageResponse response = geocoder.forward(request);
+            if (response != null && !response.getResults().isEmpty()) {
+                JOpenCageLatLng latLng = response.getResults().get(0).getGeometry();
+                return new Coordinate(latLng.getLat(), latLng.getLng());
+            } else {
+                throw new ApiException("No results found for the provided location query.", ApiException.ErrorCode.INVALID_RESPONSE);
+            }
+        } catch (Exception e) {
+            throw new ApiException("An error occurred while accessing the geocoding service.", ApiException.ErrorCode.CONNECTION_ERROR);
         }
     }
 }
