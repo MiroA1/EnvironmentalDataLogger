@@ -27,6 +27,7 @@ public class Presenter {
     ArrayList<DataExtractor> airQualityAPIs;
     ArrayList<DataExtractor> weatherAPIs;
 
+
     private static Presenter instance;
 
     public static synchronized Presenter getInstance() {
@@ -85,7 +86,7 @@ public class Presenter {
 
     /**
      * Returns the maximum range of data available for the given set of parameters.
-     * @param params
+     * @param params parameters to get data for
      * @return
      */
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
@@ -348,10 +349,11 @@ public class Presenter {
         return pieChart;
     }
 
+
     /**
      * Return the current (or most recent available) values and units of supplied parameters as string.
-     * @param params
-     * @param coordinates
+     * @param params parameters to get data for
+     * @param coordinates coordinates for the geographic location of data
      * @return TreeMap where key: parameter, value: value + unit (e.g. "20.1 °C")
      */
     public TreeMap<String, String> getCurrentData(ArrayList<String> params, Coordinate coordinates)
