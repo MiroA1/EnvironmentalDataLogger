@@ -1,8 +1,10 @@
 package fi.tuni.environmentaldatalogger;
 
+import fi.tuni.environmentaldatalogger.util.Location;
 import fi.tuni.environmentaldatalogger.util.TimeUtils;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.gui.MainView;
+import fi.tuni.environmentaldatalogger.visualization.TemporalLineChartBuilder;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
@@ -12,6 +14,8 @@ import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.util.Pair;
+
+import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -199,6 +203,42 @@ public class Presenter {
             }
         }
 
+        System.out.println("build");
+        TemporalLineChartBuilder builder = new TemporalLineChartBuilder();
+
+        for (var data : dataMap.entrySet()) {
+            SortedMap<LocalDateTime, Double> subMap = data.getValue().subMap(range.getKey().minusHours(1), range.getValue().plusHours(1));
+            var trimmedData = new TreeMap<>(subMap);
+            builder.addData(data.getKey(), trimmedData, units.get(data.getKey()));
+        }
+
+        builder.setBoundsBasedOnSmallestDataset();
+
+        try {
+            Location loc = Location.fromCoordinates(coordinates);
+            builder.setTitle(loc.getName() + " (" + loc.getCoordinates().toString(2) + ")");
+        } catch (IOException e) {
+            builder.setTitle(coordinates.toString());
+        }
+
+        return builder.getResult();
+
+
+        /*
+        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap = new TreeMap<>();
+
+        var apiMap = matchParamsAndAPIs(params);
+        TreeMap<String, String> units = new TreeMap<>();
+
+        for (DataExtractor api : apiMap.keySet()) {
+            TreeMap<String, TreeMap<LocalDateTime, Double>> result = api.getData(apiMap.get(api), range, coordinates);
+            dataMap.putAll(result);
+
+            for (String param : apiMap.get(api)) {
+                units.put(param, api.getUnit(param));
+            }
+        }
+
         NumberAxis yAxis = new NumberAxis();
         NumberAxis xAxis = new NumberAxis();
 
@@ -241,6 +281,8 @@ public class Presenter {
         }
 
         return lineChart;
+
+         */
     }
 
     /***

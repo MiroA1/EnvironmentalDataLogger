@@ -333,6 +333,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
                 coordinateLabel.setText("Coordinates: Not found");
                 return;
             }
+        } else if (selectedCoordinates != null) {
+            coords = selectedCoordinates;
         } else {
             coords = MainView.getCurrentCoords(); // Default coordinates or previously selected
         }

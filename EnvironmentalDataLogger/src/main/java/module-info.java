@@ -18,4 +18,6 @@ module fi.tuni.environmentaldatalogger {
     opens fi.tuni.environmentaldatalogger.apis to javafx.fxml, com.google.gson;
     exports fi.tuni.environmentaldatalogger.save;
     opens fi.tuni.environmentaldatalogger.save to com.google.gson, javafx.fxml;
+    exports fi.tuni.environmentaldatalogger.visualization;
+    opens fi.tuni.environmentaldatalogger.visualization to javafx.fxml;
 }

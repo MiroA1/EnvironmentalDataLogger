@@ -101,6 +101,7 @@ public class MainView {
 
             chartsPane.getChildren().add(test);
         } catch ( IOException e) {
+            e.printStackTrace();
             MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
         }
 
