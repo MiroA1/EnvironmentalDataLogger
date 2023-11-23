@@ -5,32 +5,30 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import fi.tuni.environmentaldatalogger.gui.CustomDateRangePicker?>
 <?import javafx.geometry.Insets?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="10">
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" spacing="10">
     <HBox fx:id="headerHBox" spacing="40">
         <HBox fx:id="optionsHBox" spacing="10">
-            <TextField fx:id="locationTextField" promptText="Enter location" />
-            <Label fx:id="coordinateLabel" text="Coordinates: Not Set" />
             <HBox.margin>
                 <Insets left="20"/>
             </HBox.margin>
-            <ComboBox fx:id="chartTypeSelector" />
-            <MenuButton fx:id="parameterSelector" text="Select Parameters">
-
-            </MenuButton>
-            <ComboBox fx:id="rangeSelector">
-
-            </ComboBox>
+            <VBox spacing="10">
+                <TextField fx:id="locationTextField" promptText="Enter location" prefWidth="210"/>
+                <Label fx:id="coordinateLabel" text="Coords: Not Set" />
+            </VBox>
+            <VBox spacing="10">
+                <ComboBox fx:id="chartTypeSelector" prefWidth="120" />
+                <MenuButton fx:id="parameterSelector" text="Select Params" prefWidth="120" />
+            </VBox>
+            <ComboBox fx:id="rangeSelector" prefWidth="120" />
             <CustomDateRangePicker fx:id="customRangePicker" />
         </HBox>
-        <HBox fx:id="confirmHBox" spacing="10">
-            <Button fx:id="loadButton" text="Load"/>
+        <HBox fx:id="confirmHBox">
+            <Button fx:id="loadButton" text="Load" />
         </HBox>
-        <HBox HBox.hgrow="ALWAYS"/>
+        <HBox HBox.hgrow="ALWAYS" />
         <HBox fx:id="removeHBox">
             <HBox.margin>
                 <Insets right="10"/>
