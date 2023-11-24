@@ -133,7 +133,7 @@ public class WeatherDataExtractor implements DataExtractor {
             case "feelslike":
                 return "°C";
             case "windspeed":
-                return "m/s";
+                return "km/h";
             default:
                 return "";
         }
@@ -156,6 +156,9 @@ public class WeatherDataExtractor implements DataExtractor {
         ArrayList<String> urlParams = new ArrayList<>(params);
         if(urlParams.contains("temperature")) {
             urlParams.set(urlParams.indexOf("temperature"), "temp");
+        }
+        if(urlParams.contains("feelslike")) {
+            urlParams.set(urlParams.indexOf("feels like"), "feelslike");
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
