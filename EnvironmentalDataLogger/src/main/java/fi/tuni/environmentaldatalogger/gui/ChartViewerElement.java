@@ -53,7 +53,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     @FXML
     public HBox removeHBox;
     @FXML
-    public HBox headerHBox;
+    public VBox headerVBox;
     @FXML
     public ComboBox<String> chartTypeSelector;
     @FXML
@@ -87,8 +87,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
      * Sets the element to view mode, hiding the options bar.
      */
     public void viewMode() {
-        headerHBox.setVisible(false);
-        headerHBox.setManaged(false);
+        headerVBox.setVisible(false);
+        headerVBox.setManaged(false);
         this.setStyle("-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;");
     }
 
@@ -96,8 +96,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
      * Sets the element to edit mode, showing the options bar.
      */
     public void editMode() {
-        headerHBox.setVisible(true);
-        headerHBox.setManaged(true);
+        headerVBox.setVisible(true);
+        headerVBox.setManaged(true);
         this.setStyle("-fx-border-color: transparent;");
     }
 
