@@ -112,6 +112,13 @@ public class ApiCache implements Saveable, Loadable {
 
         SortedMap<LocalDateTime, Double> subMap = data.subMap(TimeUtils.getStartOfDay(range.getKey()), TimeUtils.getEndOfDay(range.getValue()));
 
+        // this is in case there is a gap in the cached data
+        if (subMap.firstKey().isAfter(range.getKey().plus(margin))) {
+            System.out.println("Cache miss: not enough data for " + param + " " + subMap.firstKey() + " " + range.getKey());
+            lock.unlock();
+            return null;
+        }
+
         TreeMap<LocalDateTime, Double> result = new TreeMap<>();
 
         for (var key : subMap.keySet()) {
@@ -138,11 +145,16 @@ public class ApiCache implements Saveable, Loadable {
             result.put(key, subMap.get(key));
         }
 
+        if (result.isEmpty()) {
+            System.out.println("Cache miss: final result empty for " + location + " " + param + " " + range.getKey() + " " + range.getValue() + " " + margin + " " + resolution);
+            lock.unlock();
+            return null;
+        }
+
         System.out.println("Cache hit: " + param + " " + result.size() + " " + result.firstKey() + " " + result.lastKey());
 
         lock.unlock();
         return result;
-
     }
 
     /**

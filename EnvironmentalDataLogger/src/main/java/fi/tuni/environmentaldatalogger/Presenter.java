@@ -13,6 +13,7 @@ import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
+import javafx.scene.layout.Region;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -187,7 +188,7 @@ public class Presenter {
      * @return line chart of the given parameters
      */
 
-    public LineChart<Number, Number> getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) throws ApiException {
+    public Region getDataAsLineChart(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) throws ApiException {
 
         TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap = new TreeMap<>();
 
@@ -203,7 +204,6 @@ public class Presenter {
             }
         }
 
-        System.out.println("build");
         TemporalLineChartBuilder builder = new TemporalLineChartBuilder();
 
         for (var data : dataMap.entrySet()) {
@@ -212,7 +212,8 @@ public class Presenter {
             builder.addData(data.getKey(), trimmedData, units.get(data.getKey()));
         }
 
-        builder.setBoundsBasedOnSmallestDataset();
+        //builder.setBoundsBasedOnSmallestDataset();
+        builder.setBoundsBasedOnLargestDataset();
 
         try {
             Location loc = Location.fromCoordinates(coordinates);
@@ -221,7 +222,12 @@ public class Presenter {
             builder.setTitle(coordinates.toString());
         }
 
-        return builder.getResult();
+        if (dataMap.size() <= 1) {
+            return builder.getResult();
+        } else {
+            return builder.getDoubleAxisResult();
+        }
+        //return builder.getResult();
 
 
         /*

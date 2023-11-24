@@ -17,6 +17,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
@@ -343,7 +344,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         chartBox.getChildren().clear();
 
         try {
-            LineChart<Number, Number> lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
+            Region lc = presenter.getDataAsLineChart(params, getSelectedRange(), coords);
             AnchorPane.setTopAnchor(lc, 10.0);
             AnchorPane.setLeftAnchor(lc, 0.0);
             AnchorPane.setRightAnchor(lc, 0.0);
