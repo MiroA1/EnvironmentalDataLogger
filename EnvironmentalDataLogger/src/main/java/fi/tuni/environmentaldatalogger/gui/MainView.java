@@ -24,7 +24,6 @@ import java.util.*;
 
 public class MainView {
 
-
     public AnchorPane mapPane;
     public Label locationLabel;
     public HBox locationHBox;
@@ -121,12 +120,7 @@ public class MainView {
             }
         }, 0, 1000);
 
-        try {
-            currentDataPane.getChildren().add(Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now().minusDays(5), getCurrentCoords()));
-        } catch (ApiException e) {
-            throw new RuntimeException(e);
-        }
-
+        currentDataPane.getChildren().add(CurrentDataPane.getInstance());
 
     }
 

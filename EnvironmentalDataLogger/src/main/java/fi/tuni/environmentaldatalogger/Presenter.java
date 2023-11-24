@@ -32,6 +32,7 @@ public class Presenter {
     ArrayList<DataExtractor> airQualityAPIs;
     ArrayList<DataExtractor> weatherAPIs;
 
+
     private static Presenter instance;
 
     public static synchronized Presenter getInstance() {
@@ -407,6 +408,7 @@ public class Presenter {
 
         return pieChart;
     }
+
 
     /**
      * Return the current (or most recent available) values and units of supplied parameters as string.
