@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -95,12 +96,36 @@ public class Location {
         Gson gson = new Gson();
         JsonArray arr = gson.fromJson(reader, JsonArray.class);
 
-        JsonObject jo = arr.get(0).getAsJsonObject();
+        try {
+            JsonObject jo = arr.get(0).getAsJsonObject();
 
-        double lat = jo.get("lat").getAsDouble();
-        double lon = jo.get("lon").getAsDouble();
+            String name = jo.get("name").getAsString();
 
-        return new Location(placeName, jo.get("country").getAsString(), new Coordinate(lat, lon));
+            double lat = jo.get("lat").getAsDouble();
+            double lon = jo.get("lon").getAsDouble();
+
+            return new Location(name, jo.get("country").getAsString(), new Coordinate(lat, lon));
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("Invalid place name");
+        }
+
+    }
+
+    public static Location fromIP() throws IOException {
+        String urlstring = "http://ip-api.com/json/";
+
+        URL url = new URL(urlstring);
+
+        InputStreamReader reader = new InputStreamReader(url.openStream());
+        Gson gson = new Gson();
+        JsonObject arr = gson.fromJson(reader, JsonObject.class);
+
+        String name = arr.get("city").getAsString();
+        String countryCode = arr.get("countryCode").getAsString();
+        double lat = arr.get("lat").getAsDouble();
+        double lon = arr.get("lon").getAsDouble();
+
+        return new Location(name, countryCode, new Coordinate(lat, lon));
     }
 
     // TODO: toteutetaan jos ehditään, esim. https://ip-api.com/

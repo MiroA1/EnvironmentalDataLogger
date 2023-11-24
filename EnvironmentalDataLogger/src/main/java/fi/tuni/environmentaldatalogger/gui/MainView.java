@@ -14,6 +14,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
 import java.io.IOException;
@@ -69,8 +70,21 @@ public class MainView {
     Timer clockTimer = new Timer(true);
 
     public void initialize(){
+
+        try {
+            currentLocation = Location.fromIP();
+        } catch (IOException e) {}
+
         locationButton.setOnAction(actionEvent -> launchCoordinateDialog());
         locationLabel.setText(currentLocation.toString());
+        locationLabel.setOnMouseClicked(mouseEvent -> launchCoordinateDialog());
+        locationLabel.hoverProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                locationLabel.setTextFill(Color.GRAY);
+            } else {
+                locationLabel.setTextFill(Color.BLACK);
+            }
+        });
 
         initExitButton();
         initInfoButton();
@@ -104,11 +118,14 @@ public class MainView {
             MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
         }
 
+        currentDataPane.getChildren().add(CurrentDataPane.getInstance());
+
         // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 updateTemperatureLabel();
+                updateCurrentDataPane();
             }
             }, 0, 600000);
 
@@ -119,8 +136,6 @@ public class MainView {
                 updateTime();
             }
         }, 0, 1000);
-
-        currentDataPane.getChildren().add(CurrentDataPane.getInstance());
 
     }
 
@@ -163,13 +178,15 @@ public class MainView {
         CoordinateDialog dialog = new CoordinateDialog();
 
         dialog.showAndWait().ifPresent(result -> {
-            try {
-                currentLocation = Location.fromCoordinates(result);
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if (result == null) {
+                System.out.println("No location selected");
+                return;
             }
+
+            currentLocation = result;
             locationLabel.setText(currentLocation.toString());
+            updateCurrentDataPane();
+            updateTemperatureLabel();
         });
     }
 
@@ -232,7 +249,7 @@ public class MainView {
     private void updateTemperatureLabel() {
         try {
             String str = Presenter.getInstance().getCurrentData(new ArrayList<>(List.of("temperature")),
-                            getCurrentCoords()).get("temperature");
+                            getCurrentCoords()).get("Temperature");
             Platform.runLater(() -> temperatureLabel.setText(str));
         } catch (ApiException e) {
             notificationBar.pushAlertNotification(e.getMessage());
@@ -243,7 +260,7 @@ public class MainView {
      * Updates the time and date labels.
      */
     private void updateTime() {
-        // TODO: change to time of location
+        // TODO: change to time of location ?
         // clock format to hh:mm
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
@@ -253,6 +270,10 @@ public class MainView {
             dateLabel.setText(now.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH) +
                     " " + now.format(dateFormatter));
         });
+    }
+
+    private void updateCurrentDataPane() {
+        Platform.runLater(() -> {/*TODO: update current data pane*/});
     }
 
 }
