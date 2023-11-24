@@ -66,7 +66,7 @@ public class WeatherDataExtractor implements DataExtractor {
         validParameters.add("temperature");
         validParameters.add("humidity");
         validParameters.add("feels like");
-        validParameters.add("windspeed");
+        validParameters.add("wind speed");
         return validParameters;
     }
 
@@ -171,7 +171,7 @@ public class WeatherDataExtractor implements DataExtractor {
                 return "%";
             case "feels like":
                 return "°C";
-            case "windspeed":
+            case "wind speed":
                 return "km/h";
             default:
                 return "";
@@ -198,6 +198,9 @@ public class WeatherDataExtractor implements DataExtractor {
         }
         if(urlParams.contains("feels like")) {
             urlParams.set(urlParams.indexOf("feels like"), "feelslike");
+        }
+        if(urlParams.contains("wind speed")) {
+            urlParams.set(urlParams.indexOf("wind speed"), "windspeed");
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -311,6 +314,8 @@ public class WeatherDataExtractor implements DataExtractor {
                 data.put("temperature", dataObject.getDouble("temp"));
             } else if (param.equals("feels like") && dataObject.has("feelslike")) {
                 data.put("feels like", dataObject.getDouble("feelslike"));
+            } else if (param.equals("wind speed") && dataObject.has("windspeed")) {
+                data.put("wind speed", dataObject.getDouble("windspeed"));
             } else if (dataObject.has(param)) {
                 data.put(param, dataObject.getDouble(param));
             }
@@ -383,6 +388,8 @@ public class WeatherDataExtractor implements DataExtractor {
                     currentData.put("temperature", currentConditions.getDouble("temp"));
                 } else if (param.equals("feels like") && currentConditions.has("feelslike")) {
                     currentData.put("feels like", currentConditions.getDouble("feelslike"));
+                } else if (param.equals("wind speed") && currentConditions.has("windspeed")) {
+                    currentData.put("wind speed", currentConditions.getDouble("windspeed"));
                 } else if (currentConditions.has(param)) {
                     currentData.put(param, currentConditions.getDouble(param));
                 }
