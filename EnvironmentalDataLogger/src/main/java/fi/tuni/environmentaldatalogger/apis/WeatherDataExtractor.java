@@ -59,6 +59,8 @@ public class WeatherDataExtractor implements DataExtractor {
         ArrayList<String> validParameters = new ArrayList<>();
         validParameters.add("temperature");
         validParameters.add("humidity");
+        validParameters.add("feelslike");
+        validParameters.add("windspeed");
         return validParameters;
     }
 
@@ -128,6 +130,10 @@ public class WeatherDataExtractor implements DataExtractor {
                 return "°C";
             case "humidity":
                 return "%";
+            case "feelslike":
+                return "°C";
+            case "windspeed":
+                return "m/s";
             default:
                 return "";
         }
