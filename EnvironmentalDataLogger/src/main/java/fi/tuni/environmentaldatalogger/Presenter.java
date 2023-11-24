@@ -378,7 +378,8 @@ public class Presenter {
         TreeMap<String, String> result = new TreeMap<>();
 
         for (String param : currentData.keySet()) {
-            result.put(param, currentData.get(param) + " " + api.getUnit(param));
+            String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
+            result.put(paramFormatted, currentData.get(param) + " " + api.getUnit(param));
         }
 
         return result;

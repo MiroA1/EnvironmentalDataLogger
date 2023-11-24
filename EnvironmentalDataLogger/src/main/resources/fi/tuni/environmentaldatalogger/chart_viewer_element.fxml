@@ -1,39 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import fi.tuni.environmentaldatalogger.gui.CustomDateRangePicker?>
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" spacing="10">
-    <HBox fx:id="headerHBox" spacing="40">
-        <HBox fx:id="optionsHBox" spacing="10">
-            <HBox.margin>
-                <Insets left="20"/>
-            </HBox.margin>
-            <VBox spacing="10">
-                <TextField fx:id="locationTextField" promptText="Enter location" prefWidth="210"/>
-                <Label fx:id="coordinateLabel" text="Coords: Not Set" />
-            </VBox>
-            <VBox spacing="10">
-                <ComboBox fx:id="chartTypeSelector" prefWidth="120" />
-                <MenuButton fx:id="parameterSelector" text="Select Params" prefWidth="120" />
-            </VBox>
-            <ComboBox fx:id="rangeSelector" prefWidth="120" />
-            <CustomDateRangePicker fx:id="customRangePicker" />
-        </HBox>
-        <HBox fx:id="confirmHBox">
-            <Button fx:id="loadButton" text="Load" />
-        </HBox>
-        <HBox HBox.hgrow="ALWAYS" />
-        <HBox fx:id="removeHBox">
-            <HBox.margin>
-                <Insets right="10"/>
-            </HBox.margin>
-        </HBox>
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="locationTextField" promptText="Enter location" prefWidth="250"/>
+        <Label fx:id="coordinateLabel" text="Coordinates: Not Set" />
+    </HBox>
+    <HBox fx:id="optionsHBox" spacing="10" alignment="CENTER_LEFT">
+        <HBox.margin>
+            <Insets left="20"/>
+        </HBox.margin>
+        <ComboBox fx:id="chartTypeSelector" />
+        <MenuButton fx:id="parameterSelector" text="Select Parameters" />
+        <ComboBox fx:id="rangeSelector" />
+        <CustomDateRangePicker fx:id="customRangePicker" />
+        <Button fx:id="loadButton" text="Load" HBox.hgrow="ALWAYS"/>
     </HBox>
     <AnchorPane fx:id="chartBox" />
 </VBox>
+
