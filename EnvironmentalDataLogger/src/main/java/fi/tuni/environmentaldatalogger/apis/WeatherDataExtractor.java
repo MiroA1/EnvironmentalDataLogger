@@ -65,7 +65,7 @@ public class WeatherDataExtractor implements DataExtractor {
         ArrayList<String> validParameters = new ArrayList<>();
         validParameters.add("temperature");
         validParameters.add("humidity");
-        validParameters.add("feelslike");
+        validParameters.add("feels like");
         validParameters.add("windspeed");
         return validParameters;
     }
@@ -169,7 +169,7 @@ public class WeatherDataExtractor implements DataExtractor {
                 return "°C";
             case "humidity":
                 return "%";
-            case "feelslike":
+            case "feels like":
                 return "°C";
             case "windspeed":
                 return "km/h";
@@ -196,7 +196,7 @@ public class WeatherDataExtractor implements DataExtractor {
         if(urlParams.contains("temperature")) {
             urlParams.set(urlParams.indexOf("temperature"), "temp");
         }
-        if(urlParams.contains("feelslike")) {
+        if(urlParams.contains("feels like")) {
             urlParams.set(urlParams.indexOf("feels like"), "feelslike");
         }
 
@@ -309,6 +309,8 @@ public class WeatherDataExtractor implements DataExtractor {
         for (String param : params) {
             if (param.equals("temperature") && dataObject.has("temp")) {
                 data.put("temperature", dataObject.getDouble("temp"));
+            } else if (param.equals("feels like") && dataObject.has("feelslike")) {
+                data.put("feels like", dataObject.getDouble("feelslike"));
             } else if (dataObject.has(param)) {
                 data.put(param, dataObject.getDouble(param));
             }
@@ -379,6 +381,8 @@ public class WeatherDataExtractor implements DataExtractor {
             for (String param : params) {
                 if (param.equals("temperature") && currentConditions.has("temp")) {
                     currentData.put("temperature", currentConditions.getDouble("temp"));
+                } else if (param.equals("feels like") && currentConditions.has("feelslike")) {
+                    currentData.put("feels like", currentConditions.getDouble("feelslike"));
                 } else if (currentConditions.has(param)) {
                     currentData.put(param, currentConditions.getDouble(param));
                 }
