@@ -54,6 +54,12 @@ public class WeatherDataExtractor implements DataExtractor {
         return instance;
     }
 
+    /**
+     * Retrieves a list of valid parameters that can be queried from the weather API.
+     * These parameters include weather-related measurements such as temperature and humidity.
+     *
+     * @return A list of strings representing the valid parameters.
+     */
     @Override
     public ArrayList<String> getValidParameters() {
         ArrayList<String> validParameters = new ArrayList<>();
@@ -64,11 +70,28 @@ public class WeatherDataExtractor implements DataExtractor {
         return validParameters;
     }
 
+    /**
+     * Provides the valid range of dates for which data can be retrieved from the weather API.
+     * This range is dependent on the API's data availability.
+     *
+     * @param params A list of parameters for which the data range is to be determined.
+     * @return A Pair object containing the start and end LocalDateTime of the valid data range.
+     */
     @Override
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
         return new Pair<>(LocalDateTime.now().minusDays(30), LocalDateTime.now().plusDays(15));
     }
 
+    /**
+     * Retrieves weather data for a given set of parameters, date range, and geographical coordinates.
+     * This method fetches data either from the cache or the API, depending on data availability.
+     *
+     * @param params A list of parameters for which data is requested.
+     * @param range A Pair representing the start and end LocalDateTime for the requested data range.
+     * @param coordinates The geographical coordinates for the location of interest.
+     * @return A TreeMap mapping parameter names to another TreeMap of LocalDateTime to values.
+     * @throws ApiException If there is an error in data retrieval or processing.
+     */
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) throws ApiException {
 
@@ -116,6 +139,15 @@ public class WeatherDataExtractor implements DataExtractor {
         return resultMap;
     }
 
+    /**
+     * Fetches the current weather data for the specified parameters and geographical coordinates.
+     * This method retrieves real-time weather data from the API.
+     *
+     * @param params A list of parameters for which current data is requested.
+     * @param coordinates The geographical coordinates for the location of interest.
+     * @return A TreeMap mapping parameter names to their current values.
+     * @throws ApiException If there is an error in the API call.
+     */
     @Override
     public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException {
         String apiUrl = constructApiUrl(coordinates, LocalDateTime.now(), LocalDateTime.now(), params, true);
@@ -123,6 +155,13 @@ public class WeatherDataExtractor implements DataExtractor {
         return currentData;
     }
 
+    /**
+     * Provides the unit of measurement for a given weather parameter.
+     * This method returns the appropriate unit, such as degrees Celsius or percentage, for the specified parameter.
+     *
+     * @param param The parameter for which the unit is requested.
+     * @return A string representing the unit of measurement for the parameter.
+     */
     @Override
     public String getUnit(String param) {
         switch (param) {
