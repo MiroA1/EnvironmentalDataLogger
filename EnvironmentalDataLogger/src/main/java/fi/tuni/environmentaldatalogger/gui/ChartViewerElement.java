@@ -329,9 +329,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
             coords = presenter.getCoordinatesFromAddress(location);
             if (coords != null) {
                 selectedCoordinates = coords;
-                coordinateLabel.setText("Coords: " + coords.toString());
+                coordinateLabel.setText("Coordinates: " + coords.toString());
             } else {
-                coordinateLabel.setText("Coords: Not found");
+                coordinateLabel.setText("Coordinates: Not found");
                 return;
             }
         } else if (selectedCoordinates != null) {
@@ -429,7 +429,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         selectedCoordinates = saveData.coordinates;
 
         String selectedCoordinatesString = selectedCoordinates != null ? selectedCoordinates.toString() : "Not Set";
-        coordinateLabel.setText("Coords: " + selectedCoordinatesString);
+        coordinateLabel.setText("Coordinates: " + selectedCoordinatesString);
 
         if (chartTypeSelector.getValue().equals("Line chart")) {
             lineChartSelected();

@@ -5,15 +5,22 @@ import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
+
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.TreeMap;
 
 import static fi.tuni.environmentaldatalogger.gui.MainView.getCurrentCoords;
@@ -22,14 +29,20 @@ public class CurrentDataPane extends GridPane {
 
     private GridPane pieChartPane;
     private GridPane dataPane;
+    private HBox hbox;
 
 
     public CurrentDataPane() throws ApiException {
 
         initPieChartPane();
+        initHBox();
         initDataPane();
+
+        this.setPadding(new Insets(30, 0, 0, 0));
+
         this.add(pieChartPane, 0, 0);
-        this.add(dataPane, 1, 0);
+        this.add(hbox, 1, 0);
+        this.add(dataPane, 2, 0);
     }
 
     public static GridPane getInstance() {
@@ -40,6 +53,7 @@ public class CurrentDataPane extends GridPane {
             throw new RuntimeException(e);
         }
     }
+
 
     private void initPieChartPane() throws ApiException {
 
@@ -52,7 +66,6 @@ public class CurrentDataPane extends GridPane {
         GridPane.setConstraints(pieChart, 1, 0);
         pieChartPane.getChildren().add(pieChart);
         pieChartPane.getChildren().add(colorTable);
-
 
     }
 
@@ -91,7 +104,6 @@ public class CurrentDataPane extends GridPane {
         return colorTable;
     }
 
-
     public static class DataItem {
         private final ImageView imageView;
         private final String stringValue;
@@ -110,13 +122,42 @@ public class CurrentDataPane extends GridPane {
         }
     }
 
+
+    private void initHBox()  {
+
+        hbox = new HBox();
+        hbox.setPrefWidth(200);
+
+    }
+
     private void initDataPane() throws ApiException {
 
         dataPane = new GridPane();
 
+        dataPane.setHgap(20);
 
-        TreeMap<String, String> currentDataMap = Presenter.getInstance().getCurrentData(AirQualityDataExtractor.getInstance().getValidParameters(), getCurrentCoords());
+        Presenter presenter = Presenter.getInstance();
 
+        TreeMap<String, String> currentDataMap = presenter.getCurrentData(presenter.getValidParameters(), getCurrentCoords());
+
+        int rowIndex = 0;
+
+        for (Map.Entry<String, String> entry : currentDataMap.entrySet()) {
+
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            Label keyLabel = new Label(key);
+            Label valueLabel = new Label(value);
+
+            keyLabel.setFont(new Font("Arial", 16));
+            valueLabel.setFont(new Font("Arial", 16));
+
+            dataPane.add(keyLabel, 0, rowIndex);
+            dataPane.add(valueLabel, 1, rowIndex);
+
+            rowIndex++;
+        }
 
 
     }
