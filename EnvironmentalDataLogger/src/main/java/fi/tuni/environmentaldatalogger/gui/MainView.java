@@ -7,11 +7,10 @@ import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.util.Location;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 
@@ -73,6 +72,7 @@ public class MainView {
 
         initExitButton();
         initInfoButton();
+        infoButton.setOnAction(actionEvent -> launchInfoDialog());
         initNotificationBar();
         initChartGrid();
 
@@ -128,6 +128,16 @@ public class MainView {
             }
             locationLabel.setText(currentLocation.toString());
         });
+    }
+
+    private void launchInfoDialog() {
+        try {
+            // TODO: DataExtractors could have API names that can be fetched? Replace string placeholders here
+            InfoDialog infoDialog = new InfoDialog("Visual Crossing", "Open-meteo");
+            infoDialog.showAndWait();
+        } catch (RuntimeException e) {
+            notificationBar.pushAlertNotification("Error in showing application info");
+        }
     }
 
     /**
