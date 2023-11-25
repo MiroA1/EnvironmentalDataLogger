@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane minHeight="300.0" minWidth="400.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <VBox alignment="CENTER" prefHeight="172.0" prefWidth="400.0">
+         <children>
+            <GridPane alignment="CENTER" prefHeight="179.0" prefWidth="380.0" vgap="30.0">
+              <columnConstraints>
+                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="121.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="273.0" minWidth="10.0" prefWidth="259.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="20.0" prefHeight="30.0" />
+                <RowConstraints minHeight="20.0" prefHeight="30.0" />
+                <RowConstraints minHeight="20.0" prefHeight="30.0" />
+              </rowConstraints>
+               <children>
+                  <Label text="Weather Icons" GridPane.rowIndex="2" />
+                  <Label text="Air Quality API: " GridPane.rowIndex="1" />
+                  <Label text="Weather API: " />
+                  <Label fx:id="weatherApiLabel" GridPane.columnIndex="1" />
+                  <Label fx:id="airQualityApiLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label fx:id="iconLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+         </children></VBox>
+   </content>
+   <header>
+      <Label alignment="CENTER" contentDisplay="CENTER" text="Information about the Application">
+         <padding>
+            <Insets bottom="10.0" top="20.0" />
+         </padding></Label>
+   </header>
+   <buttonTypes>
+      <ButtonType fx:id="closeButton" fx:constant="CLOSE" />
+   </buttonTypes>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+</DialogPane>
