@@ -75,33 +75,8 @@ public class MainView {
         initExitButton();
         initInfoButton();
         initNotificationBar();
+        initChartGrid();
 
-        // TODO: add an own init function for the chart grid, to improve readability
-        try {
-            var grid = new ChartGrid();
-            this.chartGrid = grid;
-            chartsPane.getChildren().add(grid);
-
-            SaveLoad.load(grid, "save1.json");
-
-            Button test = new Button("View");
-            test.setOnAction(actionEvent -> {
-                if (test.getText().equals("View")) {
-                    grid.viewMode();
-                    test.setText("Edit");
-                } else {
-                    grid.editMode();
-                    test.setText("View");
-                }
-            });
-
-            AnchorPane.setTopAnchor(test, 5.0);
-            AnchorPane.setRightAnchor(test, 5.0);
-
-            chartsPane.getChildren().add(test);
-        } catch ( IOException e) {
-            MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
-        }
 
         // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
@@ -224,6 +199,38 @@ public class MainView {
         infoButton.setMinSize(48, 48);
         infoButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
+
+    /**
+     * Initializes the Chart pane view
+     */
+    private void initChartGrid(){
+        try {
+            var grid = new ChartGrid();
+            this.chartGrid = grid;
+            chartsPane.getChildren().add(grid);
+
+            SaveLoad.load(grid, "save1.json");
+
+            Button test = new Button("View");
+            test.setOnAction(actionEvent -> {
+                if (test.getText().equals("View")) {
+                    grid.viewMode();
+                    test.setText("Edit");
+                } else {
+                    grid.editMode();
+                    test.setText("View");
+                }
+            });
+
+            AnchorPane.setTopAnchor(test, 5.0);
+            AnchorPane.setRightAnchor(test, 5.0);
+
+            chartsPane.getChildren().add(test);
+        } catch ( IOException e) {
+            MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
+        }
+    }
+
 
     /**
      * Updates the temperature label with current data.
