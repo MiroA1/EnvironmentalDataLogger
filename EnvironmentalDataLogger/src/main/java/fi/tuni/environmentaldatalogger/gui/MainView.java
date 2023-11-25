@@ -1,7 +1,7 @@
 package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.Presenter;
-import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
+import fi.tuni.environmentaldatalogger.util.ViewUtils;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
@@ -14,7 +14,6 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.SVGPath;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -113,22 +112,6 @@ public class MainView {
         return currentLocation.getCoordinates();
     }
 
-    // TODO: move to an utility class?
-    /**
-     * Creates an SVGPath with the given parameters.
-     * @param pathString SVG path string
-     * @param fill fill color
-     * @param hoverFill hover fill color
-     * @return SVGPath
-     */
-    private static SVGPath createPath(String pathString, String fill, String hoverFill) {
-        SVGPath path = new SVGPath();
-        path.getStyleClass().add("svg");
-        path.setContent(pathString);
-        path.setStyle("-fill:" + fill + ";-hover-fill:" + hoverFill + ';');
-        return path;
-    }
-
     /**
      * Launches a dialog for selecting a location.
      */
@@ -157,8 +140,8 @@ public class MainView {
 
 
         Group svg = new Group(
-                createPath(EXIT_ARROW_PATH, "black", "gray"),
-                createPath(EXIT_RECTANGLE_PATH, "black", "black")
+                ViewUtils.createPath(EXIT_ARROW_PATH, "black", "gray"),
+                ViewUtils.createPath(EXIT_RECTANGLE_PATH, "black", "black")
         );
 
         Bounds bounds = svg.getBoundsInParent();
@@ -179,14 +162,9 @@ public class MainView {
      */
     private void initInfoButton() {
 
-        // Uncomment to test the notification bar!
-        //    infoButton.setOnAction(actionEvent -> {
-        //        notificationBar.pushAlertNotification("Info button pressed!");
-        //    });
-
         Group svg = new Group(
-                createPath(INFO_CIRCLE_PATH, "black", "black"),
-                createPath(INFO_I_PATH, "black", "gray")
+                ViewUtils.createPath(INFO_CIRCLE_PATH, "black", "black"),
+                ViewUtils.createPath(INFO_I_PATH, "black", "gray")
         );
 
         Bounds bounds = svg.getBoundsInParent();
