@@ -19,6 +19,8 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
 
     private ArrayList<ArrayList<GridElement>> grid = new ArrayList<>();
     private boolean expandCharts = true;
+    private final int MAX_COLUMNS = 3;
+    private final int MAX_ROWS = 2;
 
 
     /**
@@ -172,12 +174,15 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
 
         replaceChild(chart);
 
-        if (column == getGridColumnCount() - 1) {
+        int colCount = getGridColumnCount();
+        int rowCount = getRowCount();
+
+        if (column == colCount - 1 && colCount < MAX_COLUMNS) {
             var list = new ArrayList<GridElement>(Collections.nCopies(getGridRowCount(), null));
             grid.add(list);
         }
 
-        if (row == getGridRowCount() - 1) {
+        if (row == rowCount- 1 && rowCount < MAX_ROWS) {
             grid.forEach(columnList -> columnList.add(null));
         }
 
