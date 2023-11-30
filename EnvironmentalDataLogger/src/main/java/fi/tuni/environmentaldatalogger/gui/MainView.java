@@ -1,20 +1,18 @@
 package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.Presenter;
-import fi.tuni.environmentaldatalogger.apis.AirQualityDataExtractor;
+import fi.tuni.environmentaldatalogger.util.ViewUtils;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.util.Location;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.SVGPath;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -74,34 +72,10 @@ public class MainView {
 
         initExitButton();
         initInfoButton();
+        infoButton.setOnAction(actionEvent -> launchInfoDialog());
         initNotificationBar();
+        initChartGrid();
 
-        // TODO: add an own init function for the chart grid, to improve readability
-        try {
-            var grid = new ChartGrid();
-            this.chartGrid = grid;
-            chartsPane.getChildren().add(grid);
-
-            SaveLoad.load(grid, "save1.json");
-
-            Button test = new Button("View");
-            test.setOnAction(actionEvent -> {
-                if (test.getText().equals("View")) {
-                    grid.viewMode();
-                    test.setText("Edit");
-                } else {
-                    grid.editMode();
-                    test.setText("View");
-                }
-            });
-
-            AnchorPane.setTopAnchor(test, 5.0);
-            AnchorPane.setRightAnchor(test, 5.0);
-
-            chartsPane.getChildren().add(test);
-        } catch ( IOException e) {
-            MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
-        }
 
         // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
@@ -138,22 +112,6 @@ public class MainView {
         return currentLocation.getCoordinates();
     }
 
-    // TODO: move to an utility class?
-    /**
-     * Creates an SVGPath with the given parameters.
-     * @param pathString SVG path string
-     * @param fill fill color
-     * @param hoverFill hover fill color
-     * @return SVGPath
-     */
-    private static SVGPath createPath(String pathString, String fill, String hoverFill) {
-        SVGPath path = new SVGPath();
-        path.getStyleClass().add("svg");
-        path.setContent(pathString);
-        path.setStyle("-fill:" + fill + ";-hover-fill:" + hoverFill + ';');
-        return path;
-    }
-
     /**
      * Launches a dialog for selecting a location.
      */
@@ -172,6 +130,16 @@ public class MainView {
         });
     }
 
+    private void launchInfoDialog() {
+        try {
+            // TODO: DataExtractors could have API names that can be fetched? Replace string placeholders here
+            InfoDialog infoDialog = new InfoDialog("Visual Crossing", "Open-meteo");
+            infoDialog.showAndWait();
+        } catch (RuntimeException e) {
+            notificationBar.pushAlertNotification("Error in showing application info");
+        }
+    }
+
     /**
      * Initializes the exit button.
      */
@@ -182,8 +150,8 @@ public class MainView {
 
 
         Group svg = new Group(
-                createPath(EXIT_ARROW_PATH, "black", "gray"),
-                createPath(EXIT_RECTANGLE_PATH, "black", "black")
+                ViewUtils.createPath(EXIT_ARROW_PATH, "black", "gray"),
+                ViewUtils.createPath(EXIT_RECTANGLE_PATH, "black", "black")
         );
 
         Bounds bounds = svg.getBoundsInParent();
@@ -204,14 +172,9 @@ public class MainView {
      */
     private void initInfoButton() {
 
-        // Uncomment to test the notification bar!
-        //    infoButton.setOnAction(actionEvent -> {
-        //        notificationBar.pushAlertNotification("Info button pressed!");
-        //    });
-
         Group svg = new Group(
-                createPath(INFO_CIRCLE_PATH, "black", "black"),
-                createPath(INFO_I_PATH, "black", "gray")
+                ViewUtils.createPath(INFO_CIRCLE_PATH, "black", "black"),
+                ViewUtils.createPath(INFO_I_PATH, "black", "gray")
         );
 
         Bounds bounds = svg.getBoundsInParent();
@@ -224,6 +187,38 @@ public class MainView {
         infoButton.setMinSize(48, 48);
         infoButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
+
+    /**
+     * Initializes the Chart pane view
+     */
+    private void initChartGrid(){
+        try {
+            var grid = new ChartGrid();
+            this.chartGrid = grid;
+            chartsPane.getChildren().add(grid);
+
+            SaveLoad.load(grid, "save1.json");
+
+            Button test = new Button("View");
+            test.setOnAction(actionEvent -> {
+                if (test.getText().equals("View")) {
+                    grid.viewMode();
+                    test.setText("Edit");
+                } else {
+                    grid.editMode();
+                    test.setText("View");
+                }
+            });
+
+            AnchorPane.setTopAnchor(test, 5.0);
+            AnchorPane.setRightAnchor(test, 5.0);
+
+            chartsPane.getChildren().add(test);
+        } catch ( IOException e) {
+            MainView.notificationBar.pushAlertNotification("Failed to initialize charts");
+        }
+    }
+
 
     /**
      * Updates the temperature label with current data.

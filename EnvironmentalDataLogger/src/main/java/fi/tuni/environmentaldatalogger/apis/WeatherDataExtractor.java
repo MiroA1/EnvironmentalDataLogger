@@ -54,21 +54,44 @@ public class WeatherDataExtractor implements DataExtractor {
         return instance;
     }
 
+    /**
+     * Retrieves a list of valid parameters that can be queried from the weather API.
+     * These parameters include weather-related measurements such as temperature and humidity.
+     *
+     * @return A list of strings representing the valid parameters.
+     */
     @Override
     public ArrayList<String> getValidParameters() {
         ArrayList<String> validParameters = new ArrayList<>();
         validParameters.add("temperature");
         validParameters.add("humidity");
-        validParameters.add("feelslike");
-        validParameters.add("windspeed");
+        validParameters.add("feels like");
+        validParameters.add("wind speed");
         return validParameters;
     }
 
+    /**
+     * Provides the valid range of dates for which data can be retrieved from the weather API.
+     * This range is dependent on the API's data availability.
+     *
+     * @param params A list of parameters for which the data range is to be determined.
+     * @return A Pair object containing the start and end LocalDateTime of the valid data range.
+     */
     @Override
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
         return new Pair<>(LocalDateTime.now().minusDays(30), LocalDateTime.now().plusDays(15));
     }
 
+    /**
+     * Retrieves weather data for a given set of parameters, date range, and geographical coordinates.
+     * This method fetches data either from the cache or the API, depending on data availability.
+     *
+     * @param params A list of parameters for which data is requested.
+     * @param range A Pair representing the start and end LocalDateTime for the requested data range.
+     * @param coordinates The geographical coordinates for the location of interest.
+     * @return A TreeMap mapping parameter names to another TreeMap of LocalDateTime to values.
+     * @throws ApiException If there is an error in data retrieval or processing.
+     */
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime, LocalDateTime> range, Coordinate coordinates) throws ApiException {
 
@@ -116,6 +139,15 @@ public class WeatherDataExtractor implements DataExtractor {
         return resultMap;
     }
 
+    /**
+     * Fetches the current weather data for the specified parameters and geographical coordinates.
+     * This method retrieves real-time weather data from the API.
+     *
+     * @param params A list of parameters for which current data is requested.
+     * @param coordinates The geographical coordinates for the location of interest.
+     * @return A TreeMap mapping parameter names to their current values.
+     * @throws ApiException If there is an error in the API call.
+     */
     @Override
     public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException {
         String apiUrl = constructApiUrl(coordinates, LocalDateTime.now(), LocalDateTime.now(), params, true);
@@ -123,6 +155,13 @@ public class WeatherDataExtractor implements DataExtractor {
         return currentData;
     }
 
+    /**
+     * Provides the unit of measurement for a given weather parameter.
+     * This method returns the appropriate unit, such as degrees Celsius or percentage, for the specified parameter.
+     *
+     * @param param The parameter for which the unit is requested.
+     * @return A string representing the unit of measurement for the parameter.
+     */
     @Override
     public String getUnit(String param) {
         switch (param) {
@@ -130,10 +169,10 @@ public class WeatherDataExtractor implements DataExtractor {
                 return "°C";
             case "humidity":
                 return "%";
-            case "feelslike":
+            case "feels like":
                 return "°C";
-            case "windspeed":
-                return "m/s";
+            case "wind speed":
+                return "km/h";
             default:
                 return "";
         }
@@ -156,6 +195,12 @@ public class WeatherDataExtractor implements DataExtractor {
         ArrayList<String> urlParams = new ArrayList<>(params);
         if(urlParams.contains("temperature")) {
             urlParams.set(urlParams.indexOf("temperature"), "temp");
+        }
+        if(urlParams.contains("feels like")) {
+            urlParams.set(urlParams.indexOf("feels like"), "feelslike");
+        }
+        if(urlParams.contains("wind speed")) {
+            urlParams.set(urlParams.indexOf("wind speed"), "windspeed");
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -267,6 +312,10 @@ public class WeatherDataExtractor implements DataExtractor {
         for (String param : params) {
             if (param.equals("temperature") && dataObject.has("temp")) {
                 data.put("temperature", dataObject.getDouble("temp"));
+            } else if (param.equals("feels like") && dataObject.has("feelslike")) {
+                data.put("feels like", dataObject.getDouble("feelslike"));
+            } else if (param.equals("wind speed") && dataObject.has("windspeed")) {
+                data.put("wind speed", dataObject.getDouble("windspeed"));
             } else if (dataObject.has(param)) {
                 data.put(param, dataObject.getDouble(param));
             }
@@ -289,6 +338,7 @@ public class WeatherDataExtractor implements DataExtractor {
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseBody = response.body().string();
+                System.out.println(responseBody);
                 currentData = parseCurrentWeatherData(responseBody, params);
             } else {
                 throw new ApiException("Received unexpected response code " + response.code() +
@@ -337,7 +387,11 @@ public class WeatherDataExtractor implements DataExtractor {
             for (String param : params) {
                 if (param.equals("temperature") && currentConditions.has("temp")) {
                     currentData.put("temperature", currentConditions.getDouble("temp"));
-                } else if (currentConditions.has(param)) {
+                } else if (param.equals("feels like") && currentConditions.has("feelslike")) {
+                    currentData.put("feels like", currentConditions.getDouble("feelslike"));
+                } else if (param.equals("wind speed") && currentConditions.has("windspeed")) {
+                    currentData.put("wind speed", currentConditions.getDouble("windspeed"));
+                }  else if (currentConditions.has(param)) {
                     currentData.put(param, currentConditions.getDouble(param));
                 }
             }
@@ -347,6 +401,37 @@ public class WeatherDataExtractor implements DataExtractor {
         }
         return currentData;
     }
+
+    /**
+     * Retrieves the current weather icon based on the geographical coordinates.
+     * This method makes an API call to fetch the current weather conditions and extracts the icon data.
+     * The icon represents the current weather visually, such as sunny, cloudy, rainy, etc.
+     *
+     * @param coordinates The geographical coordinates for which the current weather icon is required.
+     * @return A string representing the weather icon. Returns null if the icon is not available in the response.
+     * @throws ApiException If there is an error in the API call or response parsing.
+     */
+    public String getCurrentIcon(Coordinate coordinates) throws ApiException {
+        ArrayList<String> params = new ArrayList<>(Collections.singletonList("icon"));
+        String apiUrl = constructApiUrl(coordinates, LocalDateTime.now(), LocalDateTime.now(), params, true);
+
+        try {
+            Request request = new Request.Builder().url(apiUrl).build();
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String responseBody = response.body().string();
+                    JSONObject jsonObject = new JSONObject(responseBody);
+                    JSONObject currentConditions = jsonObject.getJSONObject("currentConditions");
+                    return currentConditions.optString("icon", null);
+                } else {
+                    throw new ApiException("Unexpected response code: " + response.code(), ApiException.ErrorCode.INVALID_RESPONSE);
+                }
+            }
+        } catch (IOException e) {
+            throw new ApiException("Connection error: " + e.getMessage(), ApiException.ErrorCode.CONNECTION_ERROR);
+        }
+    }
+
 }
 
 

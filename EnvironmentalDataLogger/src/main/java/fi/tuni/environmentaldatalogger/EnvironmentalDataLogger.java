@@ -16,6 +16,8 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         FXMLLoader fxmlLoader = new FXMLLoader(EnvironmentalDataLogger.class.getResource("gui_template.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("Environmental Data Logger");
+        stage.setMinHeight(680);
+        stage.setMinWidth(880);
 
         stage.setScene(scene);
         stage.show();

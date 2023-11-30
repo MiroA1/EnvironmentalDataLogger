@@ -52,7 +52,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     @FXML
     public HBox removeHBox;
     @FXML
-    public HBox headerHBox;
+    public VBox headerVBox;
     @FXML
     public ComboBox<String> chartTypeSelector;
     @FXML
@@ -86,8 +86,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
      * Sets the element to view mode, hiding the options bar.
      */
     public void viewMode() {
-        headerHBox.setVisible(false);
-        headerHBox.setManaged(false);
+        headerVBox.setVisible(false);
+        headerVBox.setManaged(false);
         this.setStyle("-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;");
     }
 
@@ -95,8 +95,8 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
      * Sets the element to edit mode, showing the options bar.
      */
     public void editMode() {
-        headerHBox.setVisible(true);
-        headerHBox.setManaged(true);
+        headerVBox.setVisible(true);
+        headerVBox.setManaged(true);
         this.setStyle("-fx-border-color: transparent;");
     }
 
@@ -328,9 +328,9 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
             coords = presenter.getCoordinatesFromAddress(location);
             if (coords != null) {
                 selectedCoordinates = coords;
-                coordinateLabel.setText("Coords: " + coords.toString());
+                coordinateLabel.setText("Coordinates: " + coords.toString());
             } else {
-                coordinateLabel.setText("Coords: Not found");
+                coordinateLabel.setText("Coordinates: Not found");
                 return;
             }
         } else {
@@ -426,7 +426,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         selectedCoordinates = saveData.coordinates;
 
         String selectedCoordinatesString = selectedCoordinates != null ? selectedCoordinates.toString() : "Not Set";
-        coordinateLabel.setText("Coords: " + selectedCoordinatesString);
+        coordinateLabel.setText("Coordinates: " + selectedCoordinatesString);
 
         if (chartTypeSelector.getValue().equals("Line chart")) {
             lineChartSelected();
