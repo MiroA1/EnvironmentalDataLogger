@@ -11,6 +11,7 @@ import fi.tuni.environmentaldatalogger.apis.WeatherDataExtractor;
 import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import java.time.Duration;
 import java.time.ZoneOffset;

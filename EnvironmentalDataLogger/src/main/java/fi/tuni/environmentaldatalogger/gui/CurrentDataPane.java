@@ -6,7 +6,6 @@ import fi.tuni.environmentaldatalogger.apis.ApiException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -17,7 +16,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
-
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -25,13 +23,22 @@ import java.util.TreeMap;
 
 import static fi.tuni.environmentaldatalogger.gui.MainView.getCurrentCoords;
 
+/**
+ * A class for the current data pane.
+ *
+ * The current data pane displays the current data for the selected parameters.
+ */
 public class CurrentDataPane extends GridPane {
 
     private GridPane pieChartPane;
     private GridPane dataPane;
     private HBox hbox;
 
-
+    /**
+     * Constructor.
+     *
+     * @throws ApiException if an error occurs while getting the data.
+     */
     public CurrentDataPane() throws ApiException {
 
         initPieChartPane();
@@ -45,6 +52,9 @@ public class CurrentDataPane extends GridPane {
         this.add(dataPane, 2, 0);
     }
 
+    /**
+     * Returns an instance of the current data pane.
+     */
     public static GridPane getInstance() {
 
         try {
@@ -54,7 +64,11 @@ public class CurrentDataPane extends GridPane {
         }
     }
 
-
+    /**
+     * Initializes the pie chart pane.
+     *
+     * @throws ApiException if an error occurs while getting the data.
+     */
     private void initPieChartPane() throws ApiException {
 
         pieChartPane = new GridPane();
@@ -69,6 +83,9 @@ public class CurrentDataPane extends GridPane {
 
     }
 
+    /**
+     * Returns a table view of the colors.
+     */
     private TableView<DataItem> getColorTable() {
 
         TableView<DataItem> colorTable = new TableView<>();
@@ -104,6 +121,9 @@ public class CurrentDataPane extends GridPane {
         return colorTable;
     }
 
+    /**
+     * A static class for the data item.
+     */
     public static class DataItem {
         private final ImageView imageView;
         private final String stringValue;
@@ -122,43 +142,69 @@ public class CurrentDataPane extends GridPane {
         }
     }
 
-
+    /**
+     * Initializes the HBox.
+     */
     private void initHBox()  {
 
         hbox = new HBox();
         hbox.setPrefWidth(200);
-
     }
 
+    /**
+     * Adds a label pair to the data pane.
+     *
+     * @param param the parameter.
+     * @param value the value of the parameter.
+     * @param rowIndex the row index.
+     */
+    private void addLabelPair(String param, String value, int rowIndex) {
+        Label keyLabel = new Label(param);
+        Label valueLabel = new Label(value);
+
+        keyLabel.setFont(new Font("Verdana", 20));
+        valueLabel.setFont(new Font("Verdana", 20));
+
+        dataPane.add(keyLabel, 0, rowIndex);
+        dataPane.add(valueLabel, 1, rowIndex);
+    }
+
+    /**
+     * Initializes the data pane.
+     *
+     * @throws ApiException if an error occurs while getting the data.
+     */
     private void initDataPane() throws ApiException {
 
         dataPane = new GridPane();
 
         dataPane.setHgap(20);
+        dataPane.setVgap(10);
 
         Presenter presenter = Presenter.getInstance();
-
         TreeMap<String, String> currentDataMap = presenter.getCurrentData(presenter.getValidParameters(), getCurrentCoords());
 
         int rowIndex = 0;
 
-        for (Map.Entry<String, String> entry : currentDataMap.entrySet()) {
+        String temperatureKey = "Temperature";
+        String temperatureValue = currentDataMap.get(temperatureKey);
+        addLabelPair(temperatureKey, temperatureValue, rowIndex);
+        rowIndex++;
 
-            String key = entry.getKey();
+        String feelsLikeKey = "Feelslike";
+        String feelsLikeValue = currentDataMap.get(feelsLikeKey);
+        addLabelPair(feelsLikeKey, feelsLikeValue, rowIndex);
+        rowIndex++;
+
+        for (Map.Entry<String, String> entry : currentDataMap.entrySet()) {
+            String param = entry.getKey();
             String value = entry.getValue();
 
-            Label keyLabel = new Label(key);
-            Label valueLabel = new Label(value);
-
-            keyLabel.setFont(new Font("Arial", 16));
-            valueLabel.setFont(new Font("Arial", 16));
-
-            dataPane.add(keyLabel, 0, rowIndex);
-            dataPane.add(valueLabel, 1, rowIndex);
-
-            rowIndex++;
+            if (!param.equals(temperatureKey) && !param.equals(feelsLikeKey)) {
+                addLabelPair(param, value, rowIndex);
+                rowIndex++;
+            }
         }
-
 
     }
 }
