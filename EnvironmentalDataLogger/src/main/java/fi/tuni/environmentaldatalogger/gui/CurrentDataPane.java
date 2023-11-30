@@ -115,7 +115,9 @@ public class CurrentDataPane extends GridPane {
 
         colorTable.setItems(data);
         colorTable.setMaxHeight(253);
-        colorTable.setPrefWidth(133);
+        colorTable.setMinHeight(253);
+        colorTable.setMaxWidth(133);
+        colorTable.setMinWidth(133);
         colorTable.setEditable(false);
 
         return colorTable;
@@ -191,7 +193,7 @@ public class CurrentDataPane extends GridPane {
         addLabelPair(temperatureKey, temperatureValue, rowIndex);
         rowIndex++;
 
-        String feelsLikeKey = "Feelslike";
+        String feelsLikeKey = "Feels like";
         String feelsLikeValue = currentDataMap.get(feelsLikeKey);
         addLabelPair(feelsLikeKey, feelsLikeValue, rowIndex);
         rowIndex++;
