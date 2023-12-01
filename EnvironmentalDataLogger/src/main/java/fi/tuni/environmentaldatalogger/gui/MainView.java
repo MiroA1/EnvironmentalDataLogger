@@ -155,9 +155,13 @@ public class MainView {
 
     private void launchInfoDialog() {
         try {
-            // TODO: DataExtractors could have API names that can be fetched? Replace string placeholders here
-            InfoDialog infoDialog = new InfoDialog("Visual Crossing", "Open-meteo");
+            // Fetch information about the APIs
+            ArrayList<String> weatherApiInfo = Presenter.getInstance().getWeatherApiInformation();
+            ArrayList<String> airQualityApiInfo = Presenter.getInstance().getAirQualityApiInformation();
+
+            InfoDialog infoDialog = new InfoDialog(weatherApiInfo, airQualityApiInfo);
             infoDialog.showAndWait();
+
         } catch (RuntimeException e) {
             notificationBar.pushAlertNotification("Error in showing application info");
         }

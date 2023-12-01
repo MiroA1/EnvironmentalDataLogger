@@ -22,7 +22,10 @@ import java.time.format.DateTimeFormatter;
  * It handles fetching both current and historical weather data, cache management, and data formatting.
  */
 public class WeatherDataExtractor implements DataExtractor {
-    private static final String API_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
+
+    private static final String API_NAME = "Visual Crossing Weather";
+    private static final String API_URL = "https://www.visualcrossing.com/weather-data";
+    private static final String API_QUERY_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
     private static final String API_KEY = "NAJZYGFDHA4GEA5QXD7S4TZSL";
 
     private OkHttpClient httpClient;
@@ -178,6 +181,16 @@ public class WeatherDataExtractor implements DataExtractor {
         }
     }
 
+    @Override
+    public String getApiName() {
+        return API_NAME;
+    }
+
+    @Override
+    public String getApiUrl() {
+        return API_URL;
+    }
+
     /**
      * Constructs the API URL for the weather data request.
      *
@@ -189,7 +202,7 @@ public class WeatherDataExtractor implements DataExtractor {
      * @return Constructed API URL as a String.
      */
     private String constructApiUrl(Coordinate coordinates, LocalDateTime startDate, LocalDateTime endDate, ArrayList<String> params, boolean getCurrent) {
-        StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
+        StringBuilder apiUrl = new StringBuilder(API_QUERY_BASE_URL);
         apiUrl.append(coordinates.latitude()).append(",").append(coordinates.longitude());
 
         ArrayList<String> urlParams = new ArrayList<>(params);

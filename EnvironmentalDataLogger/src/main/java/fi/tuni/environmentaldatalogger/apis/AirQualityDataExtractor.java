@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -157,6 +156,16 @@ public class AirQualityDataExtractor implements DataExtractor {
         return "";
     }
 
+    @Override
+    public String getApiName() {
+        return API_NAME;
+    }
+
+    @Override
+    public String getApiUrl() {
+        return API_URL;
+    }
+
     /**
      * Constructor for API query url.
      * @param latitude latitude for the query, for now a string element
@@ -166,7 +175,7 @@ public class AirQualityDataExtractor implements DataExtractor {
      * @return url string which can be used for queries
      */
     private String constructApiUrl(String latitude, String longitude, LocalDateTime startDate, LocalDateTime endDate) {
-        StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
+        StringBuilder apiUrl = new StringBuilder(API_QUERY_BASE_URL);
         apiUrl.append(LATITUDE).append(latitude);
         apiUrl.append("&" + LONGITUDE).append(longitude);
 
@@ -298,7 +307,9 @@ public class AirQualityDataExtractor implements DataExtractor {
     private final ApiCache cache;
     private static AirQualityDataExtractor instance;
 
-    private static final String API_BASE_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?";
+    private static final String API_NAME = "Open-Meteo";
+    private static final String API_URL = "https://open-meteo.com/";
+    private static final String API_QUERY_BASE_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?";
     private static final String LATITUDE = "latitude=";
     private static final String LONGITUDE = "longitude=";
     private static final String PARAMETERS = "hourly=";
