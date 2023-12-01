@@ -277,7 +277,6 @@ public class MainView {
         } catch (ApiException e) {
             notificationBar.pushAlertNotification("Unable to fetch weather status icon");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             notificationBar.pushAlertNotification("Unable to load weather status icon");
         }
     }

@@ -70,7 +70,6 @@ public class InfoDialog extends Dialog<ButtonType>  {
         for (String line : lines){
             infoText.append(line).append("\n");
         }
-        System.out.println(infoText);
         infoLabel.setText(infoText.toString());
     }
 }
