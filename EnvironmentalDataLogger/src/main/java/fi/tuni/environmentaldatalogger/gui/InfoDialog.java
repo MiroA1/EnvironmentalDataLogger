@@ -36,8 +36,10 @@ public class InfoDialog extends Dialog<ButtonType>  {
         fxmlLoader.setController(this);
 
         // lines for icon info defined separately here
-        ArrayList<String> iconInfo = new ArrayList<>(Arrays.asList("Author: Laura Reen", "License: CC BY-NC 3.0",
-                                                                    "https://www.iconfinder.com/laurareen"));
+        ArrayList<String> iconInfo = new ArrayList<>(Arrays.asList( "Weather icons: Laura Reen", "License: CC BY-NC 3.0",
+                                                                    "https://www.iconfinder.com/laurareen",
+                                                                    "Settings and save icons: Stefan Taubert", "CC BY 3.0 DEED",
+                                                                    "https://www.iconfinder.com/stefantaubert"));
         try {
             DialogPane dialogPane = fxmlLoader.load();
             this.setDialogPane(dialogPane);

@@ -2,6 +2,7 @@ package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.apis.ApiCache;
 import fi.tuni.environmentaldatalogger.util.ViewUtils;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
@@ -32,6 +33,8 @@ public class MainView {
     public Button exitButton;
     public Button locationButton;
     public Button infoButton;
+    public Button saveButton;
+    public Button settingsButton;
     public Label temperatureLabel;
     public Label timeLabel;
     public Label dateLabel;
@@ -39,8 +42,11 @@ public class MainView {
     public Label notificationLabel;
     public ImageView iconFrame;
     public static NotificationBar notificationBar;
-
+    private static final String RESOURCE_PATH = "images/icons/";
+    private static final String SAVE_BUTTON_IMG = "save.png";
+    private static final String SETTINGS_BUTTON_IMG = "settings.png";
     private static MainView instance;
+
     public static MainView getInstance() {
         if (instance == null) {
             instance = new MainView();
@@ -88,6 +94,9 @@ public class MainView {
 
         initExitButton();
         initInfoButton();
+        initSaveButton();
+        initSettingButton();
+
         infoButton.setOnAction(actionEvent -> launchInfoDialog());
         initNotificationBar();
         initChartGrid();
@@ -192,6 +201,47 @@ public class MainView {
         exitButton.setMaxSize(48, 48);
         exitButton.setMinSize(48, 48);
         exitButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+    }
+
+    /**
+     * Initializes the save button
+     */
+    private void initSaveButton() {
+        URL _url = EnvironmentalDataLogger.class.getResource(RESOURCE_PATH + SAVE_BUTTON_IMG);
+        Image img = new Image(Objects.requireNonNull(_url).toExternalForm());
+        ImageView imgFrame = new ImageView(img);
+        imgFrame.setFitWidth(32);
+        imgFrame.setFitHeight(32);
+        saveButton.setGraphic(imgFrame);
+
+        saveButton.setMaxSize(48, 48);
+        saveButton.setMinSize(48, 48);
+        saveButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+        //saveButton.setOnAction(actionEvent -> {
+        //
+        //});
+    }
+
+    /**
+     * Initializes the settings button
+     */
+    private void initSettingButton() {
+        URL _url = EnvironmentalDataLogger.class.getResource(RESOURCE_PATH + SETTINGS_BUTTON_IMG);
+        Image img = new Image(Objects.requireNonNull(_url).toExternalForm());
+        ImageView imgFrame = new ImageView(img);
+        imgFrame.setFitWidth(32);
+        imgFrame.setFitHeight(32);
+        settingsButton.setGraphic(imgFrame);
+
+        settingsButton.setMaxSize(48, 48);
+        settingsButton.setMinSize(48, 48);
+        settingsButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+        //settingsButton.setOnAction(actionEvent -> {
+        //
+        //});
+
     }
 
     /**
