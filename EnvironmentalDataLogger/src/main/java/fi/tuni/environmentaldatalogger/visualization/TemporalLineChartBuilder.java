@@ -40,6 +40,8 @@ public class TemporalLineChartBuilder {
         yAxisSecondary = new NumberAxis();
         units = new TreeMap<>();
 
+        yAxis.setForceZeroInRange(false);
+
         // necessary for time based charts
         xAxis.setForceZeroInRange(false);
         xAxis.setAutoRanging(false);

@@ -14,6 +14,7 @@ import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.scene.layout.Region;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -84,6 +85,31 @@ public class Presenter {
         }
 
         return new ArrayList<>(params);
+    }
+
+    /**
+     * Return weather api information in array format. Function for main view's info dialogue.
+     * @return ArrayList of strings, with APIs relevant information
+     */
+    public ArrayList<String> getWeatherApiInformation(){
+        ArrayList<String> weatherApiInformation = new ArrayList<>();
+        weatherApiInformation.add(WeatherDataExtractor.getInstance().getApiName());
+        weatherApiInformation.add(WeatherDataExtractor.getInstance().getApiUrl());
+        return weatherApiInformation;
+    }
+    /**
+     * Return Air quality api information in array format. Function for main view's info dialogue.
+     * @return ArrayList of strings, with APIs relevant information
+     */
+    public ArrayList<String> getAirQualityApiInformation(){
+        ArrayList<String> weatherApiInformation = new ArrayList<>();
+        weatherApiInformation.add(AirQualityDataExtractor.getInstance().getApiName());
+        weatherApiInformation.add(AirQualityDataExtractor.getInstance().getApiUrl());
+        return weatherApiInformation;
+    }
+
+    public String getWeatherStatusIcon(Coordinate coordinates) throws ApiException {
+        return WeatherDataExtractor.getInstance().getCurrentIcon(coordinates);
     }
 
     /**

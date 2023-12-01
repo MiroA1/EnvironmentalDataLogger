@@ -55,4 +55,16 @@ public interface DataExtractor {
      * @return unit used for given parameter
      */
     String getUnit(String param);
+
+    /**
+     * Returns API name
+     */
+    String getApiName();
+
+    /**
+     * Returns API base URL
+     */
+    String getApiUrl();
+
+
 }

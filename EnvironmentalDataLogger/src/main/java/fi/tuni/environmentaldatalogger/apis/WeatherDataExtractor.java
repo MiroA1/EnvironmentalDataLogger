@@ -22,7 +22,10 @@ import java.time.format.DateTimeFormatter;
  * It handles fetching both current and historical weather data, cache management, and data formatting.
  */
 public class WeatherDataExtractor implements DataExtractor {
-    private static final String API_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
+
+    private static final String API_NAME = "Visual Crossing Weather";
+    private static final String API_URL = "https://www.visualcrossing.com/weather-data";
+    private static final String API_QUERY_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
     private static final String API_KEY = "NAJZYGFDHA4GEA5QXD7S4TZSL";
 
     private OkHttpClient httpClient;
@@ -178,6 +181,16 @@ public class WeatherDataExtractor implements DataExtractor {
         }
     }
 
+    @Override
+    public String getApiName() {
+        return API_NAME;
+    }
+
+    @Override
+    public String getApiUrl() {
+        return API_URL;
+    }
+
     /**
      * Constructs the API URL for the weather data request.
      *
@@ -189,7 +202,7 @@ public class WeatherDataExtractor implements DataExtractor {
      * @return Constructed API URL as a String.
      */
     private String constructApiUrl(Coordinate coordinates, LocalDateTime startDate, LocalDateTime endDate, ArrayList<String> params, boolean getCurrent) {
-        StringBuilder apiUrl = new StringBuilder(API_BASE_URL);
+        StringBuilder apiUrl = new StringBuilder(API_QUERY_BASE_URL);
         apiUrl.append(coordinates.latitude()).append(",").append(coordinates.longitude());
 
         ArrayList<String> urlParams = new ArrayList<>(params);
@@ -338,6 +351,7 @@ public class WeatherDataExtractor implements DataExtractor {
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseBody = response.body().string();
+                System.out.println(responseBody);
                 currentData = parseCurrentWeatherData(responseBody, params);
             } else {
                 throw new ApiException("Received unexpected response code " + response.code() +
@@ -390,7 +404,7 @@ public class WeatherDataExtractor implements DataExtractor {
                     currentData.put("feels like", currentConditions.getDouble("feelslike"));
                 } else if (param.equals("wind speed") && currentConditions.has("windspeed")) {
                     currentData.put("wind speed", currentConditions.getDouble("windspeed"));
-                } else if (currentConditions.has(param)) {
+                }  else if (currentConditions.has(param)) {
                     currentData.put(param, currentConditions.getDouble(param));
                 }
             }
@@ -400,6 +414,37 @@ public class WeatherDataExtractor implements DataExtractor {
         }
         return currentData;
     }
+
+    /**
+     * Retrieves the current weather icon based on the geographical coordinates.
+     * This method makes an API call to fetch the current weather conditions and extracts the icon data.
+     * The icon represents the current weather visually, such as sunny, cloudy, rainy, etc.
+     *
+     * @param coordinates The geographical coordinates for which the current weather icon is required.
+     * @return A string representing the weather icon. Returns null if the icon is not available in the response.
+     * @throws ApiException If there is an error in the API call or response parsing.
+     */
+    public String getCurrentIcon(Coordinate coordinates) throws ApiException {
+        ArrayList<String> params = new ArrayList<>(Collections.singletonList("icon"));
+        String apiUrl = constructApiUrl(coordinates, LocalDateTime.now(), LocalDateTime.now(), params, true);
+
+        try {
+            Request request = new Request.Builder().url(apiUrl).build();
+            try (Response response = httpClient.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String responseBody = response.body().string();
+                    JSONObject jsonObject = new JSONObject(responseBody);
+                    JSONObject currentConditions = jsonObject.getJSONObject("currentConditions");
+                    return currentConditions.optString("icon", null);
+                } else {
+                    throw new ApiException("Unexpected response code: " + response.code(), ApiException.ErrorCode.INVALID_RESPONSE);
+                }
+            }
+        } catch (IOException e) {
+            throw new ApiException("Connection error: " + e.getMessage(), ApiException.ErrorCode.CONNECTION_ERROR);
+        }
+    }
+
 }
 
 
