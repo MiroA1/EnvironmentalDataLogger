@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.gui;
 
+import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.util.ViewUtils;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
@@ -7,14 +8,16 @@ import fi.tuni.environmentaldatalogger.save.SaveLoad;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import fi.tuni.environmentaldatalogger.util.Location;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -34,6 +37,7 @@ public class MainView {
     public Label dateLabel;
     public AnchorPane currentDataPane;
     public Label notificationLabel;
+    public ImageView iconFrame;
     public static NotificationBar notificationBar;
 
     private static MainView instance;
@@ -44,6 +48,17 @@ public class MainView {
         return instance;
     }
 
+    private static final Map<String,String> ICON_PATHS = Map.of(
+            "snow","snowy.png",
+            "rain", "rainy.png",
+            "fog", "foggy.png",
+            "wind", "windy.png",
+            "cloudy", "cloudy.png",
+            "partly-cloudy-day", "partly_cloud_day.png",
+            "partly-cloudy-night", "partly_cloudy_night.png",
+            "clear-day", "clear_day.png",
+            "clear-night", "clear_night.png"
+    );
     private static final String EXIT_RECTANGLE_PATH = "M36.501,33c-0.552,0-1,0.447-1,1v20h-32V2h32v20c0,0.553," +
             "0.448,1,1,1s1-0.447,1-1V1c0-0.553-0.448-1-1-1h-34c-0.552,0-1,0.447-1,1v54c0,0.553,0.448,1,1,1h34c0.552" +
             ",0,1-0.447,1-1V34C37.501,33.447,37.053,33,36.501,33z";
@@ -64,6 +79,7 @@ public class MainView {
     private ChartGrid chartGrid;
 
     Timer temperatureTimer = new Timer(true);
+    Timer iconTimer = new Timer(true);
     Timer clockTimer = new Timer(true);
 
     public void initialize(){
@@ -76,6 +92,13 @@ public class MainView {
         initNotificationBar();
         initChartGrid();
 
+
+        iconTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateWeatherIcon();
+            }
+        },0,600000);
 
         // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
@@ -232,6 +255,29 @@ public class MainView {
             notificationBar.pushAlertNotification(e.getMessage());
         }
     }
+
+
+
+    /**
+     * Updates the weather icon
+     */
+    private void updateWeatherIcon() {
+
+        String weatherStatus;
+        try {
+            weatherStatus = Presenter.getInstance().getWeatherStatusIcon(getCurrentCoords());
+            URL _url = EnvironmentalDataLogger.class.getResource("images/icons/"+ICON_PATHS.get(weatherStatus));
+            Image img = new Image(Objects.requireNonNull(_url).toExternalForm());
+            Platform.runLater(() -> iconFrame.setImage(img));
+
+        } catch (ApiException e) {
+            notificationBar.pushAlertNotification("Unable to fetch weather status icon");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            notificationBar.pushAlertNotification("Unable to load weather status icon");
+        }
+    }
+
 
     /**
      * Updates the time and date labels.

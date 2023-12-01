@@ -82,6 +82,10 @@ public class Presenter {
         return new ArrayList<>(params);
     }
 
+    public String getWeatherStatusIcon(Coordinate coordinates) throws ApiException {
+        return WeatherDataExtractor.getInstance().getCurrentIcon(coordinates);
+    }
+
     /**
      * Returns all valid parameters available in the air quality APIs.
      * @return list of valid parameters
