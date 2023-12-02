@@ -76,7 +76,7 @@ public class CurrentDataPane extends GridPane {
         TableView<DataItem> colorTable = getColorTable();
         GridPane.setConstraints(colorTable, 0, 0);
 
-        PieChart pieChart = Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now().minusDays(5), getCurrentCoords());
+        PieChart pieChart = Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now(), getCurrentCoords());
         GridPane.setConstraints(pieChart, 1, 0);
         pieChartPane.getChildren().add(pieChart);
         pieChartPane.getChildren().add(colorTable);

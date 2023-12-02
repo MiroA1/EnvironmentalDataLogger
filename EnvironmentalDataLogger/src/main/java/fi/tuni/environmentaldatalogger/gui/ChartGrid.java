@@ -45,6 +45,16 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
 
     }
 
+    public void loadAllCharts() {
+        ObservableList<Node> children = this.getChildren();
+
+        for(Node node : children) {
+            if (node instanceof ChartViewerElement) {
+                ((ChartViewerElement) node).pushLoadButton();
+            }
+        }
+    }
+
     public int getGridColumnCount() {
         return grid.size();
     }

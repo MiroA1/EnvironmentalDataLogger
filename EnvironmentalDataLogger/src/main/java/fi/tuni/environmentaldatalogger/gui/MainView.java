@@ -1,8 +1,11 @@
 package fi.tuni.environmentaldatalogger.gui;
 
+import com.google.gson.Gson;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.apis.ApiCache;
+import fi.tuni.environmentaldatalogger.save.Loadable;
+import fi.tuni.environmentaldatalogger.save.Saveable;
 import fi.tuni.environmentaldatalogger.util.ViewUtils;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
@@ -27,7 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 
-public class MainView {
+public class MainView implements Saveable, Loadable {
 
     public AnchorPane mapPane;
     public Label locationLabel;
@@ -93,29 +96,24 @@ public class MainView {
 
     public void initialize(){
 
-        try {
-            currentLocation = Location.fromIP();
-        } catch (IOException e) {}
-
-        locationButton.setOnAction(actionEvent -> launchCoordinateDialog());
-        locationLabel.setText(currentLocation.toString());
-        locationLabel.setOnMouseClicked(mouseEvent -> launchCoordinateDialog());
-        locationLabel.hoverProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                locationLabel.setTextFill(Color.GRAY);
-            } else {
-                locationLabel.setTextFill(Color.BLACK);
-            }
-        });
-
+        initLocationButton();
         initExitButton();
         initInfoButton();
         initSaveButton();
         initSettingButton();
 
-        infoButton.setOnAction(actionEvent -> launchInfoDialog());
         initNotificationBar();
+
         initChartGrid();
+
+        if (!SaveLoad.load(this, "user_save.json")) {
+            try {
+                currentLocation = Location.fromIP();
+                locationChanged();
+            } catch (IOException ignored) {}
+        }
+
+        chartGrid.loadAllCharts();
 
         iconTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -123,7 +121,7 @@ public class MainView {
                 updateWeatherIcon();
             }
         },0,600000);
-        currentDataPane.getChildren().add(CurrentDataPane.getInstance());
+        //currentDataPane.getChildren().add(CurrentDataPane.getInstance());
 
         // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
@@ -132,7 +130,7 @@ public class MainView {
                 updateTemperatureLabel();
                 updateCurrentDataPane();
             }
-            }, 0, 600000);
+            }, 600000, 600000);
 
         // update time and date labels every second
         clockTimer.scheduleAtFixedRate(new TimerTask() {
@@ -173,10 +171,18 @@ public class MainView {
             }
 
             currentLocation = result;
-            locationLabel.setText(currentLocation.toString());
-            updateCurrentDataPane();
-            updateTemperatureLabel();
+            locationChanged();
         });
+    }
+
+    /**
+     * Updates the view when the location is changed.
+     */
+    private void locationChanged() {
+        locationLabel.setText(currentLocation.toString());
+        updateCurrentDataPane();
+        updateTemperatureLabel();
+        updateWeatherIcon();
     }
 
     private void launchInfoDialog() {
@@ -191,6 +197,22 @@ public class MainView {
         } catch (RuntimeException e) {
             notificationBar.pushAlertNotification("Error in showing application info");
         }
+    }
+
+    /**
+     * Initializes the location button (and label).
+     */
+    private void initLocationButton() {
+
+        locationButton.setOnAction(actionEvent -> launchCoordinateDialog());
+        locationLabel.setOnMouseClicked(mouseEvent -> launchCoordinateDialog());
+        locationLabel.hoverProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                locationLabel.setTextFill(Color.GRAY);
+            } else {
+                locationLabel.setTextFill(Color.BLACK);
+            }
+        });
     }
 
     /**
@@ -235,9 +257,9 @@ public class MainView {
         saveButton.setMinSize(48, 48);
         saveButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-        //saveButton.setOnAction(actionEvent -> {
-        //
-        //});
+        saveButton.setOnAction(actionEvent -> {
+            SaveLoad.save(this, "user_save.json");
+        });
     }
 
     /**
@@ -280,6 +302,8 @@ public class MainView {
         infoButton.setMaxSize(48, 48);
         infoButton.setMinSize(48, 48);
         infoButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+        infoButton.setOnAction(actionEvent -> launchInfoDialog());
     }
 
     /**
@@ -290,8 +314,6 @@ public class MainView {
             var grid = new ChartGrid();
             this.chartGrid = grid;
             chartsPane.getChildren().add(grid);
-
-            SaveLoad.load(grid, "save1.json");
 
             Button test = new Button("View");
             test.setOnAction(actionEvent -> {
@@ -366,7 +388,44 @@ public class MainView {
     }
 
     private void updateCurrentDataPane() {
-        Platform.runLater(() -> {/*TODO: update current data pane*/});
+        Platform.runLater(() -> {
+            currentDataPane.getChildren().clear();
+            currentDataPane.getChildren().add(CurrentDataPane.getInstance());
+        });
     }
 
+    @Override
+    public boolean loadFromJson(String json) {
+
+        Gson gson = new Gson();
+        SaveData saveData = gson.fromJson(json, SaveData.class);
+
+        if (saveData == null) {
+            return false;
+        }
+
+        if (saveData.grid == null) {
+            return false;
+        }
+
+        if (saveData.currentLocation == null) {
+            return false;
+        }
+
+        currentLocation = saveData.currentLocation;
+        locationChanged();
+
+        return chartGrid.loadFromJson(saveData.grid);
+    }
+
+    @Override
+    public String getJson() {
+        SaveData saveData = new SaveData(chartGrid.getJson(), currentLocation);
+        Gson gson = new Gson();
+
+        return gson.toJson(saveData);
+    }
+
+    private record SaveData(String grid, Location currentLocation) {
+    }
 }

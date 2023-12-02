@@ -3,6 +3,7 @@ package fi.tuni.environmentaldatalogger.visualization;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.util.TimeUtils;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -12,6 +13,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.time.Duration;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import static java.lang.Math.abs;
@@ -154,63 +158,31 @@ public class TemporalLineChartBuilder {
     // TODO: no need for maps
     private ArrayList<TreeMap<String, TreeMap<LocalDateTime, Double>>> splitData() {
 
+        ArrayList<DataSplitter.DataObject> dataObjects = new ArrayList<>();
+
+        for (var entry : data.entrySet()) {
+            dataObjects.add(new DataSplitter.DataObject(entry.getKey(), entry.getValue()));
+        }
+
+        var a = DataSplitter.kMeansCluster(dataObjects, 2);
+
         ArrayList<TreeMap<String, TreeMap<LocalDateTime, Double>>> result = new ArrayList<>();
 
-        ArrayList<String> params = new ArrayList<>(data.keySet());
+        for (var cluster : a) {
+            TreeMap<String, TreeMap<LocalDateTime, Double>> map = new TreeMap<>();
 
-        params.sort((o1, o2) -> {
-            double diff1 = getDiff(data.get(o1));
-            double diff2 = getDiff(data.get(o2));
+            for (var dataObject : cluster) {
+                map.put(dataObject.getName(), data.get(dataObject.getName()));
+            }
 
-            return Double.compare(diff1, diff2);
-        });
-
-        // split params in the middle
-        int split = (params.size() + 1) / 2;
-
-        TreeMap<String, TreeMap<LocalDateTime, Double>> first = new TreeMap<>();
-        TreeMap<String, TreeMap<LocalDateTime, Double>> second = new TreeMap<>();
-
-        for (int i = 0; i < split; i++) {
-            first.put(params.get(i), data.get(params.get(i)));
+            result.add(map);
         }
-
-        for (int i = split; i < params.size(); i++) {
-            second.put(params.get(i), data.get(params.get(i)));
-        }
-
-        result.add(first);
-        result.add(second);
 
         return result;
     }
 
-    private static Double getDiff(TreeMap<LocalDateTime, Double> data) {
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-
-        for (var entry : data.entrySet()) {
-            min = Math.min(min, entry.getValue());
-            max = Math.max(max, entry.getValue());
-        }
-
-        return abs(max - min);
-    }
-
-    private static Pair<Double, Double> getExtremes(TreeMap<LocalDateTime, Double> data) {
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-
-        for (var entry : data.entrySet()) {
-            min = Math.min(min, entry.getValue());
-            max = Math.max(max, entry.getValue());
-        }
-
-        return new Pair<>(min, max);
-    }
-
-    public LineChart<Number, Number> getResult() {
-        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
+    public Region getResult() {
+        var chart = new TemporalLineChart(xAxis, yAxis);
 
         chart.setTitle(title);
 
@@ -223,22 +195,34 @@ public class TemporalLineChartBuilder {
 
             series.setName(param + " (" + units.get(param) + ")");
             chart.getData().add(series);
-
-            if (data.get(param).size() > 49) {
-                for (XYChart.Data<Number, Number> dataPoint : series.getData()) {
-                    Node lineSymbol = dataPoint.getNode().lookup(".chart-line-symbol");
-                    lineSymbol.setStyle("-fx-background-color: transparent;");
-                }
-            }
         }
 
-        chart.getXAxis().setVisible(false);
+        chart.setColors(baseColors);
+        chart.setLegendVisible(false);
 
-        return chart;
+        chart.setPrefHeight(500);
+
+        VBox res = new VBox();
+        HBox legendBox = new HBox();
+
+        Pane spacer1 = new Pane();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+
+        Pane spacer2 = new Pane();
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+        legendBox.setPadding(new Insets(0, 0, 5, 0));
+
+        legendBox.getChildren().addAll(spacer1, chart.getCustomLegend(), spacer2);
+
+        res.getChildren().addAll(chart, legendBox);
+        res.setAlignment(Pos.CENTER);
+
+        return res;
     }
 
-    private LineChart<Number, Number> getBaseChart(TreeMap<String, TreeMap<LocalDateTime, Double>> baseData) {
-        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
+    private TemporalLineChart getBaseChart(TreeMap<String, TreeMap<LocalDateTime, Double>> baseData) {
+        TemporalLineChart chart = new TemporalLineChart(xAxis, yAxis);
 
         chart.setTitle(title);
 
@@ -282,11 +266,13 @@ public class TemporalLineChartBuilder {
         xAxisSecondary.setTickUnit(xAxis.getTickUnit());
         xAxisSecondary.setTickLabelFormatter(xAxis.getTickLabelFormatter());
 
-        LineChart<Number, Number> chart = new LineChart<>(xAxisSecondary, yAxisSecondary);
+        TemporalLineChart chart = new TemporalLineChart(xAxisSecondary, yAxisSecondary);
         chart.getStyleClass().add("secondary-chart");
 
-        var baseData = splitData().get(0);
-        var secondaryData = splitData().get(1);
+        var splitData = splitData();
+
+        var baseData = splitData.get(0);
+        var secondaryData = splitData.get(1);
 
         for (var param : secondaryData.keySet()) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
@@ -301,12 +287,20 @@ public class TemporalLineChartBuilder {
 
 
         var baseChart = getBaseChart(baseData);
-        //baseChart.setLegendVisible(false);
+
+        baseChart.setColors(baseColors);
+        chart.setColors(secondaryColors);
+
+        chart.setLegendVisible(false);
+        baseChart.setLegendVisible(false);
 
         chart.setTitle(baseChart.getTitle());
 
         styleSecondaryChart(chart);
         alignCharts(st, baseChart, chart);
+
+        //addDebugBorder(baseChart, Color.GREEN, 1);
+        //addDebugBorder(st, Color.BLUE, 1);
 
         VBox res = new VBox();
         res.getChildren().addAll(st, getLegend(baseChart, chart));
@@ -325,7 +319,7 @@ public class TemporalLineChartBuilder {
         return res;
     }
 
-    private HBox getLegend(LineChart<Number, Number> baseChart, LineChart<Number, Number> secondaryChart) {
+    private HBox getLegend(TemporalLineChart baseChart, TemporalLineChart secondaryChart) {
 
         HBox legend = new HBox();
         legend.setSpacing(10);
@@ -339,19 +333,25 @@ public class TemporalLineChartBuilder {
 
         VBox baseLegendBox = new VBox();
         Label baseLabel = new Label("Left y-axis");
-        Node baseLegend = baseChart.lookup(".chart-legend");
+        baseLabel.setPadding(new Insets(-4, 0, 0, 0));
+        HBox baseLegend = baseChart.getCustomLegend();
+
 
         baseLegendBox.getChildren().addAll(baseLabel, baseLegend);
         baseLegendBox.setFillWidth(false);
 
         VBox secondaryLegendBox = new VBox();
         Label secondaryLabel = new Label("Right y-axis");
-        Node secondaryLegend = secondaryChart.lookup(".chart-legend");
+        secondaryLabel.setPadding(new Insets(-4, 0, 0, 0));
+        Node secondaryLegend = secondaryChart.getCustomLegend();
 
         secondaryLegendBox.getChildren().addAll(secondaryLabel, secondaryLegend);
 
         legend.getChildren().addAll(spacer1, baseLegendBox, secondaryLegendBox, spacer2);
         secondaryLegendBox.setFillWidth(false);
+
+        //addDebugBorder(legend, Color.RED, 1);
+        legend.setPadding(new Insets(0, 0, 5, 0));
 
         return legend;
     }
@@ -402,4 +402,15 @@ public class TemporalLineChartBuilder {
 
         sp.getChildren().addAll(baseChartBox, chartBox);
     }
+
+    public static void addDebugBorder(Region node, Color color, double width) {
+        BorderStroke borderStroke = new BorderStroke(color,
+                BorderStrokeStyle.SOLID,
+                CornerRadii.EMPTY,
+                new BorderWidths(width));
+        node.setBorder(new Border(borderStroke));
+    }
+
+    ArrayList<String> baseColors = new ArrayList<>(List.of("#c90823", "#f43d25", "#fd8c3c", "#febf5a", "#ffe793"));
+    ArrayList<String> secondaryColors = new ArrayList<>(List.of("#1373b2", "#42a6cc", "#7accc4", "#b4e2ba", "#daf0d4"));
 }

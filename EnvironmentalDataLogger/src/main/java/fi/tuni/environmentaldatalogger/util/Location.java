@@ -3,6 +3,8 @@ package fi.tuni.environmentaldatalogger.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import fi.tuni.environmentaldatalogger.save.Loadable;
+import fi.tuni.environmentaldatalogger.save.Saveable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -126,10 +128,5 @@ public class Location {
         double lon = arr.get("lon").getAsDouble();
 
         return new Location(name, countryCode, new Coordinate(lat, lon));
-    }
-
-    // TODO: toteutetaan jos ehditään, esim. https://ip-api.com/
-    public static Coordinate geoLocateByIP() {
-        return null;
     }
 }

@@ -13,6 +13,10 @@
     -fx-border-color: black;
 }
 
+.button:hover .image-view {
+    -fx-opacity: 0.5;
+}
+
 
 .button:hover .svg {
     -fx-fill: -hover-fill;

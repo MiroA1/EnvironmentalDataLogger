@@ -8,6 +8,7 @@ import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
 import fi.tuni.environmentaldatalogger.apis.ApiException;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -148,8 +149,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         });
 
         lineChartSelected();
-
-        loadButton.fire();
     }
 
     /**
@@ -305,6 +304,13 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
     }
 
     /**
+     * Pushes the load button.
+     */
+    public void pushLoadButton() {
+        loadButton.fire();
+    }
+
+    /**
      * Loads a chart based on the current options.
      */
     private void loadChart() {
@@ -437,7 +443,6 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
             pieChartSelected();
         }
 
-        loadButton.fire();
         updateRangePicker();
 
         return true;
