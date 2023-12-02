@@ -16,6 +16,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -124,6 +126,13 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         }
 
         parameterSelector.setContextMenu(contextMenu);
+
+        // show context menu on left click too (default is right click)
+        parameterSelector.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                contextMenu.show(parameterSelector, event.getScreenX(), event.getScreenY());
+            }
+        });
 
         contextMenu.setOnAction(event -> {
             updateRangePicker();
