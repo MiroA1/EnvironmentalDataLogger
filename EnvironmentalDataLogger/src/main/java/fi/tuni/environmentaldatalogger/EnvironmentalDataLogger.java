@@ -22,7 +22,7 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("Environmental Data Logger");
         stage.setMinHeight(680);
-        stage.setMinWidth(880);
+        stage.setMinWidth(992);
 
         primaryStage = stage;
 
