@@ -34,6 +34,7 @@ public class CurrentDataPane extends GridPane {
     private GridPane pieChartPane;
     private GridPane dataPane;
     private HBox hbox;
+    private HBox hbox2;
 
     /**
      * Constructor.
@@ -44,13 +45,16 @@ public class CurrentDataPane extends GridPane {
 
         initPieChartPane();
         initHBox();
+        initHBox2();
         initDataPane();
 
         this.setPadding(new Insets(30, 0, 0, 0));
 
-        this.add(pieChartPane, 0, 0);
-        this.add(hbox, 1, 0);
-        this.add(dataPane, 2, 0);
+        this.add(pieChartPane, 3, 0);
+        this.add(hbox, 2, 0);
+        this.add(hbox2, 0,0);
+        this.add(dataPane, 1, 0);
+
 
         AnchorPane.setTopAnchor(this, 0.0);
         AnchorPane.setRightAnchor(this, 0.0);
@@ -78,12 +82,13 @@ public class CurrentDataPane extends GridPane {
     private void initPieChartPane() throws ApiException {
 
         pieChartPane = new GridPane();
+        pieChartPane.setHgap(50);
 
         TableView<DataItem> colorTable = getColorTable();
-        GridPane.setConstraints(colorTable, 0, 0);
+        GridPane.setConstraints(colorTable, 1, 0);
 
         PieChart pieChart = Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now(), getCurrentCoords());
-        GridPane.setConstraints(pieChart, 1, 0);
+        GridPane.setConstraints(pieChart, 0, 0);
         pieChartPane.getChildren().add(pieChart);
         pieChartPane.getChildren().add(colorTable);
 
@@ -151,12 +156,21 @@ public class CurrentDataPane extends GridPane {
     }
 
     /**
-     * Initializes the HBox.
+     * Initializes the HBox between the pie chart and the data pane.
      */
     private void initHBox()  {
 
         hbox = new HBox();
-        hbox.setPrefWidth(200);
+        hbox.setPrefWidth(150);
+    }
+
+    /**
+     * Initializes the HBox between the left border and data pane.
+     */
+    private void initHBox2()  {
+
+        hbox2 = new HBox();
+        hbox2.setPrefWidth(50);
     }
 
     /**
