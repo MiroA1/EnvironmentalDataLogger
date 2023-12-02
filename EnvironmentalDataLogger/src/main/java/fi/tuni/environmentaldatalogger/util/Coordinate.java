@@ -16,6 +16,11 @@ import java.net.URL;
  */
 public record Coordinate(double latitude, double longitude) {
 
+    /**
+     * Constructor
+     * @param latitude given as double value
+     * @param longitude given as double value
+     */
     public Coordinate {
         validateLatitude(latitude);
         validateLongitude(longitude);

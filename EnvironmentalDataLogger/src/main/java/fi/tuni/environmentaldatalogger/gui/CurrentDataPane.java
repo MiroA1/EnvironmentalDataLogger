@@ -146,6 +146,11 @@ public class CurrentDataPane extends GridPane {
         private final ImageView imageView;
         private final String stringValue;
 
+        /**
+         * Constructor
+         * @param imageView placeholder for the image
+         * @param stringValue placeholder for descriptive text
+         */
         public DataItem(ImageView imageView, String stringValue) {
             this.imageView = imageView;
             this.stringValue = stringValue;

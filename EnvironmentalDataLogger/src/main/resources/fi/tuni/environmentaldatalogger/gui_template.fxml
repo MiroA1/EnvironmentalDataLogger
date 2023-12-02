@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane stylesheets="@gradient.css" minHeight="600.0" minWidth="800.0" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fi.tuni.environmentaldatalogger.gui.MainView">
+<BorderPane minHeight="600.0" minWidth="800.0" prefHeight="720.0" prefWidth="1280.0" stylesheets="@gradient.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fi.tuni.environmentaldatalogger.gui.MainView">
    <top>
        <HBox minHeight="202.0" minWidth="800.0" styleClass="gradient-background" BorderPane.alignment="CENTER">
            <VBox minHeight="152.0" minWidth="272.0">
@@ -70,7 +70,7 @@
                    </Label>
                </HBox>
            </VBox>
-           <Separator HBox.hgrow="ALWAYS" />
+           <Separator opacity="0.0" HBox.hgrow="ALWAYS" />
          <GridPane alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT">
            <columnConstraints>
              <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
@@ -150,7 +150,7 @@
                    </AnchorPane>
                </Tab>-->
                <Tab closable="false" text="Current Data">
-                   <AnchorPane stylesheets="@tableview.css" fx:id="currentDataPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+                   <AnchorPane fx:id="currentDataPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;" stylesheets="@tableview.css">
 
                    </AnchorPane>
                </Tab>
