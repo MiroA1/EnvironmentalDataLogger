@@ -29,6 +29,9 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Chart viewer element, a cell to be added to ChartGrid. Contains data representation.
+ */
 public class ChartViewerElement extends VBox implements Initializable, GridElement, Saveable, Loadable {
 
     private final String DEFAULT_RANGE = "Last 7 days";

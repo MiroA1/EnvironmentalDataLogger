@@ -29,6 +29,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 
+/**
+ * View component of the application's MPV structure. Initializes static elements of the GUI, based on .fxml file.
+ */
 public class MainView implements Saveable, Loadable {
 
     public AnchorPane mapPane;
