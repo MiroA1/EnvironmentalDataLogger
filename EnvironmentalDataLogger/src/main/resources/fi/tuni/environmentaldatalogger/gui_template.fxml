@@ -82,11 +82,11 @@
              <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
            </rowConstraints>
             <children>
-                  <Button fx:id="saveButton" alignment="CENTER" contentDisplay="CENTER" minHeight="48.0" minWidth="48.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" prefHeight="48.0" prefWidth="48.0" stylesheets="@icon_button.css" text="save" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                  <Button fx:id="saveButton" alignment="CENTER" contentDisplay="CENTER" minHeight="48.0" minWidth="48.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" prefHeight="48.0" prefWidth="48.0" stylesheets="@icon_button.css" GridPane.columnIndex="0" GridPane.rowIndex="0">
                   <GridPane.margin>
                      <Insets left="10.0" right="10.0" />
                   </GridPane.margin></Button>
-                  <Button fx:id="settingsButton" alignment="CENTER" minHeight="48.0" minWidth="48.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" stylesheets="@icon_button.css" text="settings" GridPane.columnIndex="1">
+                  <Button fx:id="settingsButton" alignment="CENTER" minHeight="48.0" minWidth="48.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="48.0" stylesheets="@icon_button.css" GridPane.columnIndex="1">
                   <GridPane.margin>
                      <Insets left="10.0" right="10.0" />
                   </GridPane.margin></Button>
