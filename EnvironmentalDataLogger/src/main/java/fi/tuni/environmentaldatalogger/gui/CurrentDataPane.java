@@ -46,7 +46,7 @@ public class CurrentDataPane extends GridPane {
         initHBox2();
         initDataPane();
 
-        this.setPadding(new Insets(30, 0, 0, 0));
+        this.setPadding(new Insets(30, 10, 10, 10));
 
         this.add(pieChartPane, 3, 0);
         this.add(hbox, 2, 0);
