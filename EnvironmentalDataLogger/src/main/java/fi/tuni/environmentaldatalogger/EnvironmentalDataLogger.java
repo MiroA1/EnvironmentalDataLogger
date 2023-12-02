@@ -25,7 +25,6 @@ public class EnvironmentalDataLogger extends Application implements Initializabl
         stage.setMinWidth(880);
 
         primaryStage = stage;
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("secondary_chart.css")).toExternalForm());
 
         stage.setScene(scene);
         stage.show();

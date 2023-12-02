@@ -329,22 +329,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
      */
     private void loadLineChart() {
 
-        String location = locationTextField.getText();
-        Coordinate coords = null;
-        if (!location.isEmpty()) {
-            coords = presenter.getCoordinatesFromAddress(location);
-            if (coords != null) {
-                selectedCoordinates = coords;
-                coordinateLabel.setText("Coordinates: " + coords.toString());
-            } else {
-                coordinateLabel.setText("Coordinates: Not found");
-                return;
-            }
-        } else if (selectedCoordinates != null) {
-            coords = selectedCoordinates;
-        } else {
-            coords = MainView.getCurrentCoords(); // Default coordinates or previously selected
-        }
+        Coordinate coords = getCoords();
 
         ArrayList<String> params = getSelectedParameters();
         chartBox.getChildren().clear();
@@ -367,7 +352,7 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
      */
     private void loadPieChart() {
 
-        Coordinate coords = selectedCoordinates != null ? selectedCoordinates : MainView.getCurrentCoords();
+        Coordinate coords = getCoords();
 
         try {
             var pc = presenter.getDataAsPieChart(presenter.getValidAirQualityParameters(), LocalDateTime.now(), coords);
@@ -384,7 +369,28 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         } catch (ApiException e) {
             MainView.notificationBar.pushAlertNotification(e.getMessage());
         }
+    }
 
+    private Coordinate getCoords() {
+
+        String location = locationTextField.getText();
+        Coordinate coords = null;
+        if (!location.isEmpty()) {
+            coords = presenter.getCoordinatesFromAddress(location);
+            if (coords != null) {
+                selectedCoordinates = coords;
+                coordinateLabel.setText("Coordinates: " + coords.toString());
+            } else {
+                coordinateLabel.setText("Coordinates: Not found");
+                return MainView.getCurrentCoords();
+            }
+        } else if (selectedCoordinates != null) {
+            coords = selectedCoordinates;
+        } else {
+            coords = MainView.getCurrentCoords();
+        }
+
+        return coords;
     }
 
     @Override

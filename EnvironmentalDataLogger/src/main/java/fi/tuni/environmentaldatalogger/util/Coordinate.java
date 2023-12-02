@@ -53,7 +53,7 @@ public record Coordinate(double latitude, double longitude) {
             return false;
         }
 
-        return Math.abs(latitude - another.latitude) < 0.001 && Math.abs(longitude - another.longitude) < 0.001;
+        return Math.abs(latitude - another.latitude) < 0.01 && Math.abs(longitude - another.longitude) < 0.01;
     }
 
     @Override

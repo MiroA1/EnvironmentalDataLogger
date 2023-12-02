@@ -150,7 +150,7 @@
                    </AnchorPane>
                </Tab>-->
                <Tab closable="false" text="Current Data">
-                   <AnchorPane fx:id="currentDataPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
+                   <AnchorPane stylesheets="@tableview.css" fx:id="currentDataPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-border-color: #AAAAAA; -fx-border-width: 0.5px; -fx-border-style: solid;">
 
                    </AnchorPane>
                </Tab>

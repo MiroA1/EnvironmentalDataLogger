@@ -13,6 +13,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
@@ -50,6 +51,11 @@ public class CurrentDataPane extends GridPane {
         this.add(pieChartPane, 0, 0);
         this.add(hbox, 1, 0);
         this.add(dataPane, 2, 0);
+
+        AnchorPane.setTopAnchor(this, 0.0);
+        AnchorPane.setRightAnchor(this, 0.0);
+        AnchorPane.setBottomAnchor(this, 0.0);
+        AnchorPane.setLeftAnchor(this, 10.0);
     }
 
     /**

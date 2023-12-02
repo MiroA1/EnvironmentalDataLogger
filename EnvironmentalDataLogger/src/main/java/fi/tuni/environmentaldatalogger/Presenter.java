@@ -253,67 +253,6 @@ public class Presenter {
         } else {
             return builder.getDoubleAxisResult();
         }
-
-
-        /*
-        TreeMap<String, TreeMap<LocalDateTime, Double>> dataMap = new TreeMap<>();
-
-        var apiMap = matchParamsAndAPIs(params);
-        TreeMap<String, String> units = new TreeMap<>();
-
-        for (DataExtractor api : apiMap.keySet()) {
-            TreeMap<String, TreeMap<LocalDateTime, Double>> result = api.getData(apiMap.get(api), range, coordinates);
-            dataMap.putAll(result);
-
-            for (String param : apiMap.get(api)) {
-                units.put(param, api.getUnit(param));
-            }
-        }
-
-        NumberAxis yAxis = new NumberAxis();
-        NumberAxis xAxis = new NumberAxis();
-
-        xAxis.setForceZeroInRange(false);
-        xAxis.setAutoRanging(false);
-
-        LocalDateTime startDate = range.getKey();
-        LocalDateTime endDate = range.getValue();
-
-        adjustBounds(xAxis, startDate, endDate);
-
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-
-        for (Map.Entry<String, TreeMap<LocalDateTime, Double>> entry : dataMap.entrySet()) {
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
-            TreeMap<LocalDateTime, Double> dateMap = entry.getValue();
-            String param = entry.getKey();
-
-            if (dateMap == null || dateMap.isEmpty()) {
-                continue;
-            }
-
-            // discard data outside of range
-            SortedMap<LocalDateTime, Double> subMap = dateMap.subMap(range.getKey().minusHours(1), range.getValue().plusHours(1));
-            dateMap = new TreeMap<>(subMap);
-
-            // Convert the first letter of param to uppercase
-            String paramFormatted = param.substring(0, 1).toUpperCase() + param.substring(1);
-
-            for (Map.Entry<LocalDateTime, Double> innerEntry : dateMap.entrySet()) {
-                series.getData().add(new XYChart.Data<>(TimeUtils.getEpochSecond(innerEntry.getKey()), innerEntry.getValue()));
-            }
-
-            if (dateMap.size() > 49) {
-                lineChart.setCreateSymbols(false);
-            }
-
-            series.setName(paramFormatted + " " + units.get(param));
-            lineChart.getData().add(series);
-        }
-
-        return lineChart;
-
-         */
     }
 
     /***

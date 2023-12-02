@@ -49,15 +49,30 @@ public class TemporalLineChartBuilder {
         xAxis.setAutoRanging(false);
     }
 
+    /**
+     * Adds data to the chart.
+     * @param param Parameter name.
+     * @param data Data.
+     * @param unit Unit of the data.
+     */
     public void addData(String param, TreeMap<LocalDateTime, Double> data, String unit) {
         this.data.put(param, data);
         this.units.put(param, unit);
     }
 
+    /**
+     * Sets the title of the chart.
+     * @param title Title.
+     */
     public void setTitle(String title) {
         this.title = title;
     }
 
+    /**
+     * Sets the bounds of the x-axis.
+     * @param startDate Start date.
+     * @param endDate End date.
+     */
     public void setBounds(LocalDateTime startDate, LocalDateTime endDate) {
 
         Duration duration = Duration.between(startDate, endDate);
@@ -93,6 +108,9 @@ public class TemporalLineChartBuilder {
         formatTickLabels(formatter);
     }
 
+    /**
+     * Sets the bounds of the x-axis based on the smallest dataset.
+     */
     public void setBoundsBasedOnSmallestDataset() {
 
         if (data.isEmpty()) {
@@ -115,6 +133,9 @@ public class TemporalLineChartBuilder {
         setBounds(startDate, endDate);
     }
 
+    /**
+     * Sets the bounds of the x-axis based on the largest dataset.
+     */
     public void setBoundsBasedOnLargestDataset() {
 
         if (data.isEmpty()) {
@@ -137,11 +158,18 @@ public class TemporalLineChartBuilder {
         setBounds(startDate, endDate);
     }
 
+    /**
+     * Sets the bounds of the x-axis to auto (not recommended).
+     */
     public void setAutoBounds() {
         xAxis.setAutoRanging(true);
         formatTickLabels(DateTimeFormatter.ofPattern("dd.MM HH:mm"));
     }
 
+    /**
+     * Formats the tick labels of the x-axis.
+     * @param formatter Formatter.
+     */
     private void formatTickLabels(DateTimeFormatter formatter) {
         xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis, null, "s") {
             @Override
@@ -153,6 +181,10 @@ public class TemporalLineChartBuilder {
         });
     }
 
+    /**
+     * Splits the datasets into two groups. Attempts put datasets with similar values on the same group.
+     * @return The datasets split into two groups.
+     */
     private ArrayList<TreeMap<String, TreeMap<LocalDateTime, Double>>> splitData() {
 
         ArrayList<DataSplitter.DataObject> dataObjects = new ArrayList<>();
@@ -178,6 +210,10 @@ public class TemporalLineChartBuilder {
         return result;
     }
 
+    /**
+     * Returns the result as a single y-axis chart.
+     * @return The result as a single y-axis chart.
+     */
     public Region getResult() {
 
         var chart = new TemporalLineChart(xAxis, yAxis, data, units);
@@ -208,6 +244,11 @@ public class TemporalLineChartBuilder {
         return res;
     }
 
+    /**
+     * Returns the base chart used for the double y-axis chart.
+     * @param baseData Data for the base chart.
+     * @return The base chart used for the double y-axis chart.
+     */
     private TemporalLineChart getBaseChart(TreeMap<String, TreeMap<LocalDateTime, Double>> baseData) {
 
         TemporalLineChart chart = new TemporalLineChart(xAxis, yAxis, baseData, units);
@@ -219,6 +260,11 @@ public class TemporalLineChartBuilder {
         return chart;
     }
 
+    /**
+     * Returns the secondary chart used for the double y-axis chart.
+     * @param secondaryData Data for the secondary chart.
+     * @return The secondary chart used for the double y-axis chart.
+     */
     private TemporalLineChart getSecondaryChart(TreeMap<String, TreeMap<LocalDateTime, Double>> secondaryData) {
 
         setUpSecondaryAxes();
@@ -235,10 +281,14 @@ public class TemporalLineChartBuilder {
         return chart;
     }
 
+    /**
+     * Returns the result as a double y-axis chart.
+     * @return The result as a double y-axis chart.
+     */
     public Region getDoubleAxisResult() {
 
         StackPane st = new StackPane();
-        st.setMinSize(0, 0);
+        st.setMinSize(200, 150);
 
         var splitData = splitData();
 
@@ -266,6 +316,9 @@ public class TemporalLineChartBuilder {
         return res;
     }
 
+    /**
+     * Sets up the secondary axes.
+     */
     private void setUpSecondaryAxes() {
         yAxisSecondary.setSide(Side.RIGHT);
 
@@ -277,6 +330,12 @@ public class TemporalLineChartBuilder {
         xAxisSecondary.setTickLabelFormatter(xAxis.getTickLabelFormatter());
     }
 
+    /**
+     * Returns the legend for the double y-axis chart.
+     * @param baseChart Base chart.
+     * @param secondaryChart Secondary chart.
+     * @return The legend for the double y-axis chart.
+     */
     private HBox getLegend(TemporalLineChart baseChart, TemporalLineChart secondaryChart) {
 
         HBox legend = new HBox();
@@ -308,12 +367,15 @@ public class TemporalLineChartBuilder {
         legend.getChildren().addAll(spacer1, baseLegendBox, secondaryLegendBox, spacer2);
         secondaryLegendBox.setFillWidth(false);
 
-        //addDebugBorder(legend, Color.RED, 1);
         legend.setPadding(new Insets(0, 0, 5, 0));
 
         return legend;
     }
 
+    /**
+     * Styles the secondary chart.
+     * @param chart Secondary chart.
+     */
     private static void styleSecondaryChart(LineChart<Number, Number> chart) {
         chart.setVerticalZeroLineVisible(false);
         chart.setHorizontalZeroLineVisible(false);
@@ -328,6 +390,12 @@ public class TemporalLineChartBuilder {
         chart.lookup(".chart-title").setOpacity(0);
     }
 
+    /**
+     * Aligns the charts in the double y-axis chart.
+     * @param sp Stack pane.
+     * @param baseChart Base chart.
+     * @param secondaryChart Secondary chart.
+     */
     private static void alignCharts(StackPane sp, LineChart<Number, Number> baseChart, LineChart<Number, Number> secondaryChart) {
 
         sp.getChildren().clear();

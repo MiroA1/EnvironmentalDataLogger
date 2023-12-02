@@ -57,6 +57,7 @@ public class ApiCache implements Saveable, Loadable {
         // TODO: investigate, if time
         // it seems this can happen in rare cases, empty map probably turns to null after save + load
         if (cacheForLocation == null) {
+            System.out.println("Cache miss: cacheForLocation null");
             cache.put(locationKey, new TreeMap<>());
             cacheForLocation = cache.get(locationKey);
         }

@@ -6,10 +6,16 @@ import fi.tuni.environmentaldatalogger.save.Saveable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A thread-safe class for storing settings.
+ */
 public class Settings implements Saveable, Loadable {
 
     private static Settings instance = null;
 
+    /**
+     * Returns an instance of the settings.
+     */
     public static synchronized Settings getInstance() {
         if (instance == null) {
             instance = new Settings();

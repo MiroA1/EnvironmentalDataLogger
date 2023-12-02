@@ -186,6 +186,9 @@ public class MainView implements Saveable, Loadable {
         updateWeatherIcon();
     }
 
+    /**
+     * Launches a dialog for showing application information.
+     */
     private void launchInfoDialog() {
         try {
             // Fetch information about the APIs
@@ -377,8 +380,6 @@ public class MainView implements Saveable, Loadable {
      * Updates the time and date labels.
      */
     private void updateTime() {
-        // TODO: change to time of location ?
-        // clock format to hh:mm
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter clockFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -389,6 +390,9 @@ public class MainView implements Saveable, Loadable {
         });
     }
 
+    /**
+     * Updates the current data pane.
+     */
     private void updateCurrentDataPane() {
         Platform.runLater(() -> {
             currentDataPane.getChildren().clear();
@@ -430,6 +434,9 @@ public class MainView implements Saveable, Loadable {
         return gson.toJson(saveData);
     }
 
+    /**
+     * A class for saving the state of the application.
+     */
     private record SaveData(String grid, String settings, Location currentLocation) {
     }
 }
