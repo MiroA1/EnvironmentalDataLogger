@@ -40,7 +40,7 @@ public class ApiCache implements Saveable, Loadable {
             return;
         }
 
-        // just nuke the entire thing if it gets too big, partial deletion has its own problems, not worth the time
+        // just nuke the entire thing if it gets too big, partial deletion also has problems, not worth the time
         if (getCacheSize() > 20000) {
             System.out.println("Cache deleted");
             cache.clear();
@@ -55,7 +55,7 @@ public class ApiCache implements Saveable, Loadable {
         var cacheForLocation = cache.get(location);
 
         // TODO: investigate, if time
-        // it seems this can happen in rare cases, empty map probably turns to null after save + load
+        // it seems this can happen in rare cases, Gson probably turns an empty map to null after save + load
         if (cacheForLocation == null) {
             System.out.println("Cache miss: cacheForLocation null");
             cache.put(locationKey, new TreeMap<>());

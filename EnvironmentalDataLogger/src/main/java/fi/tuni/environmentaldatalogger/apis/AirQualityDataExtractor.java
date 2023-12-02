@@ -54,8 +54,6 @@ public class AirQualityDataExtractor implements DataExtractor {
      */
     @Override
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
-        // TODO: TimeZone changes? Current API provides timestamps in GMT+0 -> https://open-meteo.com/en/docs/air-quality-api
-        // For now allow only 3-day forecast; if longer period is allowed, json parsing must be improved
         LocalDateTime upperLimit = LocalDateTime.now().plusDays(MAX_FORECAST_DAYS);
         return new Pair<>(OLDEST_ENTRY, upperLimit);
     }
@@ -303,7 +301,6 @@ public class AirQualityDataExtractor implements DataExtractor {
                 for ( int i = 0; i < dateArray.length(); i++) {
                     String dateObject = dateArray.getString(i);
                     double paramValue = dataArray.getDouble(i);
-                    // TODO: make sure program can continue operations even if date cannot be parsed
                     LocalDateTime date = LocalDateTime.parse(dateObject);
                     airQualityData.get(abbr).put(date, paramValue);
                 }
