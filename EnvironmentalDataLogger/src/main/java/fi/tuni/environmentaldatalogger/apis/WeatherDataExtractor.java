@@ -26,7 +26,9 @@ public class WeatherDataExtractor implements DataExtractor {
     private static final String API_NAME = "Visual Crossing Weather";
     private static final String API_URL = "https://www.visualcrossing.com/weather-data";
     private static final String API_QUERY_BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/";
-    private static final String API_KEY = "NAJZYGFDHA4GEA5QXD7S4TZSL";
+
+    // back-up key: NAJZYGFDHA4GEA5QXD7S4TZSL
+    private static final String API_KEY = "GULTHD3XCRAMTGAG98BN8E63J";
 
     private OkHttpClient httpClient;
     private static WeatherDataExtractor instance;
