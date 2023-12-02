@@ -13,9 +13,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import java.io.File;
 import java.time.LocalDateTime;
@@ -55,11 +53,14 @@ public class CurrentDataPane extends GridPane {
         this.add(hbox2, 0,0);
         this.add(dataPane, 1, 0);
 
+        this.setStyle("-fx-background-color: #A1DEF6 ;");
 
         AnchorPane.setTopAnchor(this, 0.0);
         AnchorPane.setRightAnchor(this, 0.0);
         AnchorPane.setBottomAnchor(this, 0.0);
-        AnchorPane.setLeftAnchor(this, 10.0);
+        AnchorPane.setLeftAnchor(this, 0.0);
+
+
     }
 
     /**
@@ -81,17 +82,21 @@ public class CurrentDataPane extends GridPane {
      */
     private void initPieChartPane() throws ApiException {
 
-        pieChartPane = new GridPane();
-        pieChartPane.setHgap(50);
+        try {
+            PieChart pieChart = Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now(), getCurrentCoords());
+            pieChartPane = new GridPane();
+            pieChartPane.setHgap(50);
 
-        TableView<DataItem> colorTable = getColorTable();
-        GridPane.setConstraints(colorTable, 1, 0);
+            TableView<DataItem> colorTable = getColorTable();
+            GridPane.setConstraints(colorTable, 1, 0);
 
-        PieChart pieChart = Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now(), getCurrentCoords());
-        GridPane.setConstraints(pieChart, 0, 0);
-        pieChartPane.getChildren().add(pieChart);
-        pieChartPane.getChildren().add(colorTable);
+            GridPane.setConstraints(pieChart, 0, 0);
+            pieChartPane.getChildren().add(pieChart);
+            pieChartPane.getChildren().add(colorTable);
 
+        } catch (ApiException e) {
+            throw new ApiException("Error while getting data for pie chart", ApiException.ErrorCode.INVALID_RESPONSE);
+        }
     }
 
     /**
@@ -135,7 +140,7 @@ public class CurrentDataPane extends GridPane {
     }
 
     /**
-     * A static class for the data item.
+     * A static class for the data item used in color table.
      */
     public static class DataItem {
         private final ImageView imageView;
@@ -162,6 +167,7 @@ public class CurrentDataPane extends GridPane {
 
         hbox = new HBox();
         hbox.setPrefWidth(150);
+
     }
 
     /**

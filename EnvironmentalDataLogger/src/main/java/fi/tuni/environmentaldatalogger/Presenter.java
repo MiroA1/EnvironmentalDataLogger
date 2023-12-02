@@ -15,7 +15,6 @@ import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.scene.layout.Region;
 import javafx.util.Pair;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneOffset;
@@ -374,6 +373,10 @@ public class Presenter {
                 data.nameProperty().bind(Bindings.concat(
                         data.getName(), "   ", data.pieValueProperty(), " µg/m³")));
 
+        pieChart.setMaxWidth(1000);
+        pieChart.setMaxHeight(1000);
+        pieChart.setScaleX(1.1);
+        pieChart.setScaleY(1.1);
         pieChart.setLegendVisible(false);
 
         return pieChart;
