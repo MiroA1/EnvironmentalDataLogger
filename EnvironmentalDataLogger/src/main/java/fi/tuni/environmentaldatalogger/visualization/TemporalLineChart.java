@@ -1,10 +1,9 @@
 package fi.tuni.environmentaldatalogger.visualization;
 
 import fi.tuni.environmentaldatalogger.util.TimeUtils;
-import javafx.geometry.Insets;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -17,12 +16,22 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+/**
+ * A class for a temporal line chart.
+ */
 public class TemporalLineChart extends LineChart<Number, Number> {
 
     private TreeMap<String, String> colors = new TreeMap<>();
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
 
+    /**
+     * Constructor.
+     * @param xAxis The x-axis.
+     * @param yAxis The y-axis.
+     * @param data The data.
+     * @param units units mapped to parameters.
+     */
     public TemporalLineChart(NumberAxis xAxis, NumberAxis yAxis, TreeMap<String, TreeMap<LocalDateTime, Double>> data,
                              TreeMap<String, String> units) {
         super(xAxis, yAxis);
@@ -55,10 +64,19 @@ public class TemporalLineChart extends LineChart<Number, Number> {
         }
     }
 
+    /**
+     * Constructor.
+     * @param data The data.
+     * @param units units mapped to parameters.
+     */
     public TemporalLineChart(TreeMap<String, TreeMap<LocalDateTime, Double>> data, TreeMap<String, String> units) {
         this(new NumberAxis(), new NumberAxis(), data, units);
     }
 
+    /**
+     * Sets the color palette for the chart.
+     * @param colors The colors.
+     */
     public void setColors(ArrayList<String> colors) {
 
         this.getData().forEach(series -> {
@@ -79,10 +97,18 @@ public class TemporalLineChart extends LineChart<Number, Number> {
         });
     }
 
+    /**
+     * Returns the colors used.
+     * @return The colors.
+     */
     public TreeMap<String, String> getColors() {
         return colors;
     }
 
+    /**
+     * Returns the legend for the chart.
+     * @return The legend.
+     */
     public HBox getCustomLegend() {
 
         HBox legend = new HBox();

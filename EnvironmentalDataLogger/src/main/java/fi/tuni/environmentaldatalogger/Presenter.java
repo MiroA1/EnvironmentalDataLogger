@@ -14,9 +14,7 @@ import fi.tuni.environmentaldatalogger.apis.GeocodingService;
 import fi.tuni.environmentaldatalogger.util.Coordinate;
 import javafx.scene.chart.*;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
 import javafx.util.Pair;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneOffset;
@@ -26,7 +24,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-
+/**
+ * A class that acts as a mediator between the view and the model (APIs).
+ */
 public class Presenter {
 
     ArrayList<DataExtractor> APIs;
@@ -108,6 +108,12 @@ public class Presenter {
         return weatherApiInformation;
     }
 
+    /**
+     * Return the name of the weather status icon matching current weather conditions.
+     * @param coordinates coordinates for the geographic location of data
+     * @return name of the weather status icon
+     * @throws ApiException if an error occurs
+     */
     public String getWeatherStatusIcon(Coordinate coordinates) throws ApiException {
         return WeatherDataExtractor.getInstance().getCurrentIcon(coordinates);
     }
@@ -367,6 +373,10 @@ public class Presenter {
                 data.nameProperty().bind(Bindings.concat(
                         data.getName(), "   ", data.pieValueProperty(), " µg/m³")));
 
+        pieChart.setMaxWidth(1000);
+        pieChart.setMaxHeight(1000);
+        pieChart.setScaleX(1.1);
+        pieChart.setScaleY(1.1);
         pieChart.setLegendVisible(false);
 
         return pieChart;

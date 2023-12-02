@@ -49,18 +49,23 @@ public class AirQualityDataExtractor implements DataExtractor {
 
     /**
      * Return valid time range for the data
-     * @param params the parameter of interest
+     * @param params the parameters of interest
      * @return valid time range as Date pair
      */
     @Override
     public Pair<LocalDateTime, LocalDateTime> getValidDataRange(ArrayList<String> params) {
-        // TODO: TimeZone changes? Current API provides timestamps in GMT+0 -> https://open-meteo.com/en/docs/air-quality-api
-        // For now allow only 3-day forecast; if longer period is allowed, json parsing must be improved
         LocalDateTime upperLimit = LocalDateTime.now().plusDays(MAX_FORECAST_DAYS);
         return new Pair<>(OLDEST_ENTRY, upperLimit);
     }
 
 
+    /**
+     * Return data from the API
+     * @param params the parameters of interest
+     * @param range the time range of interest
+     * @param coordinates the coordinates of interest
+     * @return requested data
+     */
     @Override
     public TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime,
             LocalDateTime> range, Coordinate coordinates) throws ApiException {
@@ -112,6 +117,13 @@ public class AirQualityDataExtractor implements DataExtractor {
         return data;
     }
 
+    /**
+     * Return current data from the API
+     * @param params list of parameters
+     * @param coordinates coordinates of the location to fetch data for
+     * @return current data
+     * @throws ApiException if the API call fails
+     */
     @Override
     public TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException {
 
@@ -146,6 +158,11 @@ public class AirQualityDataExtractor implements DataExtractor {
         return fetchCurrentData(url.toString(), queryWords);
     }
 
+    /**
+     * Get the unit for the given parameter
+     * @param param the parameter of interest
+     * @return the unit of the parameter
+     */
     @Override
     public String getUnit(String param) {
         for (AirQualityParameter ap : AirQualityParameter.values()){
@@ -156,11 +173,19 @@ public class AirQualityDataExtractor implements DataExtractor {
         return "";
     }
 
+    /**
+     * Get the name of the API
+     * @return the name of the API
+     */
     @Override
     public String getApiName() {
         return API_NAME;
     }
 
+    /**
+     * Get the url of the API
+     * @return the url of the API
+     */
     @Override
     public String getApiUrl() {
         return API_URL;
@@ -226,6 +251,12 @@ public class AirQualityDataExtractor implements DataExtractor {
         return airQualityData;
     }
 
+    /**
+     * Fetch current data for the given parameter
+     * @param apiUrl constructed url for the query
+     * @param params the parameter which is queried
+     * @return data as a Treemap (Date,Double)
+     */
     private TreeMap<String, Double> fetchCurrentData(String apiUrl, ArrayList<String> params) throws ApiException {
         TreeMap<String, Double> airQualityData;
         Request request = new Request.Builder().url(apiUrl).build();
@@ -247,6 +278,12 @@ public class AirQualityDataExtractor implements DataExtractor {
         return airQualityData;
     }
 
+    /**
+     * Parse the data from the API
+     * @param json the json string to parse
+     * @param params the parameters which are queried
+     * @return data
+     */
     private TreeMap<String, TreeMap<LocalDateTime, Double>> parseAirQualityData(String json, ArrayList<String> params)
             throws ApiException {
 
@@ -264,7 +301,6 @@ public class AirQualityDataExtractor implements DataExtractor {
                 for ( int i = 0; i < dateArray.length(); i++) {
                     String dateObject = dateArray.getString(i);
                     double paramValue = dataArray.getDouble(i);
-                    // TODO: make sure program can continue operations even if date cannot be parsed
                     LocalDateTime date = LocalDateTime.parse(dateObject);
                     airQualityData.get(abbr).put(date, paramValue);
                 }
@@ -275,6 +311,12 @@ public class AirQualityDataExtractor implements DataExtractor {
         return airQualityData;
     }
 
+    /**
+     * Parse the current data from the API
+     * @param json the json string to parse
+     * @param params the parameters which are queried
+     * @return data
+     */
     private TreeMap<String, Double> parseCurrentAirQualityData(String json, ArrayList<String> params)
             throws ApiException {
 
@@ -320,23 +362,5 @@ public class AirQualityDataExtractor implements DataExtractor {
     private static final String DOMAINS = "domains=cams_europe";
     private static final int MAX_FORECAST_DAYS = 5;
     private static final LocalDateTime OLDEST_ENTRY = LocalDateTime.of(2022, 7, 29, 0, 0);
-
-    // json string for practising. TODO: Remove from the final version
-    private static final String json = "[{\"latitude\":61.249996,\"longitude\":23.45,\"generationtime_ms\":0.08606910705566406,\"utc_offset_seconds\":0,\"timezone\":\"GMT\",\"timezone_abbreviation\":\"GMT\",\"elevation\":121.0,\"hourly_units\":{\"time\":\"iso8601\",\"carbon_monoxide\":\"μg/m³\"},\"hourly\":{\"time\":[\"2023-10-10T00:00\",\"2023-10-10T01:00\",\"2023-10-10T02:00\",\"2023-10-10T03:00\",\"2023-10-10T04:00\",\"2023-10-10T05:00\",\"2023-10-10T06:00\",\"2023-10-10T07:00\",\"2023-10-10T08:00\",\"2023-10-10T09:00\",\"2023-10-10T10:00\",\"2023-10-10T11:00\",\"2023-10-10T12:00\",\"2023-10-10T13:00\",\"2023-10-10T14:00\",\"2023-10-10T15:00\",\"2023-10-10T16:00\",\"2023-10-10T17:00\",\"2023-10-10T18:00\",\"2023-10-10T19:00\",\"2023-10-10T20:00\",\"2023-10-10T21:00\",\"2023-10-10T22:00\",\"2023-10-10T23:00\",\"2023-10-11T00:00\",\"2023-10-11T01:00\",\"2023-10-11T02:00\",\"2023-10-11T03:00\",\"2023-10-11T04:00\",\"2023-10-11T05:00\",\"2023-10-11T06:00\",\"2023-10-11T07:00\",\"2023-10-11T08:00\",\"2023-10-11T09:00\",\"2023-10-11T10:00\",\"2023-10-11T11:00\",\"2023-10-11T12:00\",\"2023-10-11T13:00\",\"2023-10-11T14:00\",\"2023-10-11T15:00\",\"2023-10-11T16:00\",\"2023-10-11T17:00\",\"2023-10-11T18:00\",\"2023-10-11T19:00\",\"2023-10-11T20:00\",\"2023-10-11T21:00\",\"2023-10-11T22:00\",\"2023-10-11T23:00\",\"2023-10-12T00:00\",\"2023-10-12T01:00\",\"2023-10-12T02:00\",\"2023-10-12T03:00\",\"2023-10-12T04:00\",\"2023-10-12T05:00\",\"2023-10-12T06:00\",\"2023-10-12T07:00\",\"2023-10-12T08:00\",\"2023-10-12T09:00\",\"2023-10-12T10:00\",\"2023-10-12T11:00\",\"2023-10-12T12:00\",\"2023-10-12T13:00\",\"2023-10-12T14:00\",\"2023-10-12T15:00\",\"2023-10-12T16:00\",\"2023-10-12T17:00\",\"2023-10-12T18:00\",\"2023-10-12T19:00\",\"2023-10-12T20:00\",\"2023-10-12T21:00\",\"2023-10-12T22:00\",\"2023-10-12T23:00\",\"2023-10-13T00:00\",\"2023-10-13T01:00\",\"2023-10-13T02:00\",\"2023-10-13T03:00\",\"2023-10-13T04:00\",\"2023-10-13T05:00\",\"2023-10-13T06:00\",\"2023-10-13T07:00\",\"2023-10-13T08:00\",\"2023-10-13T09:00\",\"2023-10-13T10:00\",\"2023-10-13T11:00\",\"2023-10-13T12:00\",\"2023-10-13T13:00\",\"2023-10-13T14:00\",\"2023-10-13T15:00\",\"2023-10-13T16:00\",\"2023-10-13T17:00\",\"2023-10-13T18:00\",\"2023-10-13T19:00\",\"2023-10-13T20:00\",\"2023-10-13T21:00\",\"2023-10-13T22:00\",\"2023-10-13T23:00\",\"2023-10-14T00:00\",\"2023-10-14T01:00\",\"2023-10-14T02:00\",\"2023-10-14T03:00\",\"2023-10-14T04:00\",\"2023-10-14T05:00\",\"2023-10-14T06:00\",\"2023-10-14T07:00\",\"2023-10-14T08:00\",\"2023-10-14T09:00\",\"2023-10-14T10:00\",\"2023-10-14T11:00\",\"2023-10-14T12:00\",\"2023-10-14T13:00\",\"2023-10-14T14:00\",\"2023-10-14T15:00\",\"2023-10-14T16:00\",\"2023-10-14T17:00\",\"2023-10-14T18:00\",\"2023-10-14T19:00\",\"2023-10-14T20:00\",\"2023-10-14T21:00\",\"2023-10-14T22:00\",\"2023-10-14T23:00\"],\"carbon_monoxide\":[193.0,197.0,203.0,201.0,203.0,209.0,205.0,205.0,198.0,197.0,196.0,190.0,189.0,187.0,189.0,190.0,192.0,194.0,192.0,189.0,185.0,185.0,185.0,178.0,180.0,181.0,179.0,178.0,179.0,177.0,173.0,169.0,164.0,156.0,149.0,144.0,146.0,148.0,149.0,148.0,143.0,142.0,149.0,161.0,168.0,173.0,177.0,181.0,184.0,183.0,180.0,178.0,178.0,179.0,178.0,178.0,180.0,182.0,179.0,175.0,177.0,183.0,182.0,184.0,181.0,176.0,178.0,181.0,184.0,185.0,184.0,184.0,181.0,182.0,184.0,185.0,185.0,185.0,184.0,184.0,182.0,180.0,181.0,180.0,181.0,181.0,181.0,182.0,184.0,184.0,180.0,176.0,174.0,171.0,170.0,169.0,169.0,171.0,167.0,166.0,141.0,140.0,143.0,144.0,147.0,145.0,149.0,155.0,162.0,168.0,173.0,174.0,172.0,173.0,175.0,177.0,176.0,175.0,176.0,176.0]}},{\"latitude\":56.85,\"longitude\":13.650002,\"generationtime_ms\":0.04303455352783203,\"utc_offset_seconds\":0,\"timezone\":\"GMT\",\"timezone_abbreviation\":\"GMT\",\"elevation\":149.0,\"hourly_units\":{\"time\":\"iso8601\",\"carbon_monoxide\":\"μg/m³\"},\"hourly\":{\"time\":[\"2023-10-10T00:00\",\"2023-10-10T01:00\",\"2023-10-10T02:00\",\"2023-10-10T03:00\",\"2023-10-10T04:00\",\"2023-10-10T05:00\",\"2023-10-10T06:00\",\"2023-10-10T07:00\",\"2023-10-10T08:00\",\"2023-10-10T09:00\",\"2023-10-10T10:00\",\"2023-10-10T11:00\",\"2023-10-10T12:00\",\"2023-10-10T13:00\",\"2023-10-10T14:00\",\"2023-10-10T15:00\",\"2023-10-10T16:00\",\"2023-10-10T17:00\",\"2023-10-10T18:00\",\"2023-10-10T19:00\",\"2023-10-10T20:00\",\"2023-10-10T21:00\",\"2023-10-10T22:00\",\"2023-10-10T23:00\",\"2023-10-11T00:00\",\"2023-10-11T01:00\",\"2023-10-11T02:00\",\"2023-10-11T03:00\",\"2023-10-11T04:00\",\"2023-10-11T05:00\",\"2023-10-11T06:00\",\"2023-10-11T07:00\",\"2023-10-11T08:00\",\"2023-10-11T09:00\",\"2023-10-11T10:00\",\"2023-10-11T11:00\",\"2023-10-11T12:00\",\"2023-10-11T13:00\",\"2023-10-11T14:00\",\"2023-10-11T15:00\",\"2023-10-11T16:00\",\"2023-10-11T17:00\",\"2023-10-11T18:00\",\"2023-10-11T19:00\",\"2023-10-11T20:00\",\"2023-10-11T21:00\",\"2023-10-11T22:00\",\"2023-10-11T23:00\",\"2023-10-12T00:00\",\"2023-10-12T01:00\",\"2023-10-12T02:00\",\"2023-10-12T03:00\",\"2023-10-12T04:00\",\"2023-10-12T05:00\",\"2023-10-12T06:00\",\"2023-10-12T07:00\",\"2023-10-12T08:00\",\"2023-10-12T09:00\",\"2023-10-12T10:00\",\"2023-10-12T11:00\",\"2023-10-12T12:00\",\"2023-10-12T13:00\",\"2023-10-12T14:00\",\"2023-10-12T15:00\",\"2023-10-12T16:00\",\"2023-10-12T17:00\",\"2023-10-12T18:00\",\"2023-10-12T19:00\",\"2023-10-12T20:00\",\"2023-10-12T21:00\",\"2023-10-12T22:00\",\"2023-10-12T23:00\",\"2023-10-13T00:00\",\"2023-10-13T01:00\",\"2023-10-13T02:00\",\"2023-10-13T03:00\",\"2023-10-13T04:00\",\"2023-10-13T05:00\",\"2023-10-13T06:00\",\"2023-10-13T07:00\",\"2023-10-13T08:00\",\"2023-10-13T09:00\",\"2023-10-13T10:00\",\"2023-10-13T11:00\",\"2023-10-13T12:00\",\"2023-10-13T13:00\",\"2023-10-13T14:00\",\"2023-10-13T15:00\",\"2023-10-13T16:00\",\"2023-10-13T17:00\",\"2023-10-13T18:00\",\"2023-10-13T19:00\",\"2023-10-13T20:00\",\"2023-10-13T21:00\",\"2023-10-13T22:00\",\"2023-10-13T23:00\",\"2023-10-14T00:00\",\"2023-10-14T01:00\",\"2023-10-14T02:00\",\"2023-10-14T03:00\",\"2023-10-14T04:00\",\"2023-10-14T05:00\",\"2023-10-14T06:00\",\"2023-10-14T07:00\",\"2023-10-14T08:00\",\"2023-10-14T09:00\",\"2023-10-14T10:00\",\"2023-10-14T11:00\",\"2023-10-14T12:00\",\"2023-10-14T13:00\",\"2023-10-14T14:00\",\"2023-10-14T15:00\",\"2023-10-14T16:00\",\"2023-10-14T17:00\",\"2023-10-14T18:00\",\"2023-10-14T19:00\",\"2023-10-14T20:00\",\"2023-10-14T21:00\",\"2023-10-14T22:00\",\"2023-10-14T23:00\"],\"carbon_monoxide\":[181.0,182.0,184.0,185.0,192.0,201.0,205.0,201.0,190.0,180.0,178.0,177.0,180.0,183.0,186.0,182.0,186.0,184.0,181.0,186.0,176.0,165.0,165.0,163.0,165.0,173.0,184.0,198.0,194.0,185.0,175.0,165.0,153.0,143.0,141.0,137.0,138.0,140.0,149.0,157.0,163.0,166.0,170.0,175.0,178.0,179.0,182.0,182.0,181.0,180.0,178.0,176.0,174.0,174.0,173.0,172.0,172.0,173.0,174.0,174.0,173.0,171.0,171.0,171.0,171.0,171.0,171.0,170.0,169.0,170.0,171.0,172.0,175.0,176.0,178.0,178.0,178.0,178.0,179.0,182.0,181.0,178.0,174.0,174.0,176.0,178.0,183.0,167.0,148.0,140.0,128.0,125.0,122.0,121.0,124.0,122.0,133.0,152.0,165.0,170.0,170.0,173.0,175.0,175.0,175.0,175.0,175.0,175.0,174.0,173.0,171.0,171.0,173.0,172.0,175.0,177.0,175.0,174.0,173.0,177.0]}}]";
-
-    /*  Ilmatieteen laitoksen API query elementit:
-    ================================================
-
-    private static final String API_BASE_URL = "https://opendata.fmi.fi/wfs?s" +
-    "service=WFS&version=2.0.0&request=GetFeature&storedquery_id=fmi::" +
-    "observations::airquality::hourly::timevaluepair";
-    private static final String START = "&starttime=";
-    private static final String ENDTIME = "&endtime=";
-    private static final String PLACE = "&place=";
-    private static final String MAX_LOCATIONS = "&maxlocations=";
-    private static final String CRS = "&crs=";
-    private static final String TIME_STEP = "×tep=";
-
-    */
 
 }

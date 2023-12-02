@@ -54,19 +54,5 @@ public class TimeUtils {
      */
     public static long getEpochSecond(LocalDateTime date) {
         return date.toEpochSecond(ZoneOffset.UTC);
-        //ZoneOffset.systemDefault().getRules().getOffset(date)
-    }
-
-    public static Pair<LocalDateTime, LocalDateTime> dateRangeDifference(Pair<LocalDateTime, LocalDateTime> range1,
-                                                                         Pair<LocalDateTime, LocalDateTime> range2) {
-
-        LocalDateTime start = range1.getKey().isBefore(range2.getKey()) ? range1.getKey() : range2.getKey();
-        LocalDateTime end = range1.getValue().isAfter(range2.getValue()) ? range1.getValue() : range2.getValue();
-
-        return new Pair<>(start, end);
-    }
-
-    public static Duration rangeDuration(Pair<LocalDateTime, LocalDateTime> range) {
-        return Duration.between(range.getKey(), range.getValue());
     }
 }

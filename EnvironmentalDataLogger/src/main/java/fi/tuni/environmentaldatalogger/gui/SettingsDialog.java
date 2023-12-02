@@ -2,9 +2,13 @@ package fi.tuni.environmentaldatalogger.gui;
 
 import fi.tuni.environmentaldatalogger.Settings;
 import fi.tuni.environmentaldatalogger.save.SaveLoad;
+import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
+/**
+ * Dialog for changing settings.
+ */
 public class SettingsDialog extends Dialog<Boolean> {
 
     private final CheckBox enableDoubleYAxisCheckBox;
@@ -23,11 +27,13 @@ public class SettingsDialog extends Dialog<Boolean> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Restore default state");
             alert.setHeaderText("Restore default state of the program?");
-            alert.setContentText("All saved data will be lost.");
+            alert.setContentText("All saved data will be lost and program will close.");
             alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
             alert.showAndWait().ifPresent(type -> {
                 if (type == ButtonType.YES) {
                     SaveLoad.wipeSaves();
+                    this.close();
+                    Platform.exit();
                 }
             });
         });
@@ -48,7 +54,10 @@ public class SettingsDialog extends Dialog<Boolean> {
         });
     }
 
-    // Method to show the dialog and get the result
+    /**
+     * Shows the dialog and returns the result.
+     * @return true if the user pressed OK, false otherwise
+     */
     public Boolean showDialog() {
         return showAndWait().orElse(false);
     }

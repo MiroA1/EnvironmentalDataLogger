@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
 import fi.tuni.environmentaldatalogger.Settings;
-import fi.tuni.environmentaldatalogger.apis.ApiCache;
 import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
 import fi.tuni.environmentaldatalogger.util.ViewUtils;
@@ -21,7 +20,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.SVGPath;
 
 
 import java.io.IOException;
@@ -163,7 +161,7 @@ public class MainView implements Saveable, Loadable {
      */
     private void launchCoordinateDialog() {
 
-        CoordinateDialog dialog = new CoordinateDialog();
+        LocationDialog dialog = new LocationDialog();
 
         dialog.showAndWait().ifPresent(result -> {
             if (result == null) {

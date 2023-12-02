@@ -371,6 +371,10 @@ public class ChartViewerElement extends VBox implements Initializable, GridEleme
         }
     }
 
+    /**
+     * Returns the coordinates used for data query.
+     * @return Coordinates as Coordinate object.
+     */
     private Coordinate getCoords() {
 
         String location = locationTextField.getText();

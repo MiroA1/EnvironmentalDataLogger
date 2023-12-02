@@ -45,6 +45,9 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
 
     }
 
+    /**
+     * Loads all charts in the grid.
+     */
     public void loadAllCharts() {
         ObservableList<Node> children = this.getChildren();
 
@@ -55,10 +58,18 @@ public class ChartGrid extends GridPane implements Saveable, Loadable {
         }
     }
 
+    /**
+     * Returns the number of columns in the grid.
+     * @return number of columns
+     */
     public int getGridColumnCount() {
         return grid.size();
     }
 
+    /**
+     * Returns the number of rows in the grid.
+     * @return number of rows
+     */
     public int getGridRowCount() {
         return grid.get(0).size();
     }
