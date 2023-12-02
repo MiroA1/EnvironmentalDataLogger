@@ -3,12 +3,9 @@ package fi.tuni.environmentaldatalogger.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import fi.tuni.environmentaldatalogger.save.Loadable;
-import fi.tuni.environmentaldatalogger.save.Saveable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -113,6 +110,11 @@ public class Location {
 
     }
 
+    /**
+     * Creates a Location object based on the user's IP address using an IP geolocation API.
+     * @return Location object
+     * @throws IOException if an I/O error occurs
+     */
     public static Location fromIP() throws IOException {
         String urlstring = "http://ip-api.com/json/";
 

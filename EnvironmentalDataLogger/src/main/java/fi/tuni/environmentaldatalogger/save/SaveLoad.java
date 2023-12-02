@@ -62,17 +62,15 @@ public class SaveLoad {
         }
     }
 
+    /**
+     * Deletes all save files.
+     */
     public static void wipeSaves() {
         File folder = new File(saveFolderName);
         File[] files = folder.listFiles();
 
         if (files != null) {
             for (File file : files) {
-
-                if (file.getName().equals("air_quality_cache.json") || file.getName().equals("weather_cache.json")) {
-                    continue;
-                }
-
                 file.delete();
             }
         }

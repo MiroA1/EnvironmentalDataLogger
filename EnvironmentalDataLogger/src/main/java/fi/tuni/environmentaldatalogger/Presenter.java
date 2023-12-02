@@ -24,7 +24,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-
+/**
+ * A class that acts as a mediator between the view and the model (APIs).
+ */
 public class Presenter {
 
     ArrayList<DataExtractor> APIs;
@@ -106,6 +108,12 @@ public class Presenter {
         return weatherApiInformation;
     }
 
+    /**
+     * Return the name of the weather status icon matching current weather conditions.
+     * @param coordinates coordinates for the geographic location of data
+     * @return name of the weather status icon
+     * @throws ApiException if an error occurs
+     */
     public String getWeatherStatusIcon(Coordinate coordinates) throws ApiException {
         return WeatherDataExtractor.getInstance().getCurrentIcon(coordinates);
     }
