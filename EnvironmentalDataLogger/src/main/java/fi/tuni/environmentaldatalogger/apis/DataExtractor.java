@@ -61,7 +61,7 @@ public interface DataExtractor {
     /**
      * Returns API name
      * @return String name of used API
-     * /
+     */
     String getApiName();
 
     /**
