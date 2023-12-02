@@ -10,8 +10,14 @@ import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
 
+/**
+ * Dialog element to choose coordinates or location for the application.
+ */
 public class CoordinateDialog extends Dialog<Location> {
 
+    /**
+     * Constructor for the dialog
+     */
     public CoordinateDialog() {
         super();
 
