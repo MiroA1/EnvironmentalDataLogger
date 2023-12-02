@@ -35,6 +35,7 @@ public interface DataExtractor {
      * @param range time range fro data
      * @param coordinates coordinates of the location to fetch data for
      * @return map(param, map(time, value))
+     * @throws ApiException, if fetching data fails
      */
     TreeMap<String, TreeMap<LocalDateTime, Double>> getData(ArrayList<String> params, Pair<LocalDateTime,
             LocalDateTime> range, Coordinate coordinates) throws ApiException;
@@ -45,6 +46,7 @@ public interface DataExtractor {
      * @param params list of parameters
      * @param coordinates coordinates of the location to fetch data for
      * @return map(param, value)
+     * @throws ApiException, if fetching data fails
      */
     TreeMap<String, Double> getCurrentData(ArrayList<String> params, Coordinate coordinates) throws ApiException;
 
@@ -58,11 +60,13 @@ public interface DataExtractor {
 
     /**
      * Returns API name
+     * @return String name of used API
      */
     String getApiName();
 
     /**
      * Returns API base URL
+     * @return String, URL of the used API
      */
     String getApiUrl();
 

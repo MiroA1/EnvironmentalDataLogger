@@ -103,7 +103,7 @@ public class WeatherDataExtractor implements DataExtractor {
         TreeMap<String, TreeMap<LocalDateTime, Double>> resultMap = new TreeMap<>();
 
         ArrayList<String> remainingParams = new ArrayList<>();
-        
+
         Duration margin = Duration.ofDays(1);
         if (!range.getValue().isAfter(range.getKey().plusDays(1))) {
             margin = Duration.ofHours(1);

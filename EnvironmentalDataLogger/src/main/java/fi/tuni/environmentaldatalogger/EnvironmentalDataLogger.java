@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Application to showcase graphical representations of weather and air quality data.
+ */
 public class EnvironmentalDataLogger extends Application implements Initializable {
 
     // needed to fix a very specific bug with double y-axis line charts

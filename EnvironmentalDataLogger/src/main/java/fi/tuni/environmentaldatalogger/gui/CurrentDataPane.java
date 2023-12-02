@@ -47,7 +47,7 @@ public class CurrentDataPane extends GridPane {
         initHBox2();
         initDataPane();
 
-        this.setPadding(new Insets(30, 0, 0, 0));
+        this.setPadding(new Insets(30, 10, 10, 10));
 
         this.add(pieChartPane, 3, 0);
         this.add(hbox, 2, 0);
@@ -81,7 +81,7 @@ public class CurrentDataPane extends GridPane {
      *
      * @throws ApiException if an error occurs while getting the data.
      */
-    private void initPieChartPane() throws ApiException {
+    private void initPieChartPane() {
 
         try {
             PieChart pieChart = Presenter.getInstance().getDataAsPieChart(AirQualityDataExtractor.getInstance().getValidParameters(), LocalDateTime.now(), getCurrentCoords());
@@ -96,7 +96,7 @@ public class CurrentDataPane extends GridPane {
             pieChartPane.getChildren().add(colorTable);
 
         } catch (ApiException e) {
-
+            notificationBar.pushAlertNotification(e.getMessage());
         }
     }
 
@@ -147,6 +147,11 @@ public class CurrentDataPane extends GridPane {
         private final ImageView imageView;
         private final String stringValue;
 
+        /**
+         * Constructor
+         * @param imageView placeholder for the image
+         * @param stringValue placeholder for descriptive text
+         */
         public DataItem(ImageView imageView, String stringValue) {
             this.imageView = imageView;
             this.stringValue = stringValue;
@@ -203,7 +208,7 @@ public class CurrentDataPane extends GridPane {
      *
      * @throws ApiException if an error occurs while getting the data.
      */
-    private void initDataPane() throws ApiException {
+    private void initDataPane() {
 
         dataPane = new GridPane();
 
@@ -211,30 +216,35 @@ public class CurrentDataPane extends GridPane {
         dataPane.setVgap(10);
 
         Presenter presenter = Presenter.getInstance();
-        TreeMap<String, String> currentDataMap = presenter.getCurrentData(presenter.getValidParameters(), getCurrentCoords());
 
-        int rowIndex = 0;
+        TreeMap<String, String> currentDataMap = null;
+        try {
+            currentDataMap = presenter.getCurrentData(presenter.getValidParameters(), getCurrentCoords());
+            int rowIndex = 0;
 
-        String temperatureKey = "Temperature";
-        String temperatureValue = currentDataMap.get(temperatureKey);
-        addLabelPair(temperatureKey, temperatureValue, rowIndex);
-        rowIndex++;
+            String temperatureKey = "Temperature";
+            String temperatureValue = currentDataMap.get(temperatureKey);
+            addLabelPair(temperatureKey, temperatureValue, rowIndex);
+            rowIndex++;
 
-        String feelsLikeKey = "Feels like";
-        String feelsLikeValue = currentDataMap.get(feelsLikeKey);
-        addLabelPair(feelsLikeKey, feelsLikeValue, rowIndex);
-        rowIndex++;
+            String feelsLikeKey = "Feels like";
+            String feelsLikeValue = currentDataMap.get(feelsLikeKey);
+            addLabelPair(feelsLikeKey, feelsLikeValue, rowIndex);
+            rowIndex++;
 
-        for (Map.Entry<String, String> entry : currentDataMap.entrySet()) {
-            String param = entry.getKey();
-            String value = entry.getValue();
+            for (Map.Entry<String, String> entry : currentDataMap.entrySet()) {
+                String param = entry.getKey();
+                String value = entry.getValue();
 
-            if (!param.equals(temperatureKey) && !param.equals(feelsLikeKey)) {
-                addLabelPair(param, value, rowIndex);
-                rowIndex++;
+                if (!param.equals(temperatureKey) && !param.equals(feelsLikeKey)) {
+                    addLabelPair(param, value, rowIndex);
+                    rowIndex++;
+                }
             }
-        }
+        } catch (ApiException e) {
+            notificationBar.pushAlertNotification(e.getMessage());
 
+        }
     }
 }
 
