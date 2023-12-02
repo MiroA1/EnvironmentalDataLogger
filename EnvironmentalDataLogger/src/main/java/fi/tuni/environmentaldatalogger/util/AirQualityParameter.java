@@ -1,7 +1,7 @@
 package fi.tuni.environmentaldatalogger.util;
 
 /**
- * Possible util enum class?
+ * A class for handling air quality parameters.
  */
 public enum AirQualityParameter {
     // Currently used air quality parameters, open-meteo
@@ -19,25 +19,57 @@ public enum AirQualityParameter {
     private final String queryWord;
     private final String unit;
 
+    /**
+     * Constructor.
+     * @param abbreviation abbreviation of the parameter
+     * @param name name of the parameter
+     * @param queryWord query word used in the API
+     * @param unit unit of the parameter
+     */
     AirQualityParameter(String abbreviation, String name, String queryWord, String unit) {
         this.abbreviation = abbreviation;
         this.name = name;
         this.queryWord = queryWord;
         this.unit = unit;
     }
+
+    /**
+     * Returns the abbreviation of the parameter.
+     * @return abbreviation
+     */
     public String getAbbreviation(){
         return abbreviation;
     }
+
+    /**
+     * Returns the name of the parameter.
+     * @return name
+     */
     public String getName(){
         return name;
     }
+
+    /**
+     * Returns the query word used in the API.
+     * @return query word
+     */
     public String getQueryWord(){
         return queryWord;
     }
+
+    /**
+     * Returns the unit of the parameter.
+     * @return unit
+     */
     public String getUnit(){
         return unit;
     }
 
+    /**
+     * Returns the parameter with the given name.
+     * @param name name of the parameter
+     * @return parameter with the given name
+     */
     public static AirQualityParameter fromName(String name) {
         for (AirQualityParameter parameter : values()) {
             if (parameter.name.equals(name)) {
@@ -47,6 +79,11 @@ public enum AirQualityParameter {
         return null; // name doesn't match any enum constant
     }
 
+    /**
+     * Returns the parameter with the given query word.
+     * @param queryWord query word of the parameter
+     * @return parameter with the given query word
+     */
     public static AirQualityParameter fromQueryWord(String queryWord) {
 
         for (AirQualityParameter parameter : values()) {
@@ -58,19 +95,3 @@ public enum AirQualityParameter {
         throw new IllegalArgumentException("No enum constant with query word " + queryWord);
     }
 }
-
-
-
-/*
-    // Currently used air quality parameters, fmi
-    SO2("SO2","Sulphur dioxide", "SO2_PT1H_avg"),
-    NO("NO","Nitrogen oxide", "NO_PT1H_avg"),
-    NO2("NO2","Nitrogen dioxide", "NO2_PT1H_avg"),
-    O3("O3","Ozone", "O3_PT1H_avg"),
-    TRSC("TRSC","Total Reduced Sulphur", "TRSC_PT1H_avg"),
-    CO("CO","Carbon monoxide", "CO_PT1H_avg"),
-    PM10("PM10","Particulate matter, diameter 10µm", "PM10_PT1H_avg"),
-    PM2_5("PM2.5","Particulate matter, diameter 2.5µm", "PM25_PT1H_avg"),
-    AIR_QUALITY_INDEX("AQI","European Air Quality Index (AQI)",
-            "AQINDEX_PT1H_avg");
-*/

@@ -10,12 +10,15 @@ import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
 
-public class CoordinateDialog extends Dialog<Location> {
+/**
+ * Dialog for inputting location.
+ */
+public class LocationDialog extends Dialog<Location> {
 
-    public CoordinateDialog() {
+    public LocationDialog() {
         super();
 
-        this.setTitle("Coordinate Input");
+        this.setTitle("Location Input");
 
         TextField locationNameField = new TextField();
 

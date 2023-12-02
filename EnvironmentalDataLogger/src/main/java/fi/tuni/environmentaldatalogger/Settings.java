@@ -23,6 +23,7 @@ public class Settings implements Saveable, Loadable {
         return instance;
     }
 
+    // a setting that specifies whether to use double y-axis line charts
     public AtomicBoolean useDoubleAxis = new AtomicBoolean(true);
 
     @Override
@@ -46,6 +47,9 @@ public class Settings implements Saveable, Loadable {
         return gson.toJson(saveData);
     }
 
+    /**
+     * A class for saving settings.
+     */
     private record SaveData(boolean useDoubleAxis) {
     }
 }
