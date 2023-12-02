@@ -67,7 +67,7 @@ public class MainView implements Saveable, Loadable {
             "fog", "foggy.png",
             "wind", "windy.png",
             "cloudy", "cloudy.png",
-            "partly-cloudy-day", "partly_cloud_day.png",
+            "partly-cloudy-day", "partly_cloudy_day.png",
             "partly-cloudy-night", "partly_cloudy_night.png",
             "clear-day", "clear_day.png",
             "clear-night", "clear_night.png"
