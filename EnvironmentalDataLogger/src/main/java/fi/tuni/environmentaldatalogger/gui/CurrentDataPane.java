@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static fi.tuni.environmentaldatalogger.gui.MainView.getCurrentCoords;
+import static fi.tuni.environmentaldatalogger.gui.MainView.notificationBar;
 
 /**
  * A class for the current data pane.
@@ -95,7 +96,7 @@ public class CurrentDataPane extends GridPane {
             pieChartPane.getChildren().add(colorTable);
 
         } catch (ApiException e) {
-            throw new ApiException("Error while getting data for pie chart", ApiException.ErrorCode.INVALID_RESPONSE);
+
         }
     }
 
