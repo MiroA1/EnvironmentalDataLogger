@@ -8,7 +8,7 @@ module fi.tuni.environmentaldatalogger {
     requires com.google.gson;
     requires jopencage;
 
-    opens fi.tuni.environmentaldatalogger to javafx.fxml;
+    opens fi.tuni.environmentaldatalogger to javafx.fxml, com.google.gson;
     exports fi.tuni.environmentaldatalogger;
     exports fi.tuni.environmentaldatalogger.util;
     opens fi.tuni.environmentaldatalogger.util to javafx.fxml, com.google.gson;

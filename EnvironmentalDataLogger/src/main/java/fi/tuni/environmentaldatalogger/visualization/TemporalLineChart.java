@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.visualization;
 
+import fi.tuni.environmentaldatalogger.util.TimeUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -12,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -21,31 +23,46 @@ public class TemporalLineChart extends LineChart<Number, Number> {
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
 
-    public TemporalLineChart(NumberAxis xAxis, NumberAxis yAxis) {
+    public TemporalLineChart(NumberAxis xAxis, NumberAxis yAxis, TreeMap<String, TreeMap<LocalDateTime, Double>> data,
+                             TreeMap<String, String> units) {
         super(xAxis, yAxis);
         this.xAxis = xAxis;
         this.yAxis = yAxis;
-        init();
-    }
 
-    public TemporalLineChart() {
-        this(new NumberAxis(), new NumberAxis());
-    }
-
-    private void init() {
         xAxis.setForceZeroInRange(false);
         xAxis.setAutoRanging(false);
 
         yAxis.setForceZeroInRange(false);
 
         this.setLegendVisible(false);
+
+        for (var param : data.keySet()) {
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+
+            for (var entry : data.get(param).entrySet()) {
+                series.getData().add(new XYChart.Data<>(TimeUtils.getEpochSecond(entry.getKey()), entry.getValue()));
+            }
+
+            series.setName(param + " (" + units.get(param) + ")");
+            this.getData().add(series);
+
+            if (data.get(param).size() > 49) {
+                for (XYChart.Data<Number, Number> dataPoint : series.getData()) {
+                    Node lineSymbol = dataPoint.getNode().lookup(".chart-line-symbol");
+                    lineSymbol.setStyle("-fx-background-color: transparent;");
+                }
+            }
+        }
+    }
+
+    public TemporalLineChart(TreeMap<String, TreeMap<LocalDateTime, Double>> data, TreeMap<String, String> units) {
+        this(new NumberAxis(), new NumberAxis(), data, units);
     }
 
     public void setColors(ArrayList<String> colors) {
 
-        // TODO: make sure no overflow
         this.getData().forEach(series -> {
-            int index = this.getData().indexOf(series);
+            int index = this.getData().indexOf(series) % colors.size();
             this.colors.put(series.getName(), colors.get(index));
             series.getNode().setStyle("-fx-stroke: " + colors.get(index) + ";");
 
@@ -85,7 +102,11 @@ public class TemporalLineChart extends LineChart<Number, Number> {
             seriesBox.setSpacing(3);
             seriesBox.setAlignment(Pos.CENTER);
 
-            seriesBox.getChildren().addAll(icon, new Label(colorData.getKey()));
+            Label label = new Label(colorData.getKey());
+            label.setMinHeight(18);
+            label.setMaxHeight(18);
+
+            seriesBox.getChildren().addAll(icon, label);
             legend.getChildren().add(seriesBox);
         }
 

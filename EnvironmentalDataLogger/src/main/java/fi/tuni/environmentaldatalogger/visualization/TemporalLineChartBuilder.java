@@ -9,13 +9,8 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.util.Pair;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -25,16 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.max;
-
+/**
+ * Builder for a line chart with a time based x-axis. Supports multiple y-axes.
+ */
 public class TemporalLineChartBuilder {
 
+    private final static ArrayList<String> baseColors = new ArrayList<>(List.of("#c90823", "#f43d25", "#fd8c3c", "#febf5a", "#ffe793"));
+    private final static ArrayList<String> secondaryColors = new ArrayList<>(List.of("#1373b2", "#42a6cc", "#7accc4", "#b4e2ba", "#daf0d4"));
     private final TreeMap<String, TreeMap<LocalDateTime, Double>> data;
     private final TreeMap<String, String> units;
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
     private final NumberAxis yAxisSecondary;
+    private final NumberAxis xAxisSecondary;
     private String title;
 
     public TemporalLineChartBuilder() {
@@ -42,11 +40,11 @@ public class TemporalLineChartBuilder {
         xAxis = new NumberAxis();
         yAxis = new NumberAxis();
         yAxisSecondary = new NumberAxis();
+        xAxisSecondary = new NumberAxis();
         units = new TreeMap<>();
 
         yAxis.setForceZeroInRange(false);
 
-        // necessary for time based charts
         xAxis.setForceZeroInRange(false);
         xAxis.setAutoRanging(false);
     }
@@ -155,7 +153,6 @@ public class TemporalLineChartBuilder {
         });
     }
 
-    // TODO: no need for maps
     private ArrayList<TreeMap<String, TreeMap<LocalDateTime, Double>>> splitData() {
 
         ArrayList<DataSplitter.DataObject> dataObjects = new ArrayList<>();
@@ -182,20 +179,10 @@ public class TemporalLineChartBuilder {
     }
 
     public Region getResult() {
-        var chart = new TemporalLineChart(xAxis, yAxis);
+
+        var chart = new TemporalLineChart(xAxis, yAxis, data, units);
 
         chart.setTitle(title);
-
-        for (var param : data.keySet()) {
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
-            for (var entry : data.get(param).entrySet()) {
-                series.getData().add(new XYChart.Data<>(TimeUtils.getEpochSecond(entry.getKey()), entry.getValue()));
-            }
-
-            series.setName(param + " (" + units.get(param) + ")");
-            chart.getData().add(series);
-        }
 
         chart.setColors(baseColors);
         chart.setLegendVisible(false);
@@ -222,29 +209,28 @@ public class TemporalLineChartBuilder {
     }
 
     private TemporalLineChart getBaseChart(TreeMap<String, TreeMap<LocalDateTime, Double>> baseData) {
-        TemporalLineChart chart = new TemporalLineChart(xAxis, yAxis);
 
+        TemporalLineChart chart = new TemporalLineChart(xAxis, yAxis, baseData, units);
+
+        chart.setColors(baseColors);
         chart.setTitle(title);
-
-        for (var param : baseData.keySet()) {
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
-            for (var entry : baseData.get(param).entrySet()) {
-                series.getData().add(new XYChart.Data<>(TimeUtils.getEpochSecond(entry.getKey()), entry.getValue()));
-            }
-
-            series.setName(param + " (" + units.get(param) + ")");
-            chart.getData().add(series);
-
-            if (baseData.get(param).size() > 49) {
-                for (XYChart.Data<Number, Number> dataPoint : series.getData()) {
-                    Node lineSymbol = dataPoint.getNode().lookup(".chart-line-symbol");
-                    lineSymbol.setStyle("-fx-background-color: transparent;");
-                }
-            }
-        }
-
         chart.getXAxis().setVisible(false);
+
+        return chart;
+    }
+
+    private TemporalLineChart getSecondaryChart(TreeMap<String, TreeMap<LocalDateTime, Double>> secondaryData) {
+
+        setUpSecondaryAxes();
+
+        TemporalLineChart chart = new TemporalLineChart(xAxisSecondary, yAxisSecondary, secondaryData, units);
+        chart.getStyleClass().add("secondary-chart");
+
+        chart.setColors(secondaryColors);
+        chart.setTitle(title);
+        chart.getXAxis().setVisible(false);
+
+        styleSecondaryChart(chart);
 
         return chart;
     }
@@ -254,10 +240,34 @@ public class TemporalLineChartBuilder {
         StackPane st = new StackPane();
         st.setMinSize(0, 0);
 
+        var splitData = splitData();
 
+        var baseData = splitData.get(0);
+        var secondaryData = splitData.get(1);
+
+        TemporalLineChart baseChart = getBaseChart(baseData);
+        TemporalLineChart secondaryChart = getSecondaryChart(secondaryData);
+
+        alignCharts(st, baseChart, secondaryChart);
+
+        VBox res = new VBox();
+        res.getChildren().addAll(st, getLegend(baseChart, secondaryChart));
+
+        // A terrible workaround to have the charts aligned properly when the window is maximized
+        Platform.runLater( () -> {
+                EnvironmentalDataLogger.primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+                    Platform.runLater(() -> alignCharts(st, baseChart, secondaryChart));
+                });
+            }
+        );
+
+        st.setPrefHeight(500);
+
+        return res;
+    }
+
+    private void setUpSecondaryAxes() {
         yAxisSecondary.setSide(Side.RIGHT);
-
-        NumberAxis xAxisSecondary = new NumberAxis();
 
         xAxisSecondary.setForceZeroInRange(false);
         xAxisSecondary.setAutoRanging(false);
@@ -265,58 +275,6 @@ public class TemporalLineChartBuilder {
         xAxisSecondary.setUpperBound(xAxis.getUpperBound());
         xAxisSecondary.setTickUnit(xAxis.getTickUnit());
         xAxisSecondary.setTickLabelFormatter(xAxis.getTickLabelFormatter());
-
-        TemporalLineChart chart = new TemporalLineChart(xAxisSecondary, yAxisSecondary);
-        chart.getStyleClass().add("secondary-chart");
-
-        var splitData = splitData();
-
-        var baseData = splitData.get(0);
-        var secondaryData = splitData.get(1);
-
-        for (var param : secondaryData.keySet()) {
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
-            for (var entry : secondaryData.get(param).entrySet()) {
-                series.getData().add(new XYChart.Data<>(TimeUtils.getEpochSecond(entry.getKey()), entry.getValue()));
-            }
-
-            series.setName(param + " (" + units.get(param) + ")");
-            chart.getData().add(series);
-        }
-
-
-        var baseChart = getBaseChart(baseData);
-
-        baseChart.setColors(baseColors);
-        chart.setColors(secondaryColors);
-
-        chart.setLegendVisible(false);
-        baseChart.setLegendVisible(false);
-
-        chart.setTitle(baseChart.getTitle());
-
-        styleSecondaryChart(chart);
-        alignCharts(st, baseChart, chart);
-
-        //addDebugBorder(baseChart, Color.GREEN, 1);
-        //addDebugBorder(st, Color.BLUE, 1);
-
-        VBox res = new VBox();
-        res.getChildren().addAll(st, getLegend(baseChart, chart));
-
-        // A terrible workaround to have the charts aligned properly when the window is maximized
-        Platform.runLater( () -> {
-                EnvironmentalDataLogger.primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-                    Platform.runLater(() -> alignCharts(st, baseChart, chart));
-                });
-            }
-        );
-
-
-        st.setPrefHeight(500);
-
-        return res;
     }
 
     private HBox getLegend(TemporalLineChart baseChart, TemporalLineChart secondaryChart) {
@@ -361,12 +319,8 @@ public class TemporalLineChartBuilder {
         chart.setHorizontalZeroLineVisible(false);
         chart.setVerticalGridLinesVisible(false);
         chart.setHorizontalGridLinesVisible(false);
-        //chart.setCreateSymbols(false);
 
-        //TODO: uncomment
         chart.getXAxis().setOpacity(0);
-
-        //chart.setLegendVisible(false);
 
         Node contentBackground = chart.lookup(".chart-content").lookup(".chart-plot-background");
         contentBackground.setStyle("-fx-background-color: transparent;");
@@ -402,15 +356,4 @@ public class TemporalLineChartBuilder {
 
         sp.getChildren().addAll(baseChartBox, chartBox);
     }
-
-    public static void addDebugBorder(Region node, Color color, double width) {
-        BorderStroke borderStroke = new BorderStroke(color,
-                BorderStrokeStyle.SOLID,
-                CornerRadii.EMPTY,
-                new BorderWidths(width));
-        node.setBorder(new Border(borderStroke));
-    }
-
-    ArrayList<String> baseColors = new ArrayList<>(List.of("#c90823", "#f43d25", "#fd8c3c", "#febf5a", "#ffe793"));
-    ArrayList<String> secondaryColors = new ArrayList<>(List.of("#1373b2", "#42a6cc", "#7accc4", "#b4e2ba", "#daf0d4"));
 }

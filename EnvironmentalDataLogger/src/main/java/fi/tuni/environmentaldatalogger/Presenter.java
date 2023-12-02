@@ -239,7 +239,6 @@ public class Presenter {
             builder.addData(data.getKey(), trimmedData, units.get(data.getKey()));
         }
 
-        //builder.setBoundsBasedOnSmallestDataset();
         builder.setBoundsBasedOnLargestDataset();
 
         try {
@@ -249,12 +248,11 @@ public class Presenter {
             builder.setTitle(coordinates.toString());
         }
 
-        if (dataMap.size() <= 1) {
+        if (dataMap.size() <= 1 || !Settings.getInstance().useDoubleAxis.get()) {
             return builder.getResult();
         } else {
             return builder.getDoubleAxisResult();
         }
-        //return builder.getResult();
 
 
         /*

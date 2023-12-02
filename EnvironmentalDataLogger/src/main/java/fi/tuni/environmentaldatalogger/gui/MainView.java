@@ -3,6 +3,7 @@ package fi.tuni.environmentaldatalogger.gui;
 import com.google.gson.Gson;
 import fi.tuni.environmentaldatalogger.EnvironmentalDataLogger;
 import fi.tuni.environmentaldatalogger.Presenter;
+import fi.tuni.environmentaldatalogger.Settings;
 import fi.tuni.environmentaldatalogger.apis.ApiCache;
 import fi.tuni.environmentaldatalogger.save.Loadable;
 import fi.tuni.environmentaldatalogger.save.Saveable;
@@ -86,7 +87,8 @@ public class MainView implements Saveable, Loadable {
             "3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275" +
             " 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z";
 
-    private static final Location DEFAULT_LOCATION = new Location("Tampere", "FI", new Coordinate(61.4978, 23.7610));
+    private static final Location DEFAULT_LOCATION = new Location(
+            "Tampere", "FI", new Coordinate(61.4978, 23.7610));
     private static Location currentLocation = DEFAULT_LOCATION;
     private ChartGrid chartGrid;
 
@@ -121,7 +123,6 @@ public class MainView implements Saveable, Loadable {
                 updateWeatherIcon();
             }
         },0,600000);
-        //currentDataPane.getChildren().add(CurrentDataPane.getInstance());
 
         // update temperature label every 10 minutes
         temperatureTimer.scheduleAtFixedRate(new TimerTask() {
@@ -277,9 +278,10 @@ public class MainView implements Saveable, Loadable {
         settingsButton.setMinSize(48, 48);
         settingsButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-        //settingsButton.setOnAction(actionEvent -> {
-        //
-        //});
+        settingsButton.setOnAction(actionEvent -> {
+            SettingsDialog dialog = new SettingsDialog();
+            dialog.showDialog();
+        });
 
     }
 
@@ -404,28 +406,30 @@ public class MainView implements Saveable, Loadable {
             return false;
         }
 
+        if (saveData.settings != null) {
+            Settings.getInstance().loadFromJson(saveData.settings);
+        }
+
+        if (saveData.currentLocation != null) {
+            currentLocation = saveData.currentLocation;
+            locationChanged();
+        }
+
         if (saveData.grid == null) {
             return false;
         }
-
-        if (saveData.currentLocation == null) {
-            return false;
-        }
-
-        currentLocation = saveData.currentLocation;
-        locationChanged();
 
         return chartGrid.loadFromJson(saveData.grid);
     }
 
     @Override
     public String getJson() {
-        SaveData saveData = new SaveData(chartGrid.getJson(), currentLocation);
+        SaveData saveData = new SaveData(chartGrid.getJson(), Settings.getInstance().getJson(), currentLocation);
         Gson gson = new Gson();
 
         return gson.toJson(saveData);
     }
 
-    private record SaveData(String grid, Location currentLocation) {
+    private record SaveData(String grid, String settings, Location currentLocation) {
     }
 }

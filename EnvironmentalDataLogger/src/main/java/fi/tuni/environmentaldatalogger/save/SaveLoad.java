@@ -11,17 +11,19 @@ import java.io.*;
  */
 public class SaveLoad {
 
+    private final static String saveFolderName = "saves";
+
     /**
      * Saves a Saveable object to a JSON file.
      * @param saveable object to save
      * @param filename name of the file
      */
     public static void save(Saveable saveable, String filename) {
-        String folderName = "saves";
-        File folder = new File(folderName);
+
+        File folder = new File(saveFolderName);
 
         if (folder.mkdir()) {
-            System.out.println("Created folder " + folderName);
+            System.out.println("Created folder " + saveFolderName);
         }
 
         String filepath = folder.getAbsolutePath() + "/" + filename;
@@ -41,7 +43,7 @@ public class SaveLoad {
      */
     public static boolean load(Loadable loadable, String filename) {
 
-        String filePath = "saves/" + filename;
+        String filePath = saveFolderName + "/" + filename;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             StringBuilder content = new StringBuilder();
@@ -57,6 +59,22 @@ public class SaveLoad {
 
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    public static void wipeSaves() {
+        File folder = new File(saveFolderName);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+
+                if (file.getName().equals("air_quality_cache.json") || file.getName().equals("weather_cache.json")) {
+                    continue;
+                }
+
+                file.delete();
+            }
         }
     }
 }

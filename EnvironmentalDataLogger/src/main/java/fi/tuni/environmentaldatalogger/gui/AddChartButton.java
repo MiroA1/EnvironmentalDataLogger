@@ -1,5 +1,6 @@
 package fi.tuni.environmentaldatalogger.gui;
 
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Button;
@@ -43,6 +44,7 @@ public class AddChartButton extends Button implements GridElement {
                 ChartViewerElement chart = new ChartViewerElement(column, row, new RemoveChartButton(column, row, parent));
 
                 parent.addChart(chart);
+                Platform.runLater(chart::pushLoadButton);
             } catch (IOException e) {
                 // TODO: improve behaviour
                 throw new RuntimeException(e);
