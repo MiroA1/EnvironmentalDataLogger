@@ -1,0 +1,7 @@
+module:fi.tuni.environmentaldatalogger
+fi.tuni.environmentaldatalogger
+fi.tuni.environmentaldatalogger.apis
+fi.tuni.environmentaldatalogger.gui
+fi.tuni.environmentaldatalogger.save
+fi.tuni.environmentaldatalogger.util
+fi.tuni.environmentaldatalogger.visualization
